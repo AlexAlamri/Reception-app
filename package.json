@@ -1,0 +1,24 @@
+{
+  "name": "reception-triage-guide",
+  "version": "1.1.0",
+  "description": "Reception Triage Guide for Kingston GP Practice - Staff Only",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "next": "14.0.4",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "lucide-react": "^0.263.1",
+    "bcryptjs": "^2.4.3",
+    "jose": "^5.2.0"
+  },
+  "devDependencies": {
+    "autoprefixer": "^10.4.16",
+    "postcss": "^8.4.32",
+    "tailwindcss": "^3.4.0"
+  }
+}
