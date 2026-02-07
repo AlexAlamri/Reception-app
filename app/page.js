@@ -7,7 +7,7 @@ import {
   Shield, Pill, GraduationCap, Settings, Info, LogOut, Lock, User, 
   Save, Download, Upload, Plus, Trash2, Edit, RefreshCw, Eye, EyeOff,
   ExternalLink, Globe, BookOpen, ChevronDown, ChevronUp, RotateCcw,
-  Zap, ArrowRight, ClipboardCheck
+  Zap, ArrowRight, ClipboardCheck, GitBranch
 } from 'lucide-react';
 import {
   redFlags as defaultRedFlags,
@@ -21,6 +21,7 @@ import {
   trainingScenarios as defaultTraining
 } from '../lib/data';
 import { sopMeta, sopSections } from '../lib/sop-content';
+import { flowchartMeta, flowchartSections } from '../lib/flowchart-content';
 import {
   getSession, clearSession, authenticateUser, isAdmin,
   getSettings, saveSettings, getCustomData, saveCustomData, clearCustomData,
@@ -1049,8 +1050,8 @@ const SOPScreen = () => {
       case 'do-dont': return <div key={idx} className="space-y-2 mb-3">{block.donts.map((d, i) => <div key={i} className="grid grid-cols-2 gap-2 text-xs"><div className="bg-[rgba(255,59,92,0.06)] border border-[rgba(255,59,92,0.15)] rounded-lg p-2.5"><span className="text-triage-red font-semibold">✗ </span><span className="text-[rgba(255,255,255,0.5)]">{d.bad}</span></div>{d.good && <div className="bg-[rgba(34,197,94,0.06)] border border-[rgba(34,197,94,0.15)] rounded-lg p-2.5"><span className="text-triage-green font-semibold">✓ </span><span className="text-[rgba(255,255,255,0.5)]">{d.good}</span></div>}</div>)}</div>;
       case 'two-column': return <div key={idx} className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">{[block.left, block.right].filter(Boolean).map((col, ci) => <div key={ci} className="bg-[rgba(108,142,255,0.04)] border border-[rgba(108,142,255,0.12)] rounded-xl p-3.5"><div className="text-triage-blue font-bold text-sm mb-2">{col.title}</div>{col.link && <a href={col.link} target="_blank" rel="noopener noreferrer" className="text-triage-blue text-xs underline mb-2 block">{col.link}</a>}<div className="space-y-1">{col.items.map((item, i) => <div key={i} className="flex items-start gap-2 text-xs text-[rgba(255,255,255,0.55)]"><span className="text-triage-blue mt-0.5">•</span>{item}</div>)}</div></div>)}</div>;
       case 'conditions': return <div key={idx} className="mb-3">{block.title && <div className="text-triage-green font-bold text-sm mb-2">{block.title}</div>}<div className="flex flex-wrap gap-2">{block.items.map((item, i) => <div key={i} className="bg-[rgba(34,197,94,0.06)] border border-[rgba(34,197,94,0.15)] rounded-lg px-3 py-1.5 text-xs"><span className="text-[rgba(255,255,255,0.7)] font-medium">{item.name}</span><span className="text-[rgba(255,255,255,0.35)] ml-1.5">{item.age}</span></div>)}</div></div>;
-      case 'red-flags-table': return <div key={idx} className="space-y-2 mb-3">{block.items.map((item, i) => <div key={i} className="bg-[rgba(255,59,92,0.04)] border border-[rgba(255,59,92,0.12)] rounded-xl p-3 flex items-start gap-3"><div className="w-2 h-2 rounded-full bg-triage-red mt-1.5 flex-shrink-0" /><div><div className="text-[rgba(255,255,255,0.7)] text-sm">{item.symptom}</div><div className="text-triage-red font-bold text-xs mt-1">→ {item.action}</div></div></div>)}</div>;
-      case 'amber-table': return <div key={idx} className="space-y-2 mb-3">{block.items.map((item, i) => <div key={i} className="bg-[rgba(255,159,28,0.04)] border border-[rgba(255,159,28,0.12)] rounded-xl p-3"><div className="text-triage-amber font-bold text-xs mb-1">{item.category}</div><div className="text-[rgba(255,255,255,0.55)] text-xs mb-1.5">{item.buzzwords}</div><div className="text-triage-amber text-xs font-medium">→ {item.action}</div></div>)}</div>;
+      case 'red-flags-table': return <div key={idx} className="space-y-2 mb-3">{block.items.map((item, i) => <div key={i} className="bg-[rgba(255,59,92,0.04)] border border-[rgba(255,59,92,0.12)] rounded-xl p-3 flex items-start gap-3"><div className="w-2 h-2 rounded-full bg-triage-red mt-1.5 flex-shrink-0" /><div>{item.system && <div className="text-triage-red/70 font-bold text-[10px] uppercase tracking-wider mb-0.5">{item.system}</div>}<div className="text-[rgba(255,255,255,0.7)] text-sm">{item.symptom}</div><div className="text-triage-red font-bold text-xs mt-1">→ {item.action}</div></div></div>)}</div>;
+      case 'amber-table': return <div key={idx} className="space-y-2 mb-3">{block.items.map((item, i) => <div key={i} className="bg-[rgba(255,159,28,0.04)] border border-[rgba(255,159,28,0.12)] rounded-xl p-3"><div className="flex items-center gap-2 mb-1"><span className="text-triage-amber font-bold text-xs">{item.category}</span>{item.notes && <span className="text-[rgba(255,159,28,0.5)] text-[10px] font-medium">{item.notes}</span>}</div><div className="text-[rgba(255,255,255,0.55)] text-xs mb-1.5">{item.buzzwords}</div><div className="text-triage-amber text-xs font-medium">→ {item.action}</div></div>)}</div>;
       case 'risk-groups': return <div key={idx} className="space-y-2 mb-3">{block.items.map((item, i) => <div key={i} className="bg-[rgba(255,159,28,0.04)] border border-[rgba(255,159,28,0.12)] rounded-xl p-3"><div className="text-[rgba(255,255,255,0.8)] font-semibold text-sm mb-1">{item.group}</div><div className="text-[rgba(255,255,255,0.5)] text-xs">{item.action}</div></div>)}</div>;
       case 'subsection': return <div key={idx} className="mb-4"><h4 className="text-triage-blue font-bold text-sm mb-2">{block.title}</h4>{block.content.map((sub, si) => renderBlock(sub, `${idx}-${si}`))}</div>;
       case 'contact': return <div key={idx} className="flex items-center justify-between bg-[rgba(108,142,255,0.04)] border border-[rgba(108,142,255,0.12)] rounded-lg p-2.5 mb-2"><div><div className="text-[rgba(255,255,255,0.7)] text-sm font-medium">{block.service}</div>{block.hours && <div className="text-[rgba(255,255,255,0.35)] text-xs">{block.hours}</div>}</div><a href={`tel:${block.number.replace(/\s/g, '')}`} className="text-triage-blue font-bold text-sm">{block.number}</a></div>;
@@ -1059,6 +1060,10 @@ const SOPScreen = () => {
       case 'econsult-table': return <div key={idx} className="space-y-2 mb-3">{block.items.map((item, i) => <div key={i} className="bg-[rgba(78,205,196,0.04)] border border-[rgba(78,205,196,0.12)] rounded-xl p-3"><div className="text-triage-teal font-bold text-xs mb-1">{item.category}</div><div className="text-[rgba(255,255,255,0.55)] text-xs mb-1.5"><span className="text-[rgba(255,255,255,0.3)]">OK:</span> {item.examples}</div><div className="text-triage-red/80 text-xs"><span className="text-[rgba(255,255,255,0.3)]">Exclude:</span> {item.exclude}</div></div>)}</div>;
       case 'services': return <div key={idx} className="space-y-2 mb-3">{block.items.map((item, i) => <div key={i} className="bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.06)] rounded-xl p-3"><div className="text-[rgba(255,255,255,0.85)] font-semibold text-sm">{item.service}</div><div className="text-[rgba(255,255,255,0.45)] text-xs mt-0.5">{item.bestFor}</div><div className="text-triage-blue text-xs mt-1">{item.access}</div></div>)}</div>;
       case 'providers': return <div key={idx} className="space-y-2 mb-3">{block.items.map((item, i) => <div key={i} className="flex items-center justify-between bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.06)] rounded-xl p-3"><div><div className="text-[rgba(255,255,255,0.8)] font-semibold text-sm">{item.name}</div><div className="text-[rgba(255,255,255,0.35)] text-xs">{item.locations}</div></div><a href={`tel:${item.number.replace(/\s/g, '')}`} className="text-triage-blue font-bold text-sm">{item.number}</a></div>)}</div>;
+      case 'model-overview': return <div key={idx} className="overflow-x-auto mb-3"><table className="w-full text-sm"><thead><tr>{['Tier','Who','Scope','Escalates To'].map((h, i) => <th key={i} className="text-left text-[rgba(255,255,255,0.5)] font-semibold pb-2 pr-3 text-xs border-b border-[rgba(255,255,255,0.06)]">{h}</th>)}</tr></thead><tbody>{block.tiers.map((t, i) => <tr key={i} className="border-b border-[rgba(255,255,255,0.03)]"><td className="py-2.5 pr-3 text-xs font-bold text-triage-blue">{t.tier}</td><td className="py-2.5 pr-3 text-xs text-[rgba(255,255,255,0.6)]">{t.who}</td><td className="py-2.5 pr-3 text-xs text-[rgba(255,255,255,0.6)]">{t.scope}</td><td className="py-2.5 pr-3 text-xs text-[rgba(255,255,255,0.6)]">{t.escalatesTo}</td></tr>)}</tbody></table></div>;
+      case 'pathway-grid': return <div key={idx} className="space-y-2 mb-3">{block.items.map((item, i) => <div key={i} className="bg-[rgba(108,142,255,0.04)] border border-[rgba(108,142,255,0.12)] rounded-xl p-3"><div className="flex items-center gap-2 mb-1"><span>{item.icon}</span><span className="text-[rgba(255,255,255,0.85)] font-semibold text-sm">{item.pathway}</span></div><div className="text-[rgba(255,255,255,0.5)] text-xs mb-1.5">{item.symptoms}</div><div className="text-triage-blue text-xs font-medium">→ {item.action}</div>{item.contact && <div className="text-[rgba(255,255,255,0.35)] text-xs mt-0.5">{item.contact}</div>}</div>)}</div>;
+      case 'contacts-table': return <div key={idx} className="space-y-1.5 mb-3">{block.items.map((item, i) => <div key={i} className="flex items-center justify-between bg-[rgba(108,142,255,0.04)] border border-[rgba(108,142,255,0.12)] rounded-lg p-2.5"><div><div className="text-[rgba(255,255,255,0.7)] text-sm font-medium">{item.service}</div>{item.hours && <div className="text-[rgba(255,255,255,0.35)] text-xs">{item.hours}</div>}</div><div className="text-triage-blue font-bold text-sm">{item.contact}</div></div>)}</div>;
+      case 'training-table': return <div key={idx} className="space-y-2 mb-3">{block.items.map((item, i) => <div key={i} className="bg-[rgba(108,142,255,0.04)] border border-[rgba(108,142,255,0.12)] rounded-xl p-3"><div className="text-triage-blue font-bold text-sm mb-1">{item.tier}</div><div className="text-[rgba(255,255,255,0.55)] text-xs">{item.requirements}</div></div>)}</div>;
       default: return null;
     }
   };
@@ -1082,6 +1087,79 @@ const SOPScreen = () => {
             {expanded === s.id && <div className="mt-1 p-4 rounded-2xl bg-[rgba(255,255,255,0.01)] border border-[rgba(255,255,255,0.04)] animate-fade-slide">{s.content.map((b, i) => renderBlock(b, i))}</div>}
           </div>
         ))}
+      </div>
+    </div>
+  );
+};
+
+// ============ FLOWCHART VIEWER ============
+const FlowchartScreen = () => {
+  const [expanded, setExpanded] = useState(null);
+  const [search, setSearch] = useState('');
+  const [tierFilter, setTierFilter] = useState(null);
+  const filtered = flowchartSections.filter(s => {
+    if (tierFilter !== null && s.tier !== undefined && s.tier !== tierFilter) return false;
+    if (search.length >= 2) return JSON.stringify(s).toLowerCase().includes(search.toLowerCase());
+    return true;
+  });
+
+  const tierColors = {
+    1: { bg: 'bg-triage-green/10', border: 'border-triage-green/30', text: 'text-triage-green', label: 'Tier 1' },
+    2: { bg: 'bg-triage-amber/10', border: 'border-triage-amber/30', text: 'text-triage-amber', label: 'Tier 2' },
+    3: { bg: 'bg-triage-violet/10', border: 'border-triage-violet/30', text: 'text-triage-violet', label: 'Tier 3' },
+  };
+
+  const renderBlock = (block, idx) => {
+    const c = C[block.color] || C.blue;
+    switch (block.type) {
+      case 'text': return <p key={idx} className="text-[rgba(255,255,255,0.65)] text-sm leading-relaxed mb-3">{block.text}</p>;
+      case 'highlight': return <div key={idx} className={`${c.bg} border ${c.border} rounded-xl p-3 mb-3 flex items-start gap-2`}><div className={`w-2 h-2 rounded-full ${c.dot} mt-1.5 flex-shrink-0`} /><span className={`${c.text} font-semibold text-sm`}>{block.text}</span></div>;
+      case 'list': return <div key={idx} className="mb-3">{block.title && <div className={`${c.text} font-bold text-sm mb-2`}>{block.title}</div>}<div className="space-y-1.5">{block.items.map((item, i) => <div key={i} className="flex items-start gap-2.5 pl-1"><div className={`w-1.5 h-1.5 rounded-full ${c.dot} mt-2 flex-shrink-0 opacity-60`} /><span className="text-[rgba(255,255,255,0.6)] text-sm">{item}</span></div>)}</div></div>;
+      case 'checklist': return <div key={idx} className="mb-3">{block.title && <div className={`${c.text} font-bold text-sm mb-2`}>{block.title}</div>}<div className="space-y-1.5">{block.items.map((item, i) => <div key={i} className="flex items-center gap-2 text-sm text-[rgba(255,255,255,0.6)]"><div className="w-4 h-4 rounded border border-triage-green/40 bg-triage-green/10 flex items-center justify-center flex-shrink-0"><Check size={10} className="text-triage-green" /></div>{item}</div>)}</div></div>;
+      case 'subsection': return <div key={idx} className="mb-4"><h4 className="text-triage-blue font-bold text-sm mb-2">{block.title}</h4>{block.content.map((sub, si) => renderBlock(sub, `${idx}-${si}`))}</div>;
+      case 'red-flags-table': return <div key={idx} className="space-y-2 mb-3">{block.items.map((item, i) => <div key={i} className="bg-[rgba(255,59,92,0.04)] border border-[rgba(255,59,92,0.12)] rounded-xl p-3 flex items-start gap-3"><div className="w-2 h-2 rounded-full bg-triage-red mt-1.5 flex-shrink-0" /><div>{item.system && <div className="text-triage-red/70 font-bold text-[10px] uppercase tracking-wider mb-0.5">{item.system}</div>}<div className="text-[rgba(255,255,255,0.7)] text-sm">{item.symptom}</div><div className="text-triage-red font-bold text-xs mt-1">{'\u2192'} {item.action}</div></div></div>)}</div>;
+      case 'amber-table': return <div key={idx} className="space-y-2 mb-3">{block.items.map((item, i) => <div key={i} className="bg-[rgba(255,159,28,0.04)] border border-[rgba(255,159,28,0.12)] rounded-xl p-3"><div className="flex items-center gap-2 mb-1"><span className="text-triage-amber font-bold text-xs">{item.category}</span>{item.notes && <span className="text-[rgba(255,159,28,0.5)] text-[10px] font-medium">{item.notes}</span>}</div><div className="text-[rgba(255,255,255,0.55)] text-xs mb-1.5">{item.buzzwords}</div><div className="text-triage-amber text-xs font-medium">{'\u2192'} {item.action}</div></div>)}</div>;
+      case 'risk-groups': return <div key={idx} className="space-y-2 mb-3">{block.items.map((item, i) => <div key={i} className="bg-[rgba(255,159,28,0.04)] border border-[rgba(255,159,28,0.12)] rounded-xl p-3"><div className="text-[rgba(255,255,255,0.8)] font-semibold text-sm mb-1">{item.group}</div><div className="text-[rgba(255,255,255,0.5)] text-xs">{item.action}</div></div>)}</div>;
+      case 'model-overview': return <div key={idx} className="overflow-x-auto mb-3"><table className="w-full text-sm"><thead><tr>{['Tier','Who','Scope','Escalates To'].map((h, i) => <th key={i} className="text-left text-[rgba(255,255,255,0.5)] font-semibold pb-2 pr-3 text-xs border-b border-[rgba(255,255,255,0.06)]">{h}</th>)}</tr></thead><tbody>{block.tiers.map((t, i) => <tr key={i} className="border-b border-[rgba(255,255,255,0.03)]"><td className="py-2.5 pr-3 text-xs font-bold text-triage-blue">{t.tier}</td><td className="py-2.5 pr-3 text-xs text-[rgba(255,255,255,0.6)]">{t.who}</td><td className="py-2.5 pr-3 text-xs text-[rgba(255,255,255,0.6)]">{t.scope}</td><td className="py-2.5 pr-3 text-xs text-[rgba(255,255,255,0.6)]">{t.escalatesTo}</td></tr>)}</tbody></table></div>;
+      case 'pathway-grid': return <div key={idx} className="space-y-2 mb-3">{block.items.map((item, i) => <div key={i} className="bg-[rgba(108,142,255,0.04)] border border-[rgba(108,142,255,0.12)] rounded-xl p-3"><div className="flex items-center gap-2 mb-1"><span>{item.icon}</span><span className="text-[rgba(255,255,255,0.85)] font-semibold text-sm">{item.pathway}</span></div><div className="text-[rgba(255,255,255,0.5)] text-xs mb-1.5">{item.symptoms}</div><div className="text-triage-blue text-xs font-medium">{'\u2192'} {item.action}</div>{item.contact && <div className="text-[rgba(255,255,255,0.35)] text-xs mt-0.5">{item.contact}</div>}</div>)}</div>;
+      case 'contacts-table': return <div key={idx} className="space-y-1.5 mb-3">{block.items.map((item, i) => <div key={i} className="flex items-center justify-between bg-[rgba(108,142,255,0.04)] border border-[rgba(108,142,255,0.12)] rounded-lg p-2.5"><div><div className="text-[rgba(255,255,255,0.7)] text-sm font-medium">{item.service}</div>{item.hours && <div className="text-[rgba(255,255,255,0.35)] text-xs">{item.hours}</div>}</div><div className="text-triage-blue font-bold text-sm">{item.contact}</div></div>)}</div>;
+      case 'training-table': return <div key={idx} className="space-y-2 mb-3">{block.items.map((item, i) => <div key={i} className="bg-[rgba(108,142,255,0.04)] border border-[rgba(108,142,255,0.12)] rounded-xl p-3"><div className="text-triage-blue font-bold text-sm mb-1">{item.tier}</div><div className="text-[rgba(255,255,255,0.55)] text-xs">{item.requirements}</div></div>)}</div>;
+      case 'conditions': return <div key={idx} className="mb-3">{block.title && <div className="text-triage-green font-bold text-sm mb-2">{block.title}</div>}<div className="flex flex-wrap gap-2">{block.items.map((item, i) => <div key={i} className="bg-[rgba(34,197,94,0.06)] border border-[rgba(34,197,94,0.15)] rounded-lg px-3 py-1.5 text-xs"><span className="text-[rgba(255,255,255,0.7)] font-medium">{item.name}</span><span className="text-[rgba(255,255,255,0.35)] ml-1.5">{item.age}</span></div>)}</div></div>;
+      case 'flow-arrow': return <div key={idx} className="flex items-center justify-center gap-2 py-3 mb-3"><div className="h-px flex-1 bg-gradient-to-r from-transparent via-[rgba(108,142,255,0.3)] to-transparent" /><div className="flex items-center gap-1.5 bg-[rgba(108,142,255,0.08)] border border-[rgba(108,142,255,0.2)] rounded-full px-4 py-1.5"><ArrowRight size={14} className="text-triage-blue" /><span className="text-triage-blue text-xs font-semibold">{block.text}</span></div><div className="h-px flex-1 bg-gradient-to-r from-transparent via-[rgba(108,142,255,0.3)] to-transparent" /></div>;
+      default: return null;
+    }
+  };
+
+  return (
+    <div className="p-4 pb-24 max-w-lg mx-auto">
+      <h1 className="text-lg font-black mb-1 flex items-center gap-2 text-white"><GitBranch size={20} className="text-triage-teal" />Triage Flowchart</h1>
+      <p className="text-[rgba(255,255,255,0.3)] text-xs mb-3">{flowchartMeta.practices} · v{flowchartMeta.version} · {flowchartMeta.owner}</p>
+      <SearchBar value={search} onChange={setSearch} placeholder="Search flowchart..." />
+      <div className="flex gap-1.5 mb-3 overflow-x-auto pb-1 -mx-1 px-1">
+        <button onClick={() => setTierFilter(null)} className={`px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all ${tierFilter === null ? 'bg-triage-blue/20 text-triage-blue border border-triage-blue/30' : 'bg-[rgba(255,255,255,0.03)] text-[rgba(255,255,255,0.4)] border border-transparent'}`}>All</button>
+        {[1, 2, 3].map(t => <button key={t} onClick={() => setTierFilter(tierFilter === t ? null : t)} className={`px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all ${tierFilter === t ? `${tierColors[t].bg} ${tierColors[t].text} border ${tierColors[t].border}` : 'bg-[rgba(255,255,255,0.03)] text-[rgba(255,255,255,0.4)] border border-transparent'}`}>{tierColors[t].label}</button>)}
+      </div>
+      <div className="space-y-2">
+        {filtered.map(s => {
+          const tc = s.tier ? tierColors[s.tier] : null;
+          return (
+            <div key={s.id}>
+              <button onClick={() => setExpanded(expanded === s.id ? null : s.id)}
+                className={`w-full text-left p-3.5 rounded-2xl transition-all border ${expanded === s.id ? 'bg-[rgba(78,205,196,0.06)] border-[rgba(78,205,196,0.2)]' : 'bg-[rgba(255,255,255,0.02)] border-[rgba(255,255,255,0.06)]'}`}>
+                <div className="flex items-center gap-3">
+                  <span className="text-lg">{s.icon}</span>
+                  <div className="flex-1">
+                    <span className="text-[rgba(255,255,255,0.3)] text-xs font-mono mr-2">{s.number}</span>
+                    <span className="text-white font-bold text-sm">{s.title}</span>
+                    {tc && <span className={`ml-2 text-[10px] px-1.5 py-0.5 rounded ${tc.bg} ${tc.text} font-semibold`}>{tc.label}</span>}
+                  </div>
+                  {expanded === s.id ? <ChevronUp size={16} className="text-triage-teal" /> : <ChevronDown size={16} className="text-[rgba(255,255,255,0.25)]" />}
+                </div>
+              </button>
+              {expanded === s.id && <div className="mt-1 p-4 rounded-2xl bg-[rgba(255,255,255,0.01)] border border-[rgba(255,255,255,0.04)] animate-fade-slide">{s.content.map((b, i) => renderBlock(b, i))}</div>}
+            </div>
+          );
+        })}
       </div>
     </div>
   );
@@ -1135,6 +1213,7 @@ const NavBar = ({ screen, onNav, isAdminUser }) => {
     { id: 'search', icon: Search, label: 'Lookup' },
     { id: 'contacts', icon: Phone, label: 'Contacts' },
     { id: 'sop', icon: BookOpen, label: 'SOP' },
+    { id: 'flowchart', icon: GitBranch, label: 'Flowchart' },
     { id: isAdminUser ? 'admin' : 'training', icon: isAdminUser ? Settings : GraduationCap, label: isAdminUser ? 'Admin' : 'Training' }
   ];
   return (
@@ -1191,6 +1270,7 @@ export default function App() {
       case 'search': return <SearchScreen data={data} />;
       case 'contacts': return <ContactsScreen contacts={data.contacts} />;
       case 'sop': return <SOPScreen />;
+      case 'flowchart': return <FlowchartScreen />;
       case 'training': return <TrainingScreen onBack={() => nav('home')} scenarios={data.training} />;
       case 'admin': return isAdminUser ? <AdminConsole onBack={() => nav('home')} data={data} toast={showToast} /> : <DecisionFlow data={data} settings={settings} onRecord={record} showToast={showToast} />;
       default: return <DecisionFlow data={data} settings={settings} onRecord={record} showToast={showToast} />;
