@@ -72,7 +72,7 @@ function useKeywordScanner(text, redFlags, amberFlags, pharmacyFirst, highRiskGr
     });
 
     const red = redFlags.filter(f => keywordMatch(f.keywords));
-    const amber = amberFlags.filter(f => keywordMatch(f.keywords));
+    const amber = amberFlags.filter(f => keywordMatch(f.keywords) || (f.searchTerms && keywordMatch(f.searchTerms)));
     const pharmacy = pharmacyFirst.filter(c => {
       const name = c.name.toLowerCase();
       return lower.includes(name) || name.includes(lower) || words.some(w => name.includes(w));
@@ -998,29 +998,141 @@ const DecisionFlow = ({ data, settings, onRecord, showToast }) => {
 const SearchScreen = ({ data }) => {
   const [search, setSearch] = useState('');
   const results = useKeywordScanner(search, data.redFlags, data.amberFlags, data.pharmacyFirst, data.highRiskGroups);
+
+  // Search pathways
+  const pathwayResults = useMemo(() => {
+    if (!search || search.length < 2) return [];
+    const lower = search.toLowerCase().trim();
+    const words = lower.split(/\s+/).filter(t => t.length >= 3);
+    return Object.entries(data.pathways || {}).filter(([, p]) => {
+      if (p.title.toLowerCase().includes(lower) || lower.includes(p.title.toLowerCase())) return true;
+      return p.routes?.some(r =>
+        r.condition?.toLowerCase().includes(lower) ||
+        r.examples?.toLowerCase().includes(lower) ||
+        words.some(w => r.examples?.toLowerCase().includes(w) || r.condition?.toLowerCase().includes(w))
+      );
+    }).map(([, p]) => p);
+  }, [search, data.pathways]);
+
+  // Search direct booking items
+  const bookingResults = useMemo(() => {
+    if (!search || search.length < 2) return [];
+    const lower = search.toLowerCase().trim();
+    return (data.directBooking || []).filter(b =>
+      b.item.toLowerCase().includes(lower) || lower.includes(b.item.toLowerCase()) ||
+      b.emis_check?.toLowerCase().includes(lower) ||
+      b.bookWith?.toLowerCase().includes(lower)
+    );
+  }, [search, data.directBooking]);
+
+  // Search contacts
+  const contactResults = useMemo(() => {
+    if (!search || search.length < 2) return [];
+    const lower = search.toLowerCase().trim();
+    return (data.contacts || []).filter(c =>
+      c.service.toLowerCase().includes(lower) || lower.includes(c.service.toLowerCase()) ||
+      c.description?.toLowerCase().includes(lower)
+    );
+  }, [search, data.contacts]);
+
+  const totalMatches = (results?.red.length || 0) + (results?.amber.length || 0) + (results?.pharmacy.length || 0) +
+    (results?.risk.length || 0) + pathwayResults.length + bookingResults.length + contactResults.length;
+  const hasAnyResult = totalMatches > 0 || results?.hasChange;
+
   return (
     <div className="p-4 pb-24 max-w-lg mx-auto">
-      <h1 className="text-lg font-black mb-3 flex items-center gap-2 text-white"><Search size={20} className="text-triage-blue" />Quick Lookup</h1>
+      <h1 className="text-lg font-black mb-1 flex items-center gap-2 text-white"><Search size={20} className="text-triage-blue" />Quick Lookup</h1>
+      <p className="text-[11px] text-[rgba(255,255,255,0.3)] mb-3">Search symptoms, conditions, pathways, bookings, or contacts</p>
       <SearchBar value={search} onChange={setSearch} placeholder="Type symptom or keyword..." />
-      {search.length >= 2 && !results?.hasAny && <p className="text-center text-[rgba(255,255,255,0.3)] mt-8 text-sm">No matches. If unsure → GP Triager.</p>}
+
+      {search.length >= 2 && hasAnyResult && (
+        <div className="flex items-center gap-2 mb-3 text-[11px] text-[rgba(255,255,255,0.35)]">
+          <CheckCircle size={12} className="text-triage-green" />
+          <span>{totalMatches} match{totalMatches !== 1 ? 'es' : ''} found</span>
+        </div>
+      )}
+
+      {search.length >= 2 && !hasAnyResult && (
+        <div className="text-center mt-8">
+          <p className="text-[rgba(255,255,255,0.3)] text-sm mb-2">No matches found.</p>
+          <p className="text-[rgba(255,255,255,0.2)] text-xs">If unsure about any patient request → Forward to Tier 2</p>
+        </div>
+      )}
+
       {results?.red.length > 0 && (
         <div className="mb-4"><h2 className="font-bold text-triage-red mb-2 text-sm flex items-center gap-2"><AlertTriangle size={16} />RED FLAGS — Call 999</h2>
           {results.red.map(f => <GlassCard key={f.id} color="red" className="!p-3 !mb-2"><div className="text-[rgba(255,255,255,0.85)] text-sm">{f.description}</div><div className="text-triage-red font-bold text-xs mt-1">→ {f.action}</div></GlassCard>)}
         </div>
       )}
       {results?.amber.length > 0 && (
-        <div className="mb-4"><h2 className="font-bold text-triage-amber mb-2 text-sm flex items-center gap-2"><AlertCircle size={16} />AMBER — Same-Day</h2>
+        <div className="mb-4"><h2 className="font-bold text-triage-amber mb-2 text-sm flex items-center gap-2"><AlertCircle size={16} />AMBER — Forward to Tier 2</h2>
           {results.amber.map(f => <GlassCard key={f.id} color="amber" className="!p-3 !mb-2"><div className="text-triage-amber font-bold text-xs">{f.category}</div><div className="flex flex-wrap gap-1 mt-1">{f.keywords.slice(0, 6).map((k, i) => <span key={i} className="bg-[rgba(255,255,255,0.04)] px-1.5 py-0.5 rounded text-[10px] text-[rgba(255,255,255,0.4)]">{k}</span>)}</div><div className="text-triage-amber text-xs font-medium mt-1.5">→ {f.action}</div></GlassCard>)}
         </div>
       )}
       {results?.pharmacy.length > 0 && (
         <div className="mb-4"><h2 className="font-bold text-triage-green mb-2 text-sm flex items-center gap-2"><Pill size={16} />Pharmacy First</h2>
-          {results.pharmacy.map(c => <GlassCard key={c.id} color="green" className="!p-3 !mb-2"><span className="text-lg mr-2">{c.icon}</span><span className="font-bold text-white text-sm">{c.name}</span><span className="text-[rgba(255,255,255,0.3)] text-xs ml-2">({c.ageRange})</span></GlassCard>)}
+          {results.pharmacy.map(c => <GlassCard key={c.id} color="green" className="!p-3 !mb-2">
+            <div className="flex items-center gap-2"><span className="text-lg">{c.icon}</span><span className="font-bold text-white text-sm">{c.name}</span><span className="text-[rgba(255,255,255,0.3)] text-xs">({c.ageRange})</span></div>
+            {c.exclusions && <div className="mt-1.5 text-[10px] text-[rgba(255,255,255,0.35)]"><span className="text-triage-red font-semibold">Exclude: </span>{c.exclusions.join(' · ')}</div>}
+          </GlassCard>)}
         </div>
       )}
       {results?.risk.length > 0 && (
-        <div className="mb-4"><h2 className="font-bold text-triage-amber mb-2 text-sm flex items-center gap-2"><Shield size={16} />High-Risk</h2>
-          {results.risk.map(g => <GlassCard key={g.id} color="amber" className="!p-3 !mb-2"><div className="flex items-center gap-2"><span className="text-lg">{g.icon}</span><span className="text-white font-semibold text-sm">{g.group}</span></div><div className="text-[rgba(255,255,255,0.4)] text-xs mt-1">{g.action}</div></GlassCard>)}
+        <div className="mb-4"><h2 className="font-bold text-triage-amber mb-2 text-sm flex items-center gap-2"><Shield size={16} />High-Risk Group</h2>
+          {results.risk.map(g => <GlassCard key={g.id} color="amber" className="!p-3 !mb-2">
+            <div className="flex items-center gap-2"><span className="text-lg">{g.icon}</span><span className="text-white font-semibold text-sm">{g.group}</span></div>
+            <div className="text-[rgba(255,255,255,0.4)] text-xs mt-1">{g.action}</div>
+            {g.note && <div className="text-[rgba(255,255,255,0.25)] text-[10px] mt-1 italic">{g.note}</div>}
+          </GlassCard>)}
+        </div>
+      )}
+      {results?.hasChange && (
+        <div className="mb-4"><h2 className="font-bold text-triage-teal mb-2 text-sm flex items-center gap-2"><RotateCcw size={16} />Ongoing / Changed</h2>
+          <GlassCard color="teal" className="!p-3 !mb-2">
+            <div className="text-[rgba(255,255,255,0.7)] text-sm">Words suggest this may be an <strong className="text-triage-teal">ongoing or worsening</strong> problem.</div>
+            <div className="flex flex-wrap gap-1 mt-1.5">{results.changeWords.map((w, i) => <span key={i} className="bg-triage-teal/15 px-2 py-0.5 rounded text-[10px] text-triage-teal font-medium">{w}</span>)}</div>
+            <div className="text-triage-teal text-xs font-medium mt-1.5">→ Check EMIS for history → Forward to Tier 2 with context</div>
+          </GlassCard>
+        </div>
+      )}
+      {pathwayResults.length > 0 && (
+        <div className="mb-4"><h2 className="font-bold text-triage-blue mb-2 text-sm flex items-center gap-2"><ArrowRight size={16} />Specific Pathways</h2>
+          {pathwayResults.map(p => <GlassCard key={p.title} color="blue" className="!p-3 !mb-2">
+            <div className="font-bold text-white text-sm mb-1.5">{p.icon} {p.title}</div>
+            {p.routes.map((r, i) => (
+              <div key={i} className={`py-1.5 ${i > 0 ? 'border-t border-[rgba(255,255,255,0.06)]' : ''}`}>
+                <div className="flex items-start gap-1.5">
+                  <span className={`w-1.5 h-1.5 rounded-full mt-1.5 flex-shrink-0 ${r.priority === 'red' ? 'bg-triage-red' : r.priority === 'amber' ? 'bg-triage-amber' : 'bg-triage-green'}`} />
+                  <div>
+                    <div className="text-[rgba(255,255,255,0.7)] text-xs font-semibold">{r.condition}</div>
+                    <div className="text-[rgba(255,255,255,0.35)] text-[10px]">{r.examples}</div>
+                    <div className={`text-xs font-medium mt-0.5 ${r.priority === 'red' ? 'text-triage-red' : r.priority === 'amber' ? 'text-triage-amber' : 'text-triage-green'}`}>→ {r.action}</div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </GlassCard>)}
+        </div>
+      )}
+      {bookingResults.length > 0 && (
+        <div className="mb-4"><h2 className="font-bold text-triage-violet mb-2 text-sm flex items-center gap-2"><ClipboardCheck size={16} />Direct Booking</h2>
+          {bookingResults.map(b => <GlassCard key={b.id} color="violet" className="!p-3 !mb-2">
+            <div className="text-white font-semibold text-sm">{b.item}</div>
+            <div className="text-[rgba(255,255,255,0.4)] text-xs mt-1"><span className="text-triage-blue font-medium">EMIS Check: </span>{b.emis_check}</div>
+            <div className="text-[rgba(255,255,255,0.4)] text-xs mt-0.5"><span className="text-triage-violet font-medium">Book with: </span>{b.bookWith}</div>
+            {b.warning && <div className="text-triage-amber text-[10px] mt-1 font-medium">⚠️ {b.warning}</div>}
+          </GlassCard>)}
+        </div>
+      )}
+      {contactResults.length > 0 && (
+        <div className="mb-4"><h2 className="font-bold text-[rgba(255,255,255,0.6)] mb-2 text-sm flex items-center gap-2"><Phone size={16} />Contacts</h2>
+          {contactResults.map(c => <GlassCard key={c.id} className="!p-3 !mb-2">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2"><span className="text-lg">{c.icon}</span><span className="text-white font-semibold text-sm">{c.service}</span></div>
+              <a href={`tel:${c.number}`} className="text-triage-blue text-xs font-bold">{c.number}</a>
+            </div>
+            <div className="text-[rgba(255,255,255,0.35)] text-xs mt-0.5">{c.description} · {c.hours}</div>
+          </GlassCard>)}
         </div>
       )}
     </div>
