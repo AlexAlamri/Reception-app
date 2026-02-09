@@ -64,10 +64,7 @@ function useKeywordScanner(text, redFlags, amberFlags, pharmacyFirst, highRiskGr
     const red = redFlags.filter(f => f.keywords.some(k => lower.includes(k.toLowerCase())));
     const amber = amberFlags.filter(f => f.keywords.some(k => lower.includes(k.toLowerCase())));
     const pharmacy = pharmacyFirst.filter(c => c.keywords ? c.keywords.some(k => lower.includes(k.toLowerCase())) : lower.includes((c.condition || c.name).toLowerCase()));
-    const risk = highRiskGroups.filter(g => {
-      const terms = g.group.toLowerCase().split(/[\s/,]+/);
-      return terms.some(t => t.length > 3 && lower.includes(t));
-    });
+    const risk = highRiskGroups.filter(g => g.keywords ? g.keywords.some(k => lower.includes(k.toLowerCase())) : g.group.toLowerCase().split(/[\s/,]+/).some(t => t.length > 3 && lower.includes(t)));
     const changeWords = CHANGE_WORDS.filter(w => lower.includes(w));
     const hasChange = changeWords.length > 0;
     return { red, amber, pharmacy, risk, changeWords, hasChange, hasAny: red.length + amber.length + pharmacy.length + risk.length + (hasChange ? 1 : 0) > 0 };
@@ -635,9 +632,8 @@ const DecisionFlow = ({ data, settings, onRecord, showToast }) => {
           If patient is in ANY of these groups → <strong className="text-triage-amber">send directly to GP Triager</strong> (do NOT use self-care/Pharmacy First):
         </div>
         <div className="space-y-1.5 mb-3">
-          {data.highRiskGroups.map(g => (
-            <div key={g.id} className={`flex items-start gap-2.5 p-2 rounded-xl border text-xs ${scanResults?.risk.some(r => r.id === g.id) ? 'bg-triage-amber/10 border-triage-amber/25' : 'bg-[rgba(255,255,255,0.015)] border-[rgba(255,255,255,0.04)]'}`}>
-              <span className="text-lg flex-shrink-0">{g.icon}</span>
+          {data.highRiskGroups.map((g, i) => (
+            <div key={i} className={`flex items-start gap-2.5 p-2 rounded-xl border text-xs ${scanResults?.risk.some(r => r.group === g.group) ? 'bg-triage-amber/10 border-triage-amber/25' : 'bg-[rgba(255,255,255,0.015)] border-[rgba(255,255,255,0.04)]'}`}>
               <div>
                 <div className="text-[rgba(255,255,255,0.75)] font-semibold">{g.group}</div>
                 <div className="text-[rgba(255,255,255,0.4)] mt-0.5">{g.action}</div>
@@ -974,7 +970,7 @@ const SearchScreen = ({ data }) => {
       )}
       {results?.risk.length > 0 && (
         <div className="mb-4"><h2 className="font-bold text-triage-amber mb-2 text-sm flex items-center gap-2"><Shield size={16} />High-Risk</h2>
-          {results.risk.map(g => <GlassCard key={g.id} color="amber" className="!p-3 !mb-2"><div className="flex items-center gap-2"><span className="text-lg">{g.icon}</span><span className="text-white font-semibold text-sm">{g.group}</span></div><div className="text-[rgba(255,255,255,0.4)] text-xs mt-1">{g.action}</div></GlassCard>)}
+          {results.risk.map((g, i) => <GlassCard key={i} color="amber" className="!p-3 !mb-2"><span className="text-white font-semibold text-sm">{g.group}</span><div className="text-[rgba(255,255,255,0.4)] text-xs mt-1">{g.action}</div></GlassCard>)}
         </div>
       )}
     </div>
