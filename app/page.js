@@ -60,13 +60,26 @@ const CHANGE_WORDS = ['worse','worsening','not improving','getting worse','chang
 function useKeywordScanner(text, redFlags, amberFlags, pharmacyFirst, highRiskGroups) {
   return useMemo(() => {
     if (!text || text.length < 2) return null;
-    const lower = text.toLowerCase();
-    const red = redFlags.filter(f => f.keywords.some(k => lower.includes(k.toLowerCase())));
-    const amber = amberFlags.filter(f => f.keywords.some(k => lower.includes(k.toLowerCase())));
-    const pharmacy = pharmacyFirst.filter(c => lower.includes(c.name.toLowerCase()));
+    const lower = text.toLowerCase().trim();
+    // Split input into individual words (min 5 chars) for word-level matching
+    // Shorter words still match via full-phrase check (kl.includes(lower))
+    const words = lower.split(/\s+/).filter(t => t.length >= 5);
+
+    // Bidirectional match: keyword in text (ANIMA paste) OR full text in keyword OR word in keyword (symptom search)
+    const keywordMatch = (keywords) => keywords.some(k => {
+      const kl = k.toLowerCase();
+      return lower.includes(kl) || kl.includes(lower) || words.some(w => kl.includes(w));
+    });
+
+    const red = redFlags.filter(f => keywordMatch(f.keywords));
+    const amber = amberFlags.filter(f => keywordMatch(f.keywords));
+    const pharmacy = pharmacyFirst.filter(c => {
+      const name = c.name.toLowerCase();
+      return lower.includes(name) || name.includes(lower) || words.some(w => name.includes(w));
+    });
     const risk = highRiskGroups.filter(g => {
-      const terms = g.group.toLowerCase().split(/[\s/,]+/);
-      return terms.some(t => t.length > 3 && lower.includes(t));
+      const groupTerms = g.group.toLowerCase().split(/[\s/,]+/).filter(t => t.length > 3);
+      return groupTerms.some(t => lower.includes(t)) || words.some(w => groupTerms.some(t => t.includes(w)));
     });
     const changeWords = CHANGE_WORDS.filter(w => lower.includes(w));
     const hasChange = changeWords.length > 0;
