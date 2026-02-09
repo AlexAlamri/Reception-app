@@ -18,7 +18,8 @@ import {
   contacts as defaultContacts,
   scripts as defaultScripts,
   pathways as defaultPathways,
-  trainingScenarios as defaultTraining
+  trainingScenarios as defaultTraining,
+  quickMatchPathways as defaultQuickMatchPathways
 } from '../lib/data';
 import { sopMeta, sopSections } from '../lib/sop-content';
 import { flowchartMeta, flowchartSections } from '../lib/flowchart-content';
@@ -50,14 +51,18 @@ function useTriageData() {
     scripts: get('scripts', defaultScripts),
     pathways: get('pathways', defaultPathways),
     training: get('training', defaultTraining),
+    quickMatchPathways: get('quickMatchPathways', defaultQuickMatchPathways),
   };
 }
 
 // ============ KEYWORD SCANNER HOOK ============
 // Words that suggest an ONGOING problem that has CHANGED — flags Step 3
-const CHANGE_WORDS = ['worse','worsening','not improving','getting worse','changed','different now','new symptom','come back','returned','recurring','still','again','not better','deteriorat','flared up','spreading','progressed','persistent','ongoing','keeps coming','never had before','worst ever'];
+const CHANGE_WORDS = ['worse','worsening','not improving','different','getting worse','changed','spreading','new symptom','never had before','worst ever','different now','come back','returned','recurring','still','again','not better','deteriorat','flared up','progressed','persistent','ongoing','keeps coming'];
 
-function useKeywordScanner(text, redFlags, amberFlags, pharmacyFirst, highRiskGroups) {
+// Cancer-specific keywords for 2WW pathway detection (NICE NG12)
+const CANCER_KEYWORDS = ['lump','unexplained weight loss','weight loss','unexplained bleeding','persistent bowel change','difficulty swallowing','hoarseness','postmenopausal bleeding','night sweats','blood in stool','blood in urine'];
+
+function useKeywordScanner(text, redFlags, amberFlags, pharmacyFirst, highRiskGroups, quickMatchPathways) {
   return useMemo(() => {
     if (!text || text.length < 2) return null;
     const lower = text.toLowerCase();
@@ -68,10 +73,13 @@ function useKeywordScanner(text, redFlags, amberFlags, pharmacyFirst, highRiskGr
       const terms = g.group.toLowerCase().split(/[\s/,]+/);
       return terms.some(t => t.length > 3 && lower.includes(t));
     });
-    const changeWords = CHANGE_WORDS.filter(w => lower.includes(w));
-    const hasChange = changeWords.length > 0;
-    return { red, amber, pharmacy, risk, changeWords, hasChange, hasAny: red.length + amber.length + pharmacy.length + risk.length + (hasChange ? 1 : 0) > 0 };
-  }, [text, redFlags, amberFlags, pharmacyFirst, highRiskGroups]);
+    const pathways = (quickMatchPathways || []).filter(p => p.keywords.some(k => lower.includes(k.toLowerCase())));
+    const cancer = CANCER_KEYWORDS.filter(k => lower.includes(k));
+    const change = CHANGE_WORDS.filter(w => lower.includes(w));
+    const hasChange = change.length > 0;
+    const hasCancer = cancer.length > 0;
+    return { red, amber, pharmacy, risk, pathways, cancer, change, hasChange, hasCancer, hasAny: red.length + amber.length + pharmacy.length + risk.length + pathways.length + cancer.length + (hasChange ? 1 : 0) > 0 };
+  }, [text, redFlags, amberFlags, pharmacyFirst, highRiskGroups, quickMatchPathways]);
 }
 
 // ============ DESIGN TOKENS ============
@@ -345,7 +353,7 @@ const DecisionFlow = ({ data, settings, onRecord, showToast }) => {
   const [emisChecks, setEmisChecks] = useState(new Array(5).fill(false));
   const [emisFindings, setEmisFindings] = useState(''); // free-text note of what they found
 
-  const scanResults = useKeywordScanner(scanText, data.redFlags, data.amberFlags, data.pharmacyFirst, data.highRiskGroups);
+  const scanResults = useKeywordScanner(scanText, data.redFlags, data.amberFlags, data.pharmacyFirst, data.highRiskGroups, data.quickMatchPathways);
 
   const toggle = (step) => setExpandedStep(expandedStep === step ? null : step);
   
@@ -528,7 +536,7 @@ const DecisionFlow = ({ data, settings, onRecord, showToast }) => {
           <div className="mb-3 bg-triage-amber/10 border border-triage-amber/25 rounded-xl p-3">
             <div className="text-triage-amber font-bold text-xs mb-1">⚡ CHANGE WORDS DETECTED:</div>
             <div className="flex flex-wrap gap-1 mt-1">
-              {scanResults.changeWords.map((w, i) => <span key={i} className="bg-triage-amber/20 px-2 py-0.5 rounded text-[11px] text-triage-amber font-medium">"{w}"</span>)}
+              {scanResults.change.map((w, i) => <span key={i} className="bg-triage-amber/20 px-2 py-0.5 rounded text-[11px] text-triage-amber font-medium">"{w}"</span>)}
             </div>
             <div className="text-[rgba(255,255,255,0.45)] text-[11px] mt-1.5">Patient may be describing a worsening or recurring issue — check EMIS carefully.</div>
           </div>
@@ -902,12 +910,12 @@ const DecisionFlow = ({ data, settings, onRecord, showToast }) => {
               {emisFindings && <div><span className="text-triage-blue">EMIS:</span> {emisFindings}</div>}
               {scanResults?.red.length > 0 && <div><span className="text-triage-red">Red flags:</span> {scanResults.red.map(r => r.id).join(', ')}</div>}
               {scanResults?.amber.length > 0 && <div><span className="text-triage-amber">Amber flags:</span> {scanResults.amber.map(a => a.category).join(', ')}</div>}
-              {scanResults?.hasChange && <div><span className="text-triage-amber">Change words:</span> {scanResults.changeWords.join(', ')}</div>}
+              {scanResults?.hasChange && <div><span className="text-triage-amber">Change words:</span> {scanResults.change.join(', ')}</div>}
               {!scanText && !emisFindings && <div className="text-[rgba(255,255,255,0.25)] italic">Paste ANIMA text and add EMIS findings above to auto-build</div>}
             </div>
             {(scanText || emisFindings) && (
               <CopyBtn 
-                text={`Patient says: "${scanText}"\n${emisFindings ? 'EMIS: ' + emisFindings + '\n' : ''}${scanResults?.red.length ? 'Red flags: ' + scanResults.red.map(r => r.id).join(', ') + '\n' : ''}${scanResults?.amber.length ? 'Amber flags: ' + scanResults.amber.map(a => a.category).join(', ') + '\n' : ''}${scanResults?.hasChange ? 'Change noted: ' + scanResults.changeWords.join(', ') : ''}`} 
+                text={`Patient says: "${scanText}"\n${emisFindings ? 'EMIS: ' + emisFindings + '\n' : ''}${scanResults?.red.length ? 'Red flags: ' + scanResults.red.map(r => r.id).join(', ') + '\n' : ''}${scanResults?.amber.length ? 'Amber flags: ' + scanResults.amber.map(a => a.category).join(', ') + '\n' : ''}${scanResults?.hasChange ? 'Change noted: ' + scanResults.change.join(', ') : ''}`} 
                 label="Copy Triage Message" 
                 onCopy={() => showToast('Triage message copied')} 
               />
@@ -951,7 +959,7 @@ const DecisionFlow = ({ data, settings, onRecord, showToast }) => {
 // ============ SEARCH SCREEN ============
 const SearchScreen = ({ data }) => {
   const [search, setSearch] = useState('');
-  const results = useKeywordScanner(search, data.redFlags, data.amberFlags, data.pharmacyFirst, data.highRiskGroups);
+  const results = useKeywordScanner(search, data.redFlags, data.amberFlags, data.pharmacyFirst, data.highRiskGroups, data.quickMatchPathways);
   return (
     <div className="p-4 pb-24 max-w-lg mx-auto">
       <h1 className="text-lg font-black mb-3 flex items-center gap-2 text-white"><Search size={20} className="text-triage-blue" />Quick Lookup</h1>
