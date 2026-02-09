@@ -63,7 +63,7 @@ function useKeywordScanner(text, redFlags, amberFlags, pharmacyFirst, highRiskGr
     const lower = text.toLowerCase();
     const red = redFlags.filter(f => f.keywords.some(k => lower.includes(k.toLowerCase())));
     const amber = amberFlags.filter(f => f.keywords.some(k => lower.includes(k.toLowerCase())));
-    const pharmacy = pharmacyFirst.filter(c => lower.includes(c.name.toLowerCase()));
+    const pharmacy = pharmacyFirst.filter(c => c.keywords ? c.keywords.some(k => lower.includes(k.toLowerCase())) : lower.includes((c.condition || c.name).toLowerCase()));
     const risk = highRiskGroups.filter(g => {
       const terms = g.group.toLowerCase().split(/[\s/,]+/);
       return terms.some(t => t.length > 3 && lower.includes(t));
@@ -783,7 +783,7 @@ const DecisionFlow = ({ data, settings, onRecord, showToast }) => {
             <div className="flex flex-wrap gap-1.5 mb-3">
               {data.pharmacyFirst.map(c => (
                 <span key={c.id} className={`bg-[rgba(34,197,94,0.06)] border border-[rgba(34,197,94,0.15)] px-2.5 py-1 rounded-lg text-xs text-[rgba(255,255,255,0.65)] ${scanResults?.pharmacy.some(p => p.id === c.id) ? 'ring-1 ring-triage-green/50 bg-triage-green/15' : ''}`}>
-                  {c.icon} {c.name} <span className="text-[rgba(255,255,255,0.3)]">({c.ageRange})</span>
+                  {c.condition || c.name} <span className="text-[rgba(255,255,255,0.3)]">({c.ageRange})</span>
                 </span>
               ))}
             </div>
@@ -969,7 +969,7 @@ const SearchScreen = ({ data }) => {
       )}
       {results?.pharmacy.length > 0 && (
         <div className="mb-4"><h2 className="font-bold text-triage-green mb-2 text-sm flex items-center gap-2"><Pill size={16} />Pharmacy First</h2>
-          {results.pharmacy.map(c => <GlassCard key={c.id} color="green" className="!p-3 !mb-2"><span className="text-lg mr-2">{c.icon}</span><span className="font-bold text-white text-sm">{c.name}</span><span className="text-[rgba(255,255,255,0.3)] text-xs ml-2">({c.ageRange})</span></GlassCard>)}
+          {results.pharmacy.map(c => <GlassCard key={c.id} color="green" className="!p-3 !mb-2"><span className="font-bold text-white text-sm">{c.condition || c.name}</span><span className="text-[rgba(255,255,255,0.3)] text-xs ml-2">({c.ageRange})</span></GlassCard>)}
         </div>
       )}
       {results?.risk.length > 0 && (
