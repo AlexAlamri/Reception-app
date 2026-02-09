@@ -666,8 +666,8 @@ const DecisionFlow = ({ data, settings, onRecord, showToast }) => {
         {scanResults?.amber.length > 0 && (
           <div className="mb-3 bg-triage-amber/10 border border-triage-amber/25 rounded-xl p-3">
             <div className="text-triage-amber font-bold text-xs mb-1.5">⚡ MATCHED IN PATIENT'S WORDS:</div>
-            {scanResults.amber.map(f => (
-              <div key={f.id} className="text-white text-sm mb-1 flex items-start gap-2">
+            {scanResults.amber.map((f, i) => (
+              <div key={i} className="text-white text-sm mb-1 flex items-start gap-2">
                 <span className="text-triage-amber mt-0.5">•</span>
                 <span><strong className="text-triage-amber">{f.category}:</strong> {f.keywords.slice(0, 4).join(', ')}</span>
               </div>
@@ -675,8 +675,8 @@ const DecisionFlow = ({ data, settings, onRecord, showToast }) => {
           </div>
         )}
         <div className="space-y-1.5 mb-3 max-h-56 overflow-y-auto pr-1">
-          {data.amberFlags.map(f => (
-            <div key={f.id} className="bg-[rgba(255,255,255,0.015)] border border-[rgba(255,255,255,0.04)] rounded-xl p-2.5">
+          {data.amberFlags.map((f, i) => (
+            <div key={i} className="bg-[rgba(255,255,255,0.015)] border border-[rgba(255,255,255,0.04)] rounded-xl p-2.5">
               <div className="text-triage-amber font-bold text-[11px] mb-1">{f.category}</div>
               <div className="flex flex-wrap gap-1">
                 {f.keywords.map((k, i) => <span key={i} className="bg-[rgba(255,255,255,0.04)] px-1.5 py-0.5 rounded text-[10px] text-[rgba(255,255,255,0.45)]">{k}</span>)}
@@ -900,14 +900,14 @@ const DecisionFlow = ({ data, settings, onRecord, showToast }) => {
             <div className="text-[rgba(255,255,255,0.5)] text-[11px] space-y-1 font-mono">
               {scanText && <div><span className="text-triage-violet">Patient says:</span> "{scanText.substring(0, 200)}{scanText.length > 200 ? '...' : ''}"</div>}
               {emisFindings && <div><span className="text-triage-blue">EMIS:</span> {emisFindings}</div>}
-              {scanResults?.red.length > 0 && <div><span className="text-triage-red">Red flags:</span> {scanResults.red.map(r => r.id).join(', ')}</div>}
+              {scanResults?.red.length > 0 && <div><span className="text-triage-red">Red flags:</span> {scanResults.red.map(r => r.system).join(', ')}</div>}
               {scanResults?.amber.length > 0 && <div><span className="text-triage-amber">Amber flags:</span> {scanResults.amber.map(a => a.category).join(', ')}</div>}
               {scanResults?.hasChange && <div><span className="text-triage-amber">Change words:</span> {scanResults.changeWords.join(', ')}</div>}
               {!scanText && !emisFindings && <div className="text-[rgba(255,255,255,0.25)] italic">Paste ANIMA text and add EMIS findings above to auto-build</div>}
             </div>
             {(scanText || emisFindings) && (
               <CopyBtn 
-                text={`Patient says: "${scanText}"\n${emisFindings ? 'EMIS: ' + emisFindings + '\n' : ''}${scanResults?.red.length ? 'Red flags: ' + scanResults.red.map(r => r.id).join(', ') + '\n' : ''}${scanResults?.amber.length ? 'Amber flags: ' + scanResults.amber.map(a => a.category).join(', ') + '\n' : ''}${scanResults?.hasChange ? 'Change noted: ' + scanResults.changeWords.join(', ') : ''}`} 
+                text={`Patient says: "${scanText}"\n${emisFindings ? 'EMIS: ' + emisFindings + '\n' : ''}${scanResults?.red.length ? 'Red flags: ' + scanResults.red.map(r => r.system).join(', ') + '\n' : ''}${scanResults?.amber.length ? 'Amber flags: ' + scanResults.amber.map(a => a.category).join(', ') + '\n' : ''}${scanResults?.hasChange ? 'Change noted: ' + scanResults.changeWords.join(', ') : ''}`} 
                 label="Copy Triage Message" 
                 onCopy={() => showToast('Triage message copied')} 
               />
@@ -964,7 +964,7 @@ const SearchScreen = ({ data }) => {
       )}
       {results?.amber.length > 0 && (
         <div className="mb-4"><h2 className="font-bold text-triage-amber mb-2 text-sm flex items-center gap-2"><AlertCircle size={16} />AMBER — Same-Day</h2>
-          {results.amber.map(f => <GlassCard key={f.id} color="amber" className="!p-3 !mb-2"><div className="text-triage-amber font-bold text-xs">{f.category}</div><div className="flex flex-wrap gap-1 mt-1">{f.keywords.slice(0, 6).map((k, i) => <span key={i} className="bg-[rgba(255,255,255,0.04)] px-1.5 py-0.5 rounded text-[10px] text-[rgba(255,255,255,0.4)]">{k}</span>)}</div><div className="text-triage-amber text-xs font-medium mt-1.5">→ {f.action}</div></GlassCard>)}
+          {results.amber.map((f, i) => <GlassCard key={i} color="amber" className="!p-3 !mb-2"><div className="text-triage-amber font-bold text-xs">{f.category}</div><div className="flex flex-wrap gap-1 mt-1">{f.keywords.slice(0, 6).map((k, j) => <span key={j} className="bg-[rgba(255,255,255,0.04)] px-1.5 py-0.5 rounded text-[10px] text-[rgba(255,255,255,0.4)]">{k}</span>)}</div><div className="text-triage-amber text-xs font-medium mt-1.5">→ {f.action}</div></GlassCard>)}
         </div>
       )}
       {results?.pharmacy.length > 0 && (
