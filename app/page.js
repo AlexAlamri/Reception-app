@@ -361,7 +361,7 @@ const DecisionFlow = ({ data, settings, onRecord, showToast }) => {
   const advanceToNext = (currentStep) => {
     markStepDone(currentStep);
     const nextStep = currentStep + 1;
-    if (nextStep <= 8) {
+    if (nextStep <= 7) {
       setExpandedStep(nextStep);
     }
   };
@@ -383,7 +383,7 @@ const DecisionFlow = ({ data, settings, onRecord, showToast }) => {
         <div>
           <h1 className="text-lg font-black text-white tracking-tight">Process ANIMA Request</h1>
           <p className="text-[10px] text-[rgba(255,255,255,0.3)] mt-0.5">
-            {settings.practiceName} · SOP v1.0 · Work through steps in order ↓
+            {settings.practiceName} · Three-Tier SOP v3.0 · Tier 1: Steps 1–7 ↓
           </p>
         </div>
         {(outcome || completedSteps.size > 0) && (
@@ -406,13 +406,31 @@ const DecisionFlow = ({ data, settings, onRecord, showToast }) => {
           <div className="flex gap-1.5 mt-2 flex-wrap">
             {scanResults.red.length > 0 && <button onClick={() => toggle(1)} className="bg-triage-red/15 border border-triage-red/30 text-triage-red px-2.5 py-1 rounded-full text-[11px] font-bold animate-pulse">🚨 {scanResults.red.length} RED FLAG{scanResults.red.length > 1 ? 'S' : ''}</button>}
             {scanResults.risk.length > 0 && <button onClick={() => toggle(4)} className="bg-triage-amber/15 border border-triage-amber/30 text-triage-amber px-2.5 py-1 rounded-full text-[11px] font-bold">🛡️ HIGH RISK</button>}
-            {scanResults.amber.length > 0 && <button onClick={() => toggle(5)} className="bg-triage-amber/15 border border-triage-amber/30 text-triage-amber px-2.5 py-1 rounded-full text-[11px] font-bold">⚠️ {scanResults.amber.length} AMBER</button>}
-            {scanResults.pharmacy.length > 0 && <button onClick={() => toggle(7)} className="bg-triage-green/15 border border-triage-green/30 text-triage-green px-2.5 py-1 rounded-full text-[11px] font-bold">💊 Pharmacy</button>}
+            {scanResults.amber.length > 0 && <span className="bg-triage-amber/15 border border-triage-amber/30 text-triage-amber px-2.5 py-1 rounded-full text-[11px] font-bold">⚠️ {scanResults.amber.length} AMBER → Tier 2</span>}
+            {scanResults.pharmacy.length > 0 && <button onClick={() => toggle(6)} className="bg-triage-green/15 border border-triage-green/30 text-triage-green px-2.5 py-1 rounded-full text-[11px] font-bold">💊 Pharmacy</button>}
             {scanResults.hasChange && <button onClick={() => toggle(3)} className="bg-triage-teal/15 border border-triage-teal/30 text-triage-teal px-2.5 py-1 rounded-full text-[11px] font-bold">🔄 ONGOING?</button>}
             {!scanResults.hasAny && <span className="text-[rgba(255,255,255,0.25)] text-xs py-1">No keyword matches — work through steps below</span>}
           </div>
         )}
       </div>
+
+      {/* ---- AMBER ESCALATION BANNER (Tier 2 alert) ---- */}
+      {scanResults?.amber.length > 0 && (
+        <div className="bg-triage-amber/8 border border-triage-amber/25 rounded-xl px-3 py-2.5 mb-3 animate-fade-slide">
+          <div className="flex items-center gap-2 mb-1">
+            <AlertTriangle size={14} className="text-triage-amber flex-shrink-0" />
+            <span className="text-triage-amber font-bold text-xs">AMBER BUZZWORDS DETECTED — Forward to Tier 2</span>
+          </div>
+          <div className="text-[rgba(255,255,255,0.45)] text-[11px] leading-relaxed mb-1.5">
+            Tier 1 recognises these words and includes them in the Tier 2 handover. Complete Steps 1–4 first, then forward to Tier 2 at Step 7.
+          </div>
+          <div className="flex flex-wrap gap-1">
+            {scanResults.amber.map(f => (
+              <span key={f.id} className="bg-triage-amber/15 px-2 py-0.5 rounded text-[10px] text-triage-amber font-medium">{f.category}</span>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* ---- GOLDEN RULE ---- */}
       <div className="bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.06)] rounded-xl px-3 py-2 mb-4">
@@ -468,28 +486,36 @@ const DecisionFlow = ({ data, settings, onRecord, showToast }) => {
       {/* ═══════════════════════════════════════════════════
           STEP 2: CHECK EMIS
           ═══════════════════════════════════════════════════ */}
-      <FlowStep num={2} color="blue" title="✅ CHECK EMIS (mandatory)" subtitle="Look for plans, alerts, flags, letters, results"
+      <FlowStep num={2} color="blue" title="✅ CHECK EMIS (mandatory)" subtitle="Is this new? Has a GP reviewed this? Look for plans, alerts, flags"
         expanded={expandedStep === 2} onToggle={() => toggle(2)} completed={completedSteps.has(2)}>
-        
+
         <div className="bg-triage-red/5 border border-triage-red/15 rounded-xl p-2.5 mb-3">
-          <div className="text-triage-red text-[11px] font-semibold">⛔ Do NOT skip this step. Do NOT interpret results or tell the patient a diagnosis.</div>
+          <div className="text-triage-red text-[11px] font-semibold">⛔ Do NOT skip. Do NOT interpret results or tell the patient a diagnosis.</div>
         </div>
 
-        <div className="bg-triage-blue/6 border border-triage-blue/15 rounded-xl p-3 mb-3">
-          <div className="text-triage-blue font-bold text-xs mb-2">CONFIRM YOU CHECKED:</div>
+        {/* Key question prompt */}
+        <div className="bg-triage-blue/10 border border-triage-blue/25 rounded-xl p-3 mb-3">
+          <div className="text-triage-blue font-bold text-sm mb-1">KEY QUESTION: Has a GP already reviewed THIS problem?</div>
+          <div className="text-[rgba(255,255,255,0.5)] text-xs leading-relaxed">
+            Open the patient record in EMIS. Look for a consultation where a GP discussed <strong className="text-[rgba(255,255,255,0.7)]">this specific issue</strong>. This determines whether this is NEW or ONGOING in Step 3.
+          </div>
+        </div>
+
+        <div className="bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.06)] rounded-xl p-3 mb-3">
+          <div className="text-[rgba(255,255,255,0.5)] font-bold text-xs mb-2">CONFIRM YOU CHECKED (reading only):</div>
           {[
-            'Recent consultation notes — is there a follow-up plan?',
+            'Recent consultation notes — has a GP reviewed THIS issue? Any follow-up plan?',
             'Recall alerts — bloods, annual review, smear, vaccines due?',
-            'High-risk flags — pregnant, immunosuppressed, safeguarding, LD, <1yr?',
+            'High-risk flags — pregnant, immunosuppressed, safeguarding, LD, <1yr, palliative?',
             'Hospital letters / discharge summaries relevant to this request?',
-            'Recent test results (note they exist — do NOT interpret)',
+            'Recent test results (note they EXIST — do NOT interpret)',
           ].map((t, i) => (
-            <label key={i} className="flex items-center gap-2.5 py-1 cursor-pointer group">
+            <label key={i} className="flex items-center gap-2.5 py-1.5 cursor-pointer group">
               <div onClick={() => { const n = [...emisChecks]; n[i] = !n[i]; setEmisChecks(n); }}
                 className={`w-5 h-5 rounded-md border flex items-center justify-center flex-shrink-0 transition-all ${emisChecks[i] ? 'bg-triage-blue/30 border-triage-blue/50' : 'border-[rgba(255,255,255,0.15)] group-hover:border-[rgba(255,255,255,0.25)]'}`}>
                 {emisChecks[i] && <Check size={12} className="text-triage-blue" />}
               </div>
-              <span className={`text-xs ${emisChecks[i] ? 'text-[rgba(255,255,255,0.7)]' : 'text-[rgba(255,255,255,0.4)]'}`}>{t}</span>
+              <span className={`text-xs leading-relaxed ${emisChecks[i] ? 'text-[rgba(255,255,255,0.7)]' : 'text-[rgba(255,255,255,0.4)]'}`}>{t}</span>
             </label>
           ))}
         </div>
@@ -497,12 +523,16 @@ const DecisionFlow = ({ data, settings, onRecord, showToast }) => {
         <div className="mb-3">
           <div className="text-[rgba(255,255,255,0.5)] text-xs font-bold mb-1.5">📝 KEY EMIS FINDINGS (brief note):</div>
           <textarea value={emisFindings} onChange={e => setEmisFindings(e.target.value)}
-            placeholder="e.g. 'Diabetes recall due. Last seen GP 3 weeks ago re: back pain. No alerts.'"
+            placeholder="e.g. 'Seen GP 3 weeks ago re: back pain — plan: review if not better. Diabetes recall due. No high-risk flags.'"
             rows={2} className="w-full px-3 py-2 rounded-xl bg-[rgba(255,255,255,0.04)] border border-[rgba(255,255,255,0.08)] focus:border-triage-blue/40 focus:outline-none text-white text-xs resize-none" />
-          <div className="text-[rgba(255,255,255,0.25)] text-[10px] mt-1">This will be included if you forward to GP Triager</div>
+          <div className="text-[rgba(255,255,255,0.25)] text-[10px] mt-1">These findings travel with the request through all tiers</div>
         </div>
 
-        <button onClick={() => advanceToNext(2)} 
+        <div className="bg-triage-green/5 border border-triage-green/12 rounded-xl p-2.5 mb-3">
+          <div className="text-triage-green text-[11px] font-semibold">💡 Record your findings — they help Tier 2 and Tier 3 make safe decisions faster.</div>
+        </div>
+
+        <button onClick={() => advanceToNext(2)}
           disabled={!emisChecks.some(Boolean)}
           className={`w-full rounded-xl py-2.5 text-center font-semibold text-xs flex items-center justify-center gap-2 transition-all ${emisChecks.some(Boolean) ? 'bg-triage-blue/15 border border-triage-blue/25 text-triage-blue' : 'bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.06)] text-[rgba(255,255,255,0.2)] cursor-not-allowed'}`}>
           <Check size={14} />EMIS Checked → Continue to Step 3
@@ -516,12 +546,15 @@ const DecisionFlow = ({ data, settings, onRecord, showToast }) => {
         expanded={expandedStep === 3} onToggle={() => toggle(3)} completed={completedSteps.has(3)}
         badge={scanResults?.hasChange ? 'CHANGE?' : null} badgeColor="amber">
         
-        <div className="text-[rgba(255,255,255,0.5)] text-xs mb-2">
-          Based on EMIS: <strong className="text-[rgba(255,255,255,0.7)]">has a clinician already reviewed THIS specific problem?</strong>
+        <div className="bg-triage-teal/10 border border-triage-teal/25 rounded-xl p-3 mb-3">
+          <div className="text-triage-teal font-bold text-sm mb-1">Based on your EMIS check:</div>
+          <div className="text-[rgba(255,255,255,0.6)] text-xs leading-relaxed">
+            Has a GP already reviewed <strong className="text-white">THIS specific problem</strong>? Is there a documented plan? Choose the option that matches what you found in EMIS.
+          </div>
         </div>
-        
+
         <div className="bg-triage-red/5 border border-triage-red/15 rounded-xl p-2.5 mb-3">
-          <div className="text-triage-red text-[11px] font-semibold">⛔ Do NOT book a new GP appointment for a NEW problem without going through the GP Triager.</div>
+          <div className="text-triage-red text-[11px] font-semibold">⛔ Do NOT book a new GP appointment for a NEW problem without going through Tier 2 / GP Triager.</div>
         </div>
 
         {scanResults?.hasChange && (
@@ -546,25 +579,25 @@ const DecisionFlow = ({ data, settings, onRecord, showToast }) => {
               className="flex-1 bg-triage-teal/15 border border-triage-teal/25 text-triage-teal rounded-lg py-2 text-[11px] font-semibold text-center">
               ✅ Follow plan / Direct book
             </button>
-            <button onClick={() => { selectOutcome('→ Clinical admin/query → GP Triager via eConsult (ongoing)' + (emisFindings ? '. EMIS: ' + emisFindings : ''), 'blue'); }}
+            <button onClick={() => { selectOutcome('→ Admin/query forwarded to Tier 2 (ongoing)' + (emisFindings ? '. EMIS: ' + emisFindings : ''), 'blue'); }}
               className="flex-1 bg-triage-blue/15 border border-triage-blue/25 text-triage-blue rounded-lg py-2 text-[11px] font-semibold text-center">
-              📨 Admin/query → eConsult
+              📨 Admin/query → Tier 2
             </button>
           </div>
         </div>
 
-        {/* Option B: ONGOING + worsened → check amber flags then GP Triager */}
+        {/* Option B: ONGOING + worsened → check high-risk then forward to Tier 2 */}
         <div className="bg-triage-amber/6 border border-triage-amber/15 rounded-xl p-3 mb-2">
           <div className="text-triage-amber font-bold text-xs mb-1">B) ONGOING — but WORSENED or CHANGED</div>
           <div className="text-[rgba(255,255,255,0.45)] text-xs mb-1">
             Patient has been seen, but now says: <strong className="text-[rgba(255,255,255,0.6)]">"worse"</strong>, <strong className="text-[rgba(255,255,255,0.6)]">"not improving"</strong>, <strong className="text-[rgba(255,255,255,0.6)]">"different"</strong>, <strong className="text-[rgba(255,255,255,0.6)]">"come back"</strong>, or <strong className="text-[rgba(255,255,255,0.6)]">new symptoms on top</strong>.
           </div>
           <div className="text-[rgba(255,255,255,0.35)] text-[10px] mb-2 italic">
-            Still check Steps 4 & 5 (high-risk / amber flags) before sending — worsened symptoms may now be urgent.
+            Check Step 4 (high-risk) first, then forward to Tier 2. Worsened symptoms may now be urgent.
           </div>
           <button onClick={() => { markStepDone(3); setExpandedStep(4); }}
             className="w-full bg-triage-amber/15 border border-triage-amber/25 text-triage-amber rounded-lg py-2 text-[11px] font-semibold text-center">
-            ⚠️ Worsened → Check Steps 4 & 5 first ↓
+            ⚠️ Worsened → Check Step 4 then Tier 2 ↓
           </button>
         </div>
 
@@ -584,7 +617,7 @@ const DecisionFlow = ({ data, settings, onRecord, showToast }) => {
         <div className="bg-triage-violet/6 border border-triage-violet/15 rounded-xl p-3 mb-2">
           <div className="text-triage-violet font-bold text-xs mb-1">D) NEW — not previously reviewed by a GP</div>
           <div className="text-[rgba(255,255,255,0.45)] text-xs mb-2">
-            No record of this specific issue being assessed. Continue through Steps 4–8 to find the right pathway.
+            No record of this specific issue being assessed. Continue through Steps 4–7 to find the right pathway or forward to Tier 2.
           </div>
           <button onClick={() => advanceToNext(3)}
             className="w-full bg-triage-violet/15 border border-triage-violet/25 text-triage-violet rounded-lg py-2 text-[11px] font-semibold text-center">
@@ -632,7 +665,7 @@ const DecisionFlow = ({ data, settings, onRecord, showToast }) => {
         badge={scanResults?.risk.length > 0 ? 'FLAGGED' : null} badgeColor="amber">
         
         <div className="text-[rgba(255,255,255,0.4)] text-xs mb-2">
-          If patient is in ANY of these groups → <strong className="text-triage-amber">send directly to GP Triager</strong> (do NOT use self-care/Pharmacy First):
+          If patient is in ANY of these groups → <strong className="text-triage-amber">forward to Tier 2 with HIGH RISK flag</strong> (do NOT use self-care/Pharmacy First):
         </div>
         <div className="space-y-1.5 mb-3">
           {data.highRiskGroups.map(g => (
@@ -646,9 +679,9 @@ const DecisionFlow = ({ data, settings, onRecord, showToast }) => {
           ))}
         </div>
         <div className="flex gap-2">
-          <button onClick={() => selectOutcome('→ GP Triager / Duty GP (high-risk patient)', 'amber')}
+          <button onClick={() => selectOutcome('→ Forwarded to Tier 2 [HIGH RISK]' + (emisFindings ? '. EMIS: ' + emisFindings : ''), 'amber')}
             className="flex-1 bg-triage-amber/15 border border-triage-amber/25 text-triage-amber rounded-xl py-2.5 text-center font-semibold text-xs">
-            → GP Triager (High Risk)
+            → Tier 2 (HIGH RISK)
           </button>
           <button onClick={() => advanceToNext(4)} className="flex-1 bg-[rgba(255,255,255,0.03)] border border-[rgba(255,255,255,0.08)] text-[rgba(255,255,255,0.5)] rounded-xl py-2.5 text-center font-semibold text-xs hover:text-white">
             Not high risk → Step 5
@@ -657,49 +690,10 @@ const DecisionFlow = ({ data, settings, onRecord, showToast }) => {
       </FlowStep>
 
       {/* ═══════════════════════════════════════════════════
-          STEP 5: AMBER FLAGS
+          STEP 5: SPECIFIC PATHWAYS (was Step 6)
           ═══════════════════════════════════════════════════ */}
-      <FlowStep num={5} color="amber" title="⚠️ AMBER FLAGS — Urgent Same-Day?" subtitle="Worsening, severe, or new concerning symptoms"
-        expanded={expandedStep === 5} onToggle={() => toggle(5)} completed={completedSteps.has(5)}
-        badge={scanResults?.amber.length > 0 ? `${scanResults.amber.length} MATCH` : null} badgeColor="amber">
-        
-        {scanResults?.amber.length > 0 && (
-          <div className="mb-3 bg-triage-amber/10 border border-triage-amber/25 rounded-xl p-3">
-            <div className="text-triage-amber font-bold text-xs mb-1.5">⚡ MATCHED IN PATIENT'S WORDS:</div>
-            {scanResults.amber.map(f => (
-              <div key={f.id} className="text-white text-sm mb-1 flex items-start gap-2">
-                <span className="text-triage-amber mt-0.5">•</span>
-                <span><strong className="text-triage-amber">{f.category}:</strong> {f.keywords.slice(0, 4).join(', ')}</span>
-              </div>
-            ))}
-          </div>
-        )}
-        <div className="space-y-1.5 mb-3 max-h-56 overflow-y-auto pr-1">
-          {data.amberFlags.map(f => (
-            <div key={f.id} className="bg-[rgba(255,255,255,0.015)] border border-[rgba(255,255,255,0.04)] rounded-xl p-2.5">
-              <div className="text-triage-amber font-bold text-[11px] mb-1">{f.category}</div>
-              <div className="flex flex-wrap gap-1">
-                {f.keywords.map((k, i) => <span key={i} className="bg-[rgba(255,255,255,0.04)] px-1.5 py-0.5 rounded text-[10px] text-[rgba(255,255,255,0.45)]">{k}</span>)}
-              </div>
-            </div>
-          ))}
-        </div>
-        <div className="flex gap-2">
-          <button onClick={() => selectOutcome('→ Duty GP / GP Triager SAME-DAY (amber flag)', 'amber')}
-            className="flex-1 bg-triage-amber/15 border border-triage-amber/25 text-triage-amber rounded-xl py-2.5 text-center font-semibold text-xs">
-            → Same-Day GP Triager
-          </button>
-          <button onClick={() => advanceToNext(5)} className="flex-1 bg-[rgba(255,255,255,0.03)] border border-[rgba(255,255,255,0.08)] text-[rgba(255,255,255,0.5)] rounded-xl py-2.5 text-center font-semibold text-xs hover:text-white">
-            No amber flags → Step 6
-          </button>
-        </div>
-      </FlowStep>
-
-      {/* ═══════════════════════════════════════════════════
-          STEP 6: SPECIFIC PATHWAYS
-          ═══════════════════════════════════════════════════ */}
-      <FlowStep num={6} color="blue" title="📋 SPECIFIC PATHWAY?" subtitle="Eye · Injury · Pregnancy · Sexual Health · Fit Note · Mental Health"
-        expanded={expandedStep === 6} onToggle={() => toggle(6)} completed={completedSteps.has(6)}>
+      <FlowStep num={5} color="blue" title="📋 SPECIFIC PATHWAY?" subtitle="Eye · Injury · Pregnancy · Sexual Health · Fit Note · Mental Health"
+        expanded={expandedStep === 5} onToggle={() => toggle(5)} completed={completedSteps.has(5)}>
         
         <div className="text-[rgba(255,255,255,0.4)] text-xs mb-3">Does the request fit one of these? Tap to expand:</div>
         <div className="grid grid-cols-3 gap-1.5 mb-3">
@@ -741,16 +735,16 @@ const DecisionFlow = ({ data, settings, onRecord, showToast }) => {
           </div>
         )}
 
-        <button onClick={() => advanceToNext(6)} className="w-full text-center text-xs text-[rgba(255,255,255,0.4)] hover:text-triage-blue py-2 border-t border-[rgba(255,255,255,0.04)]">
-          Doesn't fit a specific pathway → Step 7 ↓
+        <button onClick={() => advanceToNext(5)} className="w-full text-center text-xs text-[rgba(255,255,255,0.4)] hover:text-triage-blue py-2 border-t border-[rgba(255,255,255,0.04)]">
+          Doesn't fit a specific pathway → Step 6 ↓
         </button>
       </FlowStep>
 
       {/* ═══════════════════════════════════════════════════
-          STEP 7: PHARMACY FIRST / SELF-CARE
+          STEP 6: PHARMACY FIRST / SELF-CARE (was Step 7)
           ═══════════════════════════════════════════════════ */}
-      <FlowStep num={7} color="green" title="💊 PHARMACY FIRST / SELF-CARE?" subtitle="Minor, single, short-lived, patient agrees"
-        expanded={expandedStep === 7} onToggle={() => toggle(7)} completed={completedSteps.has(7)}
+      <FlowStep num={6} color="green" title="💊 PHARMACY FIRST / SELF-CARE?" subtitle="Minor, single, short-lived, patient agrees"
+        expanded={expandedStep === 6} onToggle={() => toggle(6)} completed={completedSteps.has(6)}
         badge={scanResults?.pharmacy.length > 0 ? `${scanResults.pharmacy.length} MATCH` : null} badgeColor="green">
         
         {/* Eligibility checklist - GATE */}
@@ -760,7 +754,7 @@ const DecisionFlow = ({ data, settings, onRecord, showToast }) => {
           {[
             'Minor SINGLE symptom (not multiple problems)',
             'Short-lived (< 7 days) and NOT recurring or > 2 weeks',
-            'NO red or amber flags identified in Steps 1 & 5',
+            'NO red or amber flags identified in Step 1 or scanner',
             'NOT a high-risk patient from Step 4',
             'Patient does NOT say "severe", "worsening", or "worst ever"',
             "You can clearly match it to ONE self-care resource",
@@ -849,18 +843,19 @@ const DecisionFlow = ({ data, settings, onRecord, showToast }) => {
           </div>
         )}
 
-        <button onClick={() => advanceToNext(7)} className="w-full text-center text-xs text-[rgba(255,255,255,0.4)] hover:text-triage-blue py-2 border-t border-[rgba(255,255,255,0.04)] mt-2">
-          Doesn't fit / patient declines → Step 8 ↓
+        <button onClick={() => advanceToNext(6)} className="w-full text-center text-xs text-[rgba(255,255,255,0.4)] hover:text-triage-blue py-2 border-t border-[rgba(255,255,255,0.04)] mt-2">
+          Doesn't fit / patient declines → Step 7 ↓
         </button>
       </FlowStep>
 
       {/* ═══════════════════════════════════════════════════
-          STEP 8: DEFAULT → GP TRIAGER
+          STEP 7: DEFAULT → FORWARD TO TIER 2 (was Step 8)
           ═══════════════════════════════════════════════════ */}
-      <FlowStep num={8} color="violet" title="📨 DEFAULT → GP TRIAGER" subtitle="Anything else, unclear, multiple symptoms, or patient anxious"
-        expanded={expandedStep === 8} onToggle={() => toggle(8)} completed={completedSteps.has(8)}>
-        
-        <div className="text-[rgba(255,255,255,0.4)] text-xs mb-3">Send to GP Triager if the request reaches this step, OR if ANY of these apply:</div>
+      <FlowStep num={7} color="violet" title="📨 DEFAULT → FORWARD TO TIER 2" subtitle="Anything else, unclear, multiple symptoms, or patient anxious"
+        expanded={expandedStep === 7} onToggle={() => toggle(7)} completed={completedSteps.has(7)}
+        badge={scanResults?.amber.length > 0 ? 'AMBER' : null} badgeColor="amber">
+
+        <div className="text-[rgba(255,255,255,0.4)] text-xs mb-3">Forward to <strong className="text-triage-violet">Tier 2 (Experienced Non-Clinical Triager)</strong> if the request reaches this step, OR if ANY of these apply:</div>
         <div className="space-y-1 mb-3">
           {[
             'Can\'t confidently match to ONE pathway above',
@@ -870,6 +865,7 @@ const DecisionFlow = ({ data, settings, onRecord, showToast }) => {
             'New lump, night sweats, unexplained weight loss, unexplained bleeding',
             'Patient is anxious, distressed, or specifically requesting a GP',
             'Self-care / Pharmacy First declined by patient',
+            'ANY uncertainty whatsoever',
           ].map((t, i) => (
             <div key={i} className="flex items-start gap-2 text-xs text-[rgba(255,255,255,0.55)]">
               <span className="text-triage-violet mt-0.5">•</span>{t}
@@ -877,49 +873,86 @@ const DecisionFlow = ({ data, settings, onRecord, showToast }) => {
           ))}
         </div>
 
+        {/* Amber flags detected reminder */}
+        {scanResults?.amber.length > 0 && (
+          <div className="bg-triage-amber/8 border border-triage-amber/20 rounded-xl p-2.5 mb-3">
+            <div className="text-triage-amber font-bold text-[11px] mb-1">⚠️ AMBER BUZZWORDS DETECTED — include in handover:</div>
+            <div className="flex flex-wrap gap-1">
+              {scanResults.amber.map(f => (
+                <span key={f.id} className="bg-triage-amber/15 px-2 py-0.5 rounded text-[10px] text-triage-amber font-medium">{f.category}: {f.keywords.slice(0, 3).join(', ')}</span>
+              ))}
+            </div>
+            <div className="text-[rgba(255,255,255,0.35)] text-[10px] mt-1">Tier 2 will match these to same-day duty GP or escalate to Tier 3</div>
+          </div>
+        )}
+
         <div className="bg-triage-violet/8 border border-triage-violet/15 rounded-xl p-3 mb-3">
-          <div className="text-triage-violet font-bold text-xs mb-1.5">INCLUDE WITH YOUR TRIAGE MESSAGE:</div>
+          <div className="text-triage-violet font-bold text-xs mb-1.5">TIER 1 → TIER 2 HANDOVER MUST INCLUDE:</div>
           <div className="space-y-1 text-[rgba(255,255,255,0.5)] text-xs">
             <div>✓ Patient's <strong className="text-[rgba(255,255,255,0.7)]">EXACT words</strong> (copy/paste from ANIMA)</div>
-            <div>✓ <strong className="text-[rgba(255,255,255,0.7)]">EMIS findings</strong> — alerts, recent notes, risk flags</div>
-            <div>✓ Whether this is <strong className="text-[rgba(255,255,255,0.7)]">NEW or ONGOING</strong> and any changes</div>
-            <div>✓ Any <strong className="text-[rgba(255,255,255,0.7)]">red/amber keywords</strong> you spotted</div>
+            <div>✓ <strong className="text-[rgba(255,255,255,0.7)]">EMIS findings</strong> — plans, alerts, risk flags</div>
+            <div>✓ <strong className="text-[rgba(255,255,255,0.7)]">NEW or ONGOING</strong> + any change words</div>
+            <div>✓ <strong className="text-[rgba(255,255,255,0.7)]">Red/amber keywords</strong> you noticed</div>
+            <div>✓ If patient <strong className="text-[rgba(255,255,255,0.7)]">declined self-care</strong> + reason</div>
             <div>✓ <strong className="text-[rgba(255,255,255,0.7)]">Contact details</strong> and availability</div>
           </div>
         </div>
 
-        <button onClick={() => selectOutcome('→ GP Triager (via eConsult / triage message)' + (emisFindings ? '. EMIS: ' + emisFindings : ''), 'violet')}
+        <button onClick={() => selectOutcome('→ Forwarded to Tier 2' + (scanResults?.amber.length ? ' [AMBER: ' + scanResults.amber.map(a => a.category).join(', ') + ']' : '') + (emisFindings ? '. EMIS: ' + emisFindings : ''), 'violet')}
           className="w-full bg-triage-violet/15 border border-triage-violet/25 text-triage-violet rounded-xl py-2.5 text-center font-semibold text-xs flex items-center justify-center gap-2">
-          📨 Send to GP Triager
+          📨 Forward to Tier 2
         </button>
 
-        {/* Build triage message helper */}
+        {/* Structured Tier 2 Handover Builder */}
         <div className="mt-3 pt-3 border-t border-[rgba(255,255,255,0.06)]">
-          <div className="text-[rgba(255,255,255,0.4)] text-xs font-bold mb-1.5">📋 QUICK TRIAGE MESSAGE BUILDER:</div>
+          <div className="text-[rgba(255,255,255,0.4)] text-xs font-bold mb-1.5">📋 TIER 2 HANDOVER MESSAGE BUILDER:</div>
           <div className="bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.06)] rounded-xl p-2.5">
             <div className="text-[rgba(255,255,255,0.5)] text-[11px] space-y-1 font-mono">
-              {scanText && <div><span className="text-triage-violet">Patient says:</span> "{scanText.substring(0, 200)}{scanText.length > 200 ? '...' : ''}"</div>}
-              {emisFindings && <div><span className="text-triage-blue">EMIS:</span> {emisFindings}</div>}
-              {scanResults?.red.length > 0 && <div><span className="text-triage-red">Red flags:</span> {scanResults.red.map(r => r.id).join(', ')}</div>}
-              {scanResults?.amber.length > 0 && <div><span className="text-triage-amber">Amber flags:</span> {scanResults.amber.map(a => a.category).join(', ')}</div>}
+              {scanText && <div><span className="text-triage-violet">Patient says:</span> &quot;{scanText.substring(0, 300)}{scanText.length > 300 ? '...' : ''}&quot;</div>}
+              {emisFindings && <div><span className="text-triage-blue">EMIS findings:</span> {emisFindings}</div>}
+              <div><span className="text-triage-teal">Status:</span> {scanResults?.hasChange ? 'ONGOING — patient reports change/worsening' : 'Check NEW or ONGOING in EMIS'}</div>
+              {scanResults?.red.length > 0 && <div><span className="text-triage-red">Red flag words spotted:</span> {scanResults.red.map(r => r.description).join('; ')}</div>}
+              {scanResults?.amber.length > 0 && <div><span className="text-triage-amber">Amber buzzwords:</span> {scanResults.amber.map(a => a.category + ' (' + a.keywords.slice(0, 3).join(', ') + ')').join('; ')}</div>}
+              {scanResults?.risk.length > 0 && <div><span className="text-triage-amber">High-risk group:</span> {scanResults.risk.map(r => r.group).join('; ')}</div>}
               {scanResults?.hasChange && <div><span className="text-triage-amber">Change words:</span> {scanResults.changeWords.join(', ')}</div>}
-              {!scanText && !emisFindings && <div className="text-[rgba(255,255,255,0.25)] italic">Paste ANIMA text and add EMIS findings above to auto-build</div>}
+              {!scanText && !emisFindings && <div className="text-[rgba(255,255,255,0.25)] italic">Paste ANIMA text and add EMIS findings above to auto-build handover</div>}
             </div>
             {(scanText || emisFindings) && (
-              <CopyBtn 
-                text={`Patient says: "${scanText}"\n${emisFindings ? 'EMIS: ' + emisFindings + '\n' : ''}${scanResults?.red.length ? 'Red flags: ' + scanResults.red.map(r => r.id).join(', ') + '\n' : ''}${scanResults?.amber.length ? 'Amber flags: ' + scanResults.amber.map(a => a.category).join(', ') + '\n' : ''}${scanResults?.hasChange ? 'Change noted: ' + scanResults.changeWords.join(', ') : ''}`} 
-                label="Copy Triage Message" 
-                onCopy={() => showToast('Triage message copied')} 
+              <CopyBtn
+                text={[
+                  `TIER 1 → TIER 2 HANDOVER`,
+                  `Patient says: "${scanText}"`,
+                  emisFindings ? `EMIS findings: ${emisFindings}` : '',
+                  `Status: ${scanResults?.hasChange ? 'ONGOING — patient reports change/worsening' : 'NEW / check EMIS'}`,
+                  scanResults?.red.length ? `Red flag words: ${scanResults.red.map(r => r.description).join('; ')}` : '',
+                  scanResults?.amber.length ? `Amber buzzwords: ${scanResults.amber.map(a => a.category).join(', ')}` : '',
+                  scanResults?.risk.length ? `High-risk group: ${scanResults.risk.map(r => r.group).join('; ')}` : '',
+                  scanResults?.hasChange ? `Change words noted: ${scanResults.changeWords.join(', ')}` : '',
+                ].filter(Boolean).join('\n')}
+                label="Copy Tier 2 Handover"
+                onCopy={() => showToast('Tier 2 handover copied')}
               />
             )}
+          </div>
+        </div>
+
+        {/* Tier 2 will then... */}
+        <div className="mt-3 bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.06)] rounded-xl p-2.5">
+          <div className="text-[rgba(255,255,255,0.35)] text-[10px] font-bold mb-1">WHAT HAPPENS NEXT:</div>
+          <div className="text-[rgba(255,255,255,0.3)] text-[10px] space-y-0.5">
+            <div>• Tier 2 reviews your handover within <strong className="text-[rgba(255,255,255,0.5)]">2 hours</strong> (amber: 1 hour)</div>
+            <div>• Tier 2 matches amber patterns → books same-day duty GP</div>
+            <div>• Unclear/complex → Tier 2 escalates to <strong className="text-[rgba(255,255,255,0.5)]">Tier 3 GP Triager</strong></div>
+            <div>• End of day unresolved → auto-escalates to GP Triager</div>
           </div>
         </div>
       </FlowStep>
 
       {/* ---- IF IN DOUBT BANNER ---- */}
       <div className="bg-[rgba(108,142,255,0.04)] border border-[rgba(108,142,255,0.12)] rounded-2xl p-4 text-center mt-2 mb-2">
-        <div className="text-triage-blue font-black text-sm">⚠️ IF IN DOUBT → ASK A CLINICIAN</div>
-        <div className="text-[rgba(255,255,255,0.3)] text-xs mt-1">GP Triager from 8am · Duty clinician on site</div>
+        <div className="text-triage-blue font-black text-sm">⚠️ IF IN DOUBT → ESCALATE UP</div>
+        <div className="text-[rgba(255,255,255,0.3)] text-xs mt-1">Forward to Tier 2 · GP Triager from 8am · Duty clinician on site</div>
+        <div className="text-[rgba(255,255,255,0.25)] text-[10px] mt-1">A false escalation is safe. A missed escalation is not.</div>
       </div>
 
       {/* ---- OUTCOME BAR (sticky bottom) ---- */}
@@ -1000,32 +1033,73 @@ const TrainingScreen = ({ onBack, scenarios }) => {
   const [answer, setAnswer] = useState(null);
   const [showResult, setShowResult] = useState(false);
   const [score, setScore] = useState({ correct: 0, total: 0 });
-  const sc = scenarios[idx];
+  const [filterCat, setFilterCat] = useState(null);
+
+  const categories = [...new Set(scenarios.map(s => s.category).filter(Boolean))];
+  const filtered = filterCat ? scenarios.filter(s => s.category === filterCat) : scenarios;
+  const sc = filtered[idx];
+
   const check = id => { setAnswer(id); setShowResult(true); setScore(p => id === sc.correctAnswer ? { correct: p.correct + 1, total: p.total + 1 } : { ...p, total: p.total + 1 }); };
-  const next = () => { if (idx < scenarios.length - 1) { setIdx(idx + 1); setAnswer(null); setShowResult(false); } };
+  const next = () => { if (idx < filtered.length - 1) { setIdx(idx + 1); setAnswer(null); setShowResult(false); } };
   const restart = () => { setIdx(0); setAnswer(null); setShowResult(false); setScore({ correct: 0, total: 0 }); };
+  const switchCategory = (cat) => { setFilterCat(cat); setIdx(0); setAnswer(null); setShowResult(false); setScore({ correct: 0, total: 0 }); };
+
+  const catColors = {
+    'Red Flags': 'red', 'High-Risk Groups': 'amber', 'EMIS Check': 'blue', 'New vs Ongoing': 'teal',
+    'Specific Pathways': 'blue', 'Tier 2 Escalation': 'violet', 'Three-Tier Model': 'violet',
+    'Safety Netting': 'green', 'Handover Quality': 'violet', 'Scope of Role': 'blue', 'Signposting': 'green',
+    'EMIS & Direct Booking': 'blue'
+  };
+  const catColor = catColors[sc?.category] || 'blue';
+
   return (
     <div className="p-4 pb-24 max-w-lg mx-auto">
       <BackButton onClick={onBack} />
-      <h1 className="text-lg font-black mb-2 flex items-center gap-2 text-white"><GraduationCap size={20} className="text-triage-violet" />Training</h1>
-      <div className="flex items-center justify-between mb-4 glass rounded-xl p-3 border border-[rgba(255,255,255,0.06)]">
-        <span className="text-[rgba(255,255,255,0.5)] text-sm">{idx + 1}/{scenarios.length}</span>
-        <span className="font-bold text-white text-sm">Score: {score.correct}/{score.total}</span>
-      </div>
-      <GlassCard color="blue"><div className="text-triage-blue font-bold mb-2 text-xs">📋 ANIMA REQUEST:</div><p className="text-[rgba(255,255,255,0.75)] text-sm leading-relaxed">{sc.scenario}</p></GlassCard>
-      <div className="mt-3 space-y-2">
-        {sc.options.map(o => {
-          let style = 'bg-[rgba(255,255,255,0.02)] border-[rgba(255,255,255,0.06)] hover:border-triage-blue/30';
-          if (showResult) { if (o.id === sc.correctAnswer) style = 'bg-[rgba(34,197,94,0.08)] border-[rgba(34,197,94,0.3)]'; else if (o.id === answer) style = 'bg-[rgba(255,59,92,0.08)] border-[rgba(255,59,92,0.3)]'; else style = 'opacity-40'; }
-          return <button key={o.id} onClick={() => !showResult && check(o.id)} disabled={showResult} className={`w-full p-3.5 rounded-xl border text-left text-sm text-[rgba(255,255,255,0.75)] transition-all ${style}`}>{o.text}</button>;
+      <h1 className="text-lg font-black mb-1 flex items-center gap-2 text-white"><GraduationCap size={20} className="text-triage-violet" />Training Scenarios</h1>
+      <p className="text-[rgba(255,255,255,0.3)] text-xs mb-3">Based on NHS Care Navigation Competency Framework</p>
+
+      {/* Category filter */}
+      <div className="flex gap-1.5 overflow-x-auto pb-2 mb-3 -mx-1 px-1">
+        <button onClick={() => switchCategory(null)}
+          className={`px-3 py-1.5 rounded-full text-[11px] font-semibold whitespace-nowrap transition-all ${!filterCat ? 'bg-triage-blue/20 text-triage-blue border border-triage-blue/30' : 'bg-[rgba(255,255,255,0.03)] text-[rgba(255,255,255,0.4)] border border-transparent'}`}>
+          All ({scenarios.length})
+        </button>
+        {categories.map(cat => {
+          const cc = C[catColors[cat] || 'blue'];
+          return (
+            <button key={cat} onClick={() => switchCategory(cat)}
+              className={`px-3 py-1.5 rounded-full text-[11px] font-semibold whitespace-nowrap transition-all ${filterCat === cat ? `${cc.bg} ${cc.text} border ${cc.border}` : 'bg-[rgba(255,255,255,0.03)] text-[rgba(255,255,255,0.4)] border border-transparent'}`}>
+              {cat} ({scenarios.filter(s => s.category === cat).length})
+            </button>
+          );
         })}
       </div>
-      {showResult && (
-        <><GlassCard color={answer === sc.correctAnswer ? 'green' : 'red'} className="mt-3">
-          <div className="font-bold mb-1 text-white text-sm">{answer === sc.correctAnswer ? '✅ Correct!' : '❌ Not quite'}</div>
-          <p className="text-sm text-[rgba(255,255,255,0.55)]">{sc.explanation}</p>
-        </GlassCard>
-        <div className="mt-3">{idx < scenarios.length - 1 ? <Button color="blue" full onClick={next}>Next →</Button> : <div className="text-center"><div className="text-xl font-black mb-3 text-white">{score.correct}/{score.total}</div><Button color="green" onClick={restart}>Restart</Button></div>}</div></>
+
+      {sc && (
+        <>
+          <div className="flex items-center justify-between mb-3 glass rounded-xl p-3 border border-[rgba(255,255,255,0.06)]">
+            <div className="flex items-center gap-2">
+              <span className="text-[rgba(255,255,255,0.5)] text-sm">{idx + 1}/{filtered.length}</span>
+              {sc.category && <span className={`${C[catColor].bg} border ${C[catColor].border} ${C[catColor].text} px-2 py-0.5 rounded-full text-[10px] font-bold`}>{sc.category}</span>}
+            </div>
+            <span className="font-bold text-white text-sm">Score: {score.correct}/{score.total}</span>
+          </div>
+          <GlassCard color={catColor}><div className={`${C[catColor].text} font-bold mb-2 text-xs`}>📋 ANIMA REQUEST:</div><p className="text-[rgba(255,255,255,0.75)] text-sm leading-relaxed">{sc.scenario}</p></GlassCard>
+          <div className="mt-3 space-y-2">
+            {sc.options.map(o => {
+              let style = 'bg-[rgba(255,255,255,0.02)] border-[rgba(255,255,255,0.06)] hover:border-triage-blue/30';
+              if (showResult) { if (o.id === sc.correctAnswer) style = 'bg-[rgba(34,197,94,0.08)] border-[rgba(34,197,94,0.3)]'; else if (o.id === answer) style = 'bg-[rgba(255,59,92,0.08)] border-[rgba(255,59,92,0.3)]'; else style = 'opacity-40'; }
+              return <button key={o.id} onClick={() => !showResult && check(o.id)} disabled={showResult} className={`w-full p-3.5 rounded-xl border text-left text-sm text-[rgba(255,255,255,0.75)] transition-all ${style}`}>{o.text}</button>;
+            })}
+          </div>
+          {showResult && (
+            <><GlassCard color={answer === sc.correctAnswer ? 'green' : 'red'} className="mt-3">
+              <div className="font-bold mb-1 text-white text-sm">{answer === sc.correctAnswer ? '✅ Correct!' : '❌ Not quite'}</div>
+              <p className="text-sm text-[rgba(255,255,255,0.55)] leading-relaxed">{sc.explanation}</p>
+            </GlassCard>
+            <div className="mt-3">{idx < filtered.length - 1 ? <Button color="blue" full onClick={next}>Next →</Button> : <div className="text-center"><div className="text-xl font-black mb-3 text-white">{score.correct}/{score.total}</div><Button color="green" onClick={restart}>Restart</Button></div>}</div></>
+          )}
+        </>
       )}
     </div>
   );
