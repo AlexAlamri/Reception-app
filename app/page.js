@@ -439,15 +439,15 @@ const DecisionFlow = ({ data, settings, onRecord, showToast }) => {
         {scanResults?.red.length > 0 && (
           <div className="mb-3 bg-triage-red/10 border border-triage-red/25 rounded-xl p-3">
             <div className="text-triage-red font-bold text-xs mb-1.5">⚡ MATCHED IN PATIENT'S WORDS:</div>
-            {scanResults.red.map(f => <div key={f.id} className="text-white text-sm mb-1 flex items-start gap-2"><span className="text-triage-red mt-0.5">•</span>{f.description}</div>)}
+            {scanResults.red.map((f, i) => <div key={i} className="text-white text-sm mb-1 flex items-start gap-2"><span className="text-triage-red mt-0.5">•</span>{f.symptom}</div>)}
           </div>
         )}
         <div className="text-[rgba(255,255,255,0.4)] text-xs mb-2 font-semibold">STOP if patient mentions ANY:</div>
         <div className="space-y-1.5 mb-4 max-h-48 overflow-y-auto pr-1">
-          {data.redFlags.map(f => (
-            <div key={f.id} className="flex items-start gap-2">
+          {data.redFlags.map((f, i) => (
+            <div key={i} className="flex items-start gap-2">
               <div className="w-1.5 h-1.5 rounded-full bg-triage-red mt-1.5 flex-shrink-0" />
-              <span className="text-[rgba(255,255,255,0.55)] text-xs leading-relaxed">{f.description}</span>
+              <span className="text-[rgba(255,255,255,0.55)] text-xs leading-relaxed">{f.symptom}</span>
             </div>
           ))}
         </div>
@@ -959,7 +959,7 @@ const SearchScreen = ({ data }) => {
       {search.length >= 2 && !results?.hasAny && <p className="text-center text-[rgba(255,255,255,0.3)] mt-8 text-sm">No matches. If unsure → GP Triager.</p>}
       {results?.red.length > 0 && (
         <div className="mb-4"><h2 className="font-bold text-triage-red mb-2 text-sm flex items-center gap-2"><AlertTriangle size={16} />RED FLAGS — Call 999</h2>
-          {results.red.map(f => <GlassCard key={f.id} color="red" className="!p-3 !mb-2"><div className="text-[rgba(255,255,255,0.85)] text-sm">{f.description}</div><div className="text-triage-red font-bold text-xs mt-1">→ {f.action}</div></GlassCard>)}
+          {results.red.map((f, i) => <GlassCard key={i} color="red" className="!p-3 !mb-2"><div className="text-[rgba(255,255,255,0.85)] text-sm">{f.symptom}</div><div className="text-triage-red font-bold text-xs mt-1">→ {f.action}</div></GlassCard>)}
         </div>
       )}
       {results?.amber.length > 0 && (
