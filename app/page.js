@@ -995,6 +995,21 @@ const DecisionFlow = ({ data, settings, onRecord, showToast }) => {
 };
 
 // ============ SEARCH SCREEN ============
+const QUICK_SEARCHES = [
+  { label: '🚨 Chest Pain', term: 'chest pain' },
+  { label: '🧠 Headache', term: 'headache' },
+  { label: '🫁 Breathing', term: 'breathing' },
+  { label: '🤒 Rash', term: 'rash' },
+  { label: '💊 Pharmacy', term: 'sore throat' },
+  { label: '👁️ Eye', term: 'eye' },
+  { label: '🤰 Pregnancy', term: 'pregnancy' },
+  { label: '🩹 Injury', term: 'injury' },
+  { label: '📝 Fit Note', term: 'fit note' },
+  { label: '🧠 Mental Health', term: 'mental health' },
+  { label: '🩸 Blood Test', term: 'blood test' },
+  { label: '💉 Vaccine', term: 'vaccine' },
+];
+
 const SearchScreen = ({ data }) => {
   const [search, setSearch] = useState('');
   const results = useKeywordScanner(search, data.redFlags, data.amberFlags, data.pharmacyFirst, data.highRiskGroups);
@@ -1044,6 +1059,20 @@ const SearchScreen = ({ data }) => {
       <h1 className="text-lg font-black mb-1 flex items-center gap-2 text-white"><Search size={20} className="text-triage-blue" />Quick Lookup</h1>
       <p className="text-[11px] text-[rgba(255,255,255,0.3)] mb-3">Search symptoms, conditions, pathways, bookings, or contacts</p>
       <SearchBar value={search} onChange={setSearch} placeholder="Type symptom or keyword..." />
+
+      {!search && (
+        <div className="mb-4">
+          <p className="text-[10px] text-[rgba(255,255,255,0.25)] mb-2 font-semibold uppercase tracking-wider">Quick access — tap to search</p>
+          <div className="flex flex-wrap gap-1.5">
+            {QUICK_SEARCHES.map(q => (
+              <button key={q.term} onClick={() => setSearch(q.term)}
+                className="bg-[rgba(255,255,255,0.04)] border border-[rgba(255,255,255,0.08)] px-2.5 py-1.5 rounded-xl text-[11px] text-[rgba(255,255,255,0.5)] hover:bg-[rgba(255,255,255,0.08)] hover:text-white transition-all active:scale-95">
+                {q.label}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
 
       {search.length >= 2 && hasAnyResult && (
         <div className="flex items-center gap-2 mb-3 text-[11px] text-[rgba(255,255,255,0.35)]">
