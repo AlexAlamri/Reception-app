@@ -353,6 +353,10 @@ const DecisionFlow = ({ data, settings, onRecord, showToast }) => {
   const [newOngoing, setNewOngoing] = useState(null);
   const [pathwaySearch, setPathwaySearch] = useState('');
   const [quickAction, setQuickAction] = useState(null);
+  const [handoverContact, setHandoverContact] = useState('');
+  const [handoverAvailability, setHandoverAvailability] = useState('');
+  const [selfCareOffered, setSelfCareOffered] = useState('');
+  const [selfCareReason, setSelfCareReason] = useState('');
 
   const scanResults = useKeywordScanner(scanText, data.redFlags, data.amberFlags, data.pharmacyFirst, data.highRiskGroups);
 
@@ -382,6 +386,8 @@ const DecisionFlow = ({ data, settings, onRecord, showToast }) => {
     setEmisChecks(new Array(5).fill(false)); setEmisFindings('');
     setExpandedSystems({}); setIsClinicalAdmin(false); setNewOngoing(null);
     setPathwaySearch(''); setQuickAction(null);
+    setHandoverContact(''); setHandoverAvailability('');
+    setSelfCareOffered(''); setSelfCareReason('');
     window.scrollTo(0, 0);
   };
 
@@ -879,69 +885,139 @@ const DecisionFlow = ({ data, settings, onRecord, showToast }) => {
       {/* ═══════════════════════════════════════════════════
           STEP 8: DEFAULT → GP TRIAGER
           ═══════════════════════════════════════════════════ */}
-      <FlowStep num={8} color="violet" title="📨 DEFAULT → GP TRIAGER" subtitle="Anything else, unclear, multiple symptoms, or patient anxious"
+      <FlowStep num={8} color="violet" title="➡️ DEFAULT: FORWARD TO TIER 2" subtitle="Anything else, unclear, multiple symptoms, or patient anxious"
         expanded={expandedStep === 8} onToggle={() => toggle(8)} completed={completedSteps.has(8)}>
-        
-        <div className="text-[rgba(255,255,255,0.4)] text-xs mb-3">Send to GP Triager if the request reaches this step, OR if ANY of these apply:</div>
-        <div className="space-y-1 mb-3">
-          {[
-            'Can\'t confidently match to ONE pathway above',
-            'Multiple symptoms or problems',
-            'Patient says "severe", "worsening", "worst ever", "very worried"',
-            'Symptoms > 2 weeks or not improving despite pharmacy/self-care',
-            'New lump, night sweats, unexplained weight loss, unexplained bleeding',
-            'Patient is anxious, distressed, or specifically requesting a GP',
-            'Self-care / Pharmacy First declined by patient',
-          ].map((t, i) => (
-            <div key={i} className="flex items-start gap-2 text-xs text-[rgba(255,255,255,0.55)]">
-              <span className="text-triage-violet mt-0.5">•</span>{t}
-            </div>
-          ))}
+
+        <div className="text-[rgba(255,255,255,0.45)] text-[11px] mb-3">
+          Forward if: multiple problems, severe/worsening, &gt;2 weeks, new lump/night sweats/unexplained bleeding, patient anxious, any uncertainty.
         </div>
 
-        <div className="bg-triage-violet/8 border border-triage-violet/15 rounded-xl p-3 mb-3">
-          <div className="text-triage-violet font-bold text-xs mb-1.5">INCLUDE WITH YOUR TRIAGE MESSAGE:</div>
-          <div className="space-y-1 text-[rgba(255,255,255,0.5)] text-xs">
-            <div>✓ Patient's <strong className="text-[rgba(255,255,255,0.7)]">EXACT words</strong> (copy/paste from ANIMA)</div>
-            <div>✓ <strong className="text-[rgba(255,255,255,0.7)]">EMIS findings</strong> — alerts, recent notes, risk flags</div>
-            <div>✓ Whether this is <strong className="text-[rgba(255,255,255,0.7)]">NEW or ONGOING</strong> and any changes</div>
-            <div>✓ Any <strong className="text-[rgba(255,255,255,0.7)]">red/amber keywords</strong> you spotted</div>
-            <div>✓ <strong className="text-[rgba(255,255,255,0.7)]">Contact details</strong> and availability</div>
+        {/* Structured handover form */}
+        <div className="space-y-2.5 mb-3">
+          <div>
+            <div className="text-[rgba(255,255,255,0.5)] text-[10px] font-bold mb-1">PATIENT&apos;S EXACT WORDS:</div>
+            <textarea value={scanText} onChange={e => setScanText(e.target.value)}
+              placeholder="Paste ANIMA text / patient's words here..."
+              rows={2} className="w-full px-3 py-2 rounded-xl bg-[rgba(255,255,255,0.04)] border border-[rgba(255,255,255,0.08)] focus:border-triage-violet/40 focus:outline-none text-white text-xs resize-none" />
           </div>
-        </div>
-
-        <button onClick={() => selectOutcome('→ GP Triager (via eConsult / triage message)' + (emisFindings ? '. EMIS: ' + emisFindings : ''), 'violet')}
-          className="w-full bg-triage-violet/15 border border-triage-violet/25 text-triage-violet rounded-xl py-2.5 text-center font-semibold text-xs flex items-center justify-center gap-2">
-          📨 Send to GP Triager
-        </button>
-
-        {/* Build triage message helper */}
-        <div className="mt-3 pt-3 border-t border-[rgba(255,255,255,0.06)]">
-          <div className="text-[rgba(255,255,255,0.4)] text-xs font-bold mb-1.5">📋 QUICK TRIAGE MESSAGE BUILDER:</div>
-          <div className="bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.06)] rounded-xl p-2.5">
-            <div className="text-[rgba(255,255,255,0.5)] text-[11px] space-y-1 font-mono">
-              {scanText && <div><span className="text-triage-violet">Patient says:</span> "{scanText.substring(0, 200)}{scanText.length > 200 ? '...' : ''}"</div>}
-              {emisFindings && <div><span className="text-triage-blue">EMIS:</span> {emisFindings}</div>}
-              {scanResults?.red.length > 0 && <div><span className="text-triage-red">Red flags:</span> {scanResults.red.map(r => r.id).join(', ')}</div>}
-              {scanResults?.amber.length > 0 && <div><span className="text-triage-amber">Amber flags:</span> {scanResults.amber.map(a => a.category).join(', ')}</div>}
-              {scanResults?.hasChange && <div><span className="text-triage-amber">Change words:</span> {scanResults.changeWords.join(', ')}</div>}
-              {!scanText && !emisFindings && <div className="text-[rgba(255,255,255,0.25)] italic">Paste ANIMA text and add EMIS findings above to auto-build</div>}
+          <div>
+            <div className="text-[rgba(255,255,255,0.5)] text-[10px] font-bold mb-1">EMIS FINDINGS:</div>
+            <textarea value={emisFindings} onChange={e => setEmisFindings(e.target.value)}
+              placeholder="Alerts, recent notes, risk flags, letters..."
+              rows={2} className="w-full px-3 py-2 rounded-xl bg-[rgba(255,255,255,0.04)] border border-[rgba(255,255,255,0.08)] focus:border-triage-violet/40 focus:outline-none text-white text-xs resize-none" />
+          </div>
+          <div>
+            <div className="text-[rgba(255,255,255,0.5)] text-[10px] font-bold mb-1">NEW or ONGOING:</div>
+            <div className={`px-3 py-2 rounded-xl border text-xs ${newOngoing ? 'bg-triage-teal/8 border-triage-teal/20 text-triage-teal' : 'bg-[rgba(255,255,255,0.04)] border-[rgba(255,255,255,0.08)] text-[rgba(255,255,255,0.4)]'}`}>
+              {newOngoing === 'plan-exists' ? '✅ ONGOING — plan exists in EMIS' : newOngoing === 'no-plan' ? '➡️ NEW / no plan / worsened' : 'Not yet determined (set in Step 3)'}
             </div>
-            {(scanText || emisFindings) && (
-              <CopyBtn 
-                text={`Patient says: "${scanText}"\n${emisFindings ? 'EMIS: ' + emisFindings + '\n' : ''}${scanResults?.red.length ? 'Red flags: ' + scanResults.red.map(r => r.id).join(', ') + '\n' : ''}${scanResults?.amber.length ? 'Amber flags: ' + scanResults.amber.map(a => a.category).join(', ') + '\n' : ''}${scanResults?.hasChange ? 'Change noted: ' + scanResults.changeWords.join(', ') : ''}`} 
-                label="Copy Triage Message" 
-                onCopy={() => showToast('Triage message copied')} 
-              />
+          </div>
+          <div>
+            <div className="text-[rgba(255,255,255,0.5)] text-[10px] font-bold mb-1">FLAGS IDENTIFIED:</div>
+            <div className="px-3 py-2 rounded-xl bg-[rgba(255,255,255,0.04)] border border-[rgba(255,255,255,0.08)] text-xs min-h-[32px]">
+              {scanResults?.red.length > 0 && <span className="text-triage-red">Red: {scanResults.red.map(r => r.symptom).join(', ')}. </span>}
+              {scanResults?.amber.length > 0 && <span className="text-triage-amber">Amber: {scanResults.amber.map(a => a.category).join(', ')}. </span>}
+              {scanResults?.hasCancer && <span className="text-triage-red">Cancer keywords: {scanResults.cancer.join(', ')}. </span>}
+              {scanResults?.hasChange && <span className="text-triage-amber">Change: {scanResults.changeWords.join(', ')}. </span>}
+              {scanResults?.risk.length > 0 && <span className="text-triage-amber">High-risk: {scanResults.risk.map(r => r.group).join(', ')}. </span>}
+              {!scanResults?.hasAny && <span className="text-[rgba(255,255,255,0.3)]">None detected — enter patient text above</span>}
+            </div>
+          </div>
+          <div>
+            <div className="text-[rgba(255,255,255,0.5)] text-[10px] font-bold mb-1">SELF-CARE OFFERED:</div>
+            <div className="flex gap-2">
+              <button onClick={() => setSelfCareOffered('yes')}
+                className={`px-3 py-1.5 rounded-lg border text-[11px] font-semibold ${selfCareOffered === 'yes' ? 'bg-triage-green/15 border-triage-green/30 text-triage-green' : 'border-[rgba(255,255,255,0.1)] text-[rgba(255,255,255,0.4)]'}`}>
+                Yes
+              </button>
+              <button onClick={() => setSelfCareOffered('no')}
+                className={`px-3 py-1.5 rounded-lg border text-[11px] font-semibold ${selfCareOffered === 'no' ? 'bg-triage-amber/15 border-triage-amber/30 text-triage-amber' : 'border-[rgba(255,255,255,0.1)] text-[rgba(255,255,255,0.4)]'}`}>
+                No
+              </button>
+            </div>
+            {selfCareOffered === 'no' && (
+              <input type="text" value={selfCareReason} onChange={e => setSelfCareReason(e.target.value)}
+                placeholder="Reason (e.g. high-risk, patient declined, multiple symptoms)"
+                className="w-full mt-1.5 px-3 py-1.5 rounded-xl bg-[rgba(255,255,255,0.04)] border border-[rgba(255,255,255,0.08)] focus:border-triage-violet/40 focus:outline-none text-white text-[11px]" />
             )}
           </div>
+          <div>
+            <div className="text-[rgba(255,255,255,0.5)] text-[10px] font-bold mb-1">CONTACT DETAILS:</div>
+            <input type="text" value={handoverContact} onChange={e => setHandoverContact(e.target.value)}
+              placeholder="Phone number / callback number"
+              className="w-full px-3 py-1.5 rounded-xl bg-[rgba(255,255,255,0.04)] border border-[rgba(255,255,255,0.08)] focus:border-triage-violet/40 focus:outline-none text-white text-xs" />
+          </div>
+          <div>
+            <div className="text-[rgba(255,255,255,0.5)] text-[10px] font-bold mb-1">PATIENT AVAILABILITY:</div>
+            <input type="text" value={handoverAvailability} onChange={e => setHandoverAvailability(e.target.value)}
+              placeholder="e.g. Available all day / mornings only / after 2pm"
+              className="w-full px-3 py-1.5 rounded-xl bg-[rgba(255,255,255,0.04)] border border-[rgba(255,255,255,0.08)] focus:border-triage-violet/40 focus:outline-none text-white text-xs" />
+          </div>
         </div>
+
+        {/* Copy Handover + Send buttons */}
+        <div className="flex gap-2 mb-3">
+          <button onClick={() => {
+            const flagParts = [];
+            if (scanResults?.red.length) flagParts.push('Red: ' + scanResults.red.map(r => r.symptom).join(', '));
+            if (scanResults?.amber.length) flagParts.push('Amber: ' + scanResults.amber.map(a => a.category).join(', '));
+            if (scanResults?.hasCancer) flagParts.push('Cancer keywords: ' + scanResults.cancer.join(', '));
+            if (scanResults?.hasChange) flagParts.push('Change: ' + scanResults.changeWords.join(', '));
+            if (scanResults?.risk.length) flagParts.push('High-risk: ' + scanResults.risk.map(r => r.group).join(', '));
+            const msg = [
+              'HANDOVER TO TIER 2',
+              `Patient says: "${scanText}"`,
+              emisFindings ? `EMIS: ${emisFindings}` : '',
+              `NEW/ONGOING: ${newOngoing === 'plan-exists' ? 'ONGOING — plan exists' : newOngoing === 'no-plan' ? 'NEW / no plan / worsened' : 'Not determined'}`,
+              flagParts.length ? `Flags: ${flagParts.join('; ')}` : 'Flags: None detected',
+              `Self-care: ${selfCareOffered === 'yes' ? 'Yes — offered' : selfCareOffered === 'no' ? 'No — ' + (selfCareReason || 'reason not specified') : 'Not recorded'}`,
+              handoverContact ? `Contact: ${handoverContact}` : '',
+              handoverAvailability ? `Availability: ${handoverAvailability}` : '',
+              `Time: ${new Date().toLocaleString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}`,
+            ].filter(Boolean).join('\n');
+            navigator.clipboard.writeText(msg);
+            showToast('Handover copied to clipboard');
+          }}
+            className="flex-1 bg-[rgba(255,255,255,0.04)] border border-[rgba(255,255,255,0.1)] text-[rgba(255,255,255,0.7)] rounded-xl py-2.5 text-center font-semibold text-xs flex items-center justify-center gap-2 hover:bg-[rgba(255,255,255,0.06)]">
+            <Copy size={14} />📋 Copy Handover
+          </button>
+          <button onClick={() => selectOutcome('→ Forwarded to Tier 2 / GP Triager' + (emisFindings ? '. EMIS: ' + emisFindings : ''), 'violet')}
+            className="flex-1 bg-triage-violet/15 border border-triage-violet/25 text-triage-violet rounded-xl py-2.5 text-center font-semibold text-xs flex items-center justify-center gap-2">
+            📨 Send to Tier 2
+          </button>
+        </div>
+
+        <button onClick={resetFlow}
+          className="w-full bg-[rgba(255,255,255,0.03)] border border-[rgba(255,255,255,0.08)] text-[rgba(255,255,255,0.5)] rounded-xl py-2.5 text-center font-semibold text-xs hover:bg-[rgba(255,255,255,0.06)]">
+          Done — Start New Triage
+        </button>
       </FlowStep>
 
       {/* ---- IF IN DOUBT BANNER ---- */}
       <div className="bg-[rgba(108,142,255,0.04)] border border-[rgba(108,142,255,0.12)] rounded-2xl p-4 text-center mt-2 mb-2">
         <div className="text-triage-blue font-black text-sm">⚠️ IF IN DOUBT → ASK A CLINICIAN</div>
         <div className="text-[rgba(255,255,255,0.3)] text-xs mt-1">GP Triager from 8am · Duty clinician on site</div>
+      </div>
+
+      {/* ---- DOCUMENTATION REMINDER (shows after outcome selected) ---- */}
+      {outcome && (
+        <div className="bg-triage-violet/5 border border-triage-violet/15 rounded-2xl p-3 mb-2 animate-fade-slide">
+          <div className="text-triage-violet font-bold text-xs mb-1.5">📝 DOCUMENT IN EMIS:</div>
+          <div className="text-[rgba(255,255,255,0.45)] text-[11px] space-y-0.5">
+            <div>• What was decided & who decided</div>
+            <div>• Why — patient&apos;s words + your rationale</div>
+            <div>• Safety-net advice given</div>
+            <div>• Where signposted / referred</div>
+            <div>• EMIS findings noted</div>
+            <div>• NEW or ONGOING status</div>
+            <div>• Resource sent (CalmCare / Healthier Together)</div>
+          </div>
+        </div>
+      )}
+
+      {/* ---- VERSION TEXT ---- */}
+      <div className="text-center text-[rgba(255,255,255,0.15)] text-[10px] py-2 mb-2">
+        SOP v3.1 | Flowchart v3.1 | Feb 2026 | Dr Sahar Jahanian
       </div>
 
       {/* ---- QUICK ACTION BAR (fixed bottom) ---- */}
