@@ -19,7 +19,8 @@ import {
   scripts as defaultScripts,
   pathways as defaultPathways,
   trainingScenarios as defaultTraining,
-  quickMatchPathways
+  quickMatchPathways,
+  trainingTopics
 } from '../lib/data';
 import { sopMeta, sopSections } from '../lib/sop-content';
 import { flowchartMeta, flowchartSections } from '../lib/flowchart-content';
@@ -1138,36 +1139,176 @@ const ContactsScreen = ({ contacts }) => {
 
 // ============ TRAINING SCREEN ============
 const TrainingScreen = ({ onBack, scenarios }) => {
+  const [selectedTopic, setSelectedTopic] = useState(null);
   const [idx, setIdx] = useState(0);
   const [answer, setAnswer] = useState(null);
   const [showResult, setShowResult] = useState(false);
   const [score, setScore] = useState({ correct: 0, total: 0 });
-  const sc = scenarios[idx];
-  const check = id => { setAnswer(id); setShowResult(true); setScore(p => id === sc.correctAnswer ? { correct: p.correct + 1, total: p.total + 1 } : { ...p, total: p.total + 1 }); };
-  const next = () => { if (idx < scenarios.length - 1) { setIdx(idx + 1); setAnswer(null); setShowResult(false); } };
-  const restart = () => { setIdx(0); setAnswer(null); setShowResult(false); setScore({ correct: 0, total: 0 }); };
+  const [followUpPart, setFollowUpPart] = useState(1); // 1 = main, 2 = followUp
+  const [progress, setProgress] = useState(() => {
+    try { const d = JSON.parse(localStorage.getItem('triage_training_progress')); return d?.completedScenarios || []; }
+    catch { return []; }
+  });
+
+  const saveProgress = (completedIds) => {
+    setProgress(completedIds);
+    localStorage.setItem('triage_training_progress', JSON.stringify({ completedScenarios: completedIds, lastActivity: new Date().toISOString() }));
+  };
+
+  const topicButtons = [
+    { key: null, label: '📋 All', ids: null },
+    { key: 'Red Flag Recognition', label: '🚨 Red Flags', ids: trainingTopics['Red Flag Recognition'] },
+    { key: 'EMIS & Direct Booking', label: '✅ EMIS & Booking', ids: trainingTopics['EMIS & Direct Booking'] },
+    { key: 'Pharmacy First & Self-Care', label: '💊 Pharmacy First', ids: trainingTopics['Pharmacy First & Self-Care'] },
+    { key: 'High-Risk Patients', label: '🛡️ High-Risk', ids: trainingTopics['High-Risk Patients'] },
+    { key: 'Pathways & Signposting', label: '🔍 Pathways', ids: trainingTopics['Pathways & Signposting'] },
+    { key: 'Amber Flags & GP Triager', label: '⚠️ Amber & GP', ids: trainingTopics['Amber Flags & GP Triager'] },
+  ];
+
+  const filtered = selectedTopic
+    ? scenarios.filter(s => trainingTopics[selectedTopic]?.includes(s.id))
+    : scenarios;
+  const sc = filtered[idx];
+
+  // Determine which part of the scenario to show
+  const currentPart = (followUpPart === 2 && sc?.followUp) ? sc.followUp : sc;
+  const hasFollowUp = sc?.followUp != null;
+  const totalParts = hasFollowUp ? 2 : 1;
+
+  const check = id => {
+    setAnswer(id);
+    setShowResult(true);
+    const isCorrect = id === currentPart.correctAnswer;
+    setScore(p => isCorrect ? { correct: p.correct + 1, total: p.total + 1 } : { ...p, total: p.total + 1 });
+    // Save progress only when correct on final part
+    if (isCorrect) {
+      const isFinalPart = !hasFollowUp || followUpPart === 2;
+      if (isFinalPart && !progress.includes(sc.id)) {
+        saveProgress([...progress, sc.id]);
+      }
+    }
+  };
+
+  const next = () => {
+    if (showResult && hasFollowUp && followUpPart === 1 && answer === currentPart.correctAnswer) {
+      // Move to follow-up part
+      setFollowUpPart(2);
+      setAnswer(null);
+      setShowResult(false);
+    } else if (idx < filtered.length - 1) {
+      setIdx(idx + 1);
+      setAnswer(null);
+      setShowResult(false);
+      setFollowUpPart(1);
+    }
+  };
+
+  const restart = () => {
+    setIdx(0); setAnswer(null); setShowResult(false);
+    setScore({ correct: 0, total: 0 }); setFollowUpPart(1);
+  };
+
+  const resetProgress = () => {
+    saveProgress([]);
+    restart();
+  };
+
+  const completedCount = progress.length;
+  const totalCount = scenarios.length;
+  const pct = totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0;
+
+  if (!sc) return (
+    <div className="p-4 pb-24 max-w-lg mx-auto">
+      <BackButton onClick={onBack} />
+      <div className="text-center text-[rgba(255,255,255,0.4)] mt-8">No scenarios for this topic.</div>
+    </div>
+  );
+
   return (
     <div className="p-4 pb-24 max-w-lg mx-auto">
       <BackButton onClick={onBack} />
       <h1 className="text-lg font-black mb-2 flex items-center gap-2 text-white"><GraduationCap size={20} className="text-triage-violet" />Training</h1>
-      <div className="flex items-center justify-between mb-4 glass rounded-xl p-3 border border-[rgba(255,255,255,0.06)]">
-        <span className="text-[rgba(255,255,255,0.5)] text-sm">{idx + 1}/{scenarios.length}</span>
-        <span className="font-bold text-white text-sm">Score: {score.correct}/{score.total}</span>
+
+      {/* Progress bar */}
+      <div className="glass rounded-xl p-3 border border-[rgba(255,255,255,0.06)] mb-3">
+        <div className="flex items-center justify-between mb-1.5">
+          <span className="text-[rgba(255,255,255,0.6)] text-xs font-semibold">{completedCount}/{totalCount} completed ({pct}%)</span>
+          <button onClick={resetProgress} className="text-[rgba(255,255,255,0.3)] text-[10px] hover:text-triage-red">Reset Progress</button>
+        </div>
+        <div className="w-full h-1.5 bg-[rgba(255,255,255,0.06)] rounded-full overflow-hidden">
+          <div className="h-full bg-triage-green/60 rounded-full transition-all" style={{ width: `${pct}%` }} />
+        </div>
       </div>
-      <GlassCard color="blue"><div className="text-triage-blue font-bold mb-2 text-xs">📋 ANIMA REQUEST:</div><p className="text-[rgba(255,255,255,0.75)] text-sm leading-relaxed">{sc.scenario}</p></GlassCard>
+
+      {/* Topic navigation */}
+      <div className="flex flex-wrap gap-1.5 mb-3">
+        {topicButtons.map(t => {
+          const count = t.ids ? scenarios.filter(s => t.ids.includes(s.id)).length : scenarios.length;
+          const isActive = selectedTopic === t.key;
+          return (
+            <button key={t.label} onClick={() => { setSelectedTopic(t.key); setIdx(0); setAnswer(null); setShowResult(false); setFollowUpPart(1); }}
+              className={`px-2.5 py-1.5 rounded-lg border text-[10px] font-semibold transition-all ${isActive ? 'bg-triage-violet/15 border-triage-violet/30 text-triage-violet' : 'border-[rgba(255,255,255,0.08)] text-[rgba(255,255,255,0.4)] hover:border-[rgba(255,255,255,0.15)]'}`}>
+              {t.label} <span className="text-[rgba(255,255,255,0.25)] ml-0.5">{count}</span>
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Scenario counter + score */}
+      <div className="flex items-center justify-between mb-3">
+        <span className="text-[rgba(255,255,255,0.5)] text-sm">{idx + 1}/{filtered.length}{hasFollowUp && <span className="text-triage-teal ml-1.5 text-[10px] font-bold">Part {followUpPart}/{totalParts}</span>}</span>
+        <div className="flex items-center gap-2">
+          {progress.includes(sc.id) && <span className="text-triage-green text-[10px] font-bold">✅ Done</span>}
+          <span className="font-bold text-white text-sm">Score: {score.correct}/{score.total}</span>
+        </div>
+      </div>
+
+      {/* Scenario card */}
+      <GlassCard color="blue">
+        <div className="text-triage-blue font-bold mb-2 text-xs">
+          📋 ANIMA REQUEST:{hasFollowUp && <span className="text-triage-teal ml-2">{followUpPart === 1 ? 'Initial call' : 'Follow-up'}</span>}
+        </div>
+        <p className="text-[rgba(255,255,255,0.75)] text-sm leading-relaxed">{currentPart.scenario}</p>
+      </GlassCard>
+
+      {/* Options */}
       <div className="mt-3 space-y-2">
-        {sc.options.map(o => {
+        {currentPart.options.map(o => {
           let style = 'bg-[rgba(255,255,255,0.02)] border-[rgba(255,255,255,0.06)] hover:border-triage-blue/30';
-          if (showResult) { if (o.id === sc.correctAnswer) style = 'bg-[rgba(34,197,94,0.08)] border-[rgba(34,197,94,0.3)]'; else if (o.id === answer) style = 'bg-[rgba(255,59,92,0.08)] border-[rgba(255,59,92,0.3)]'; else style = 'opacity-40'; }
+          if (showResult) {
+            if (o.id === currentPart.correctAnswer) style = 'bg-[rgba(34,197,94,0.08)] border-[rgba(34,197,94,0.3)]';
+            else if (o.id === answer) style = 'bg-[rgba(255,59,92,0.08)] border-[rgba(255,59,92,0.3)]';
+            else style = 'opacity-40';
+          }
           return <button key={o.id} onClick={() => !showResult && check(o.id)} disabled={showResult} className={`w-full p-3.5 rounded-xl border text-left text-sm text-[rgba(255,255,255,0.75)] transition-all ${style}`}>{o.text}</button>;
         })}
       </div>
+
+      {/* Result */}
       {showResult && (
-        <><GlassCard color={answer === sc.correctAnswer ? 'green' : 'red'} className="mt-3">
-          <div className="font-bold mb-1 text-white text-sm">{answer === sc.correctAnswer ? '✅ Correct!' : '❌ Not quite'}</div>
-          <p className="text-sm text-[rgba(255,255,255,0.55)]">{sc.explanation}</p>
-        </GlassCard>
-        <div className="mt-3">{idx < scenarios.length - 1 ? <Button color="blue" full onClick={next}>Next →</Button> : <div className="text-center"><div className="text-xl font-black mb-3 text-white">{score.correct}/{score.total}</div><Button color="green" onClick={restart}>Restart</Button></div>}</div></>
+        <>
+          <GlassCard color={answer === currentPart.correctAnswer ? 'green' : 'red'} className="mt-3">
+            <div className="font-bold mb-1 text-white text-sm">{answer === currentPart.correctAnswer ? '✅ Correct!' : '❌ Not quite'}</div>
+            <p className="text-sm text-[rgba(255,255,255,0.55)]">{currentPart.explanation}</p>
+          </GlassCard>
+          <div className="mt-3">
+            {/* If correct on part 1 with followUp, show "Continue to Part 2" */}
+            {hasFollowUp && followUpPart === 1 && answer === currentPart.correctAnswer ? (
+              <Button color="teal" full onClick={next}>Continue to Part 2 →</Button>
+            ) : hasFollowUp && followUpPart === 1 && answer !== currentPart.correctAnswer ? (
+              <div className="text-center text-[rgba(255,255,255,0.35)] text-xs mb-2">Get Part 1 correct to unlock the follow-up scenario.
+                {idx < filtered.length - 1 && <div className="mt-2"><Button color="blue" full onClick={() => { setIdx(idx + 1); setAnswer(null); setShowResult(false); setFollowUpPart(1); }}>Skip to Next →</Button></div>}
+              </div>
+            ) : idx < filtered.length - 1 ? (
+              <Button color="blue" full onClick={next}>Next →</Button>
+            ) : (
+              <div className="text-center">
+                <div className="text-xl font-black mb-3 text-white">{score.correct}/{score.total}</div>
+                <Button color="green" onClick={restart}>Restart Topic</Button>
+              </div>
+            )}
+          </div>
+        </>
       )}
     </div>
   );
