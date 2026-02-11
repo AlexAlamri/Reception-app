@@ -306,7 +306,7 @@ const FlowStep = ({ num, color, title, subtitle, expanded, onToggle, badge, badg
   const c = C[color] || C.gray;
   const bc = C[badgeColor] || C[color] || C.gray;
   return (
-    <div className={`mb-2 rounded-2xl border transition-all duration-200 ${completed ? 'opacity-50' : ''} ${expanded ? `${c.bg} ${c.border}` : 'bg-[rgba(255,255,255,0.015)] border-[rgba(255,255,255,0.05)]'}`}>
+    <div id={`flow-step-${num}`} className={`mb-2 rounded-2xl border transition-all duration-200 ${completed ? 'opacity-50' : ''} ${expanded ? `${c.bg} ${c.border}` : 'bg-[rgba(255,255,255,0.015)] border-[rgba(255,255,255,0.05)]'}`}>
       <button onClick={onToggle} className="w-full text-left p-3 sm:p-4 flex items-center gap-3">
         <div className={`w-9 h-9 rounded-xl flex items-center justify-center font-black text-sm flex-shrink-0 ${completed ? 'bg-triage-green/15 border border-triage-green/30 text-triage-green' : `${c.bg} border ${c.border} ${c.text}`}`}>
           {completed ? <Check size={16} /> : num}
@@ -351,6 +351,8 @@ const DecisionFlow = ({ data, settings, onRecord, showToast }) => {
   const [expandedSystems, setExpandedSystems] = useState({});
   const [isClinicalAdmin, setIsClinicalAdmin] = useState(false);
   const [newOngoing, setNewOngoing] = useState(null);
+  const [pathwaySearch, setPathwaySearch] = useState('');
+  const [quickAction, setQuickAction] = useState(null);
 
   const scanResults = useKeywordScanner(scanText, data.redFlags, data.amberFlags, data.pharmacyFirst, data.highRiskGroups);
 
@@ -379,6 +381,7 @@ const DecisionFlow = ({ data, settings, onRecord, showToast }) => {
     setExpandedPathway(null); setSelfCareChecks(new Array(7).fill(false));
     setEmisChecks(new Array(5).fill(false)); setEmisFindings('');
     setExpandedSystems({}); setIsClinicalAdmin(false); setNewOngoing(null);
+    setPathwaySearch(''); setQuickAction(null);
     window.scrollTo(0, 0);
   };
 
@@ -693,50 +696,75 @@ const DecisionFlow = ({ data, settings, onRecord, showToast }) => {
           STEP 6: SPECIFIC PATHWAYS
           ═══════════════════════════════════════════════════ */}
       <FlowStep num={6} color="blue" title="📋 SPECIFIC PATHWAY?" subtitle="Eye · Injury · Pregnancy · Sexual Health · Fit Note · Mental Health"
-        expanded={expandedStep === 6} onToggle={() => toggle(6)} completed={completedSteps.has(6)}>
-        
-        <div className="text-[rgba(255,255,255,0.4)] text-xs mb-3">Does the request fit one of these? Tap to expand:</div>
-        <div className="grid grid-cols-3 gap-1.5 mb-3">
-          {[
-            { key: 'eye', icon: '👁️', label: 'Eye' },
-            { key: 'injury', icon: '🤕', label: 'Injury/Burn' },
-            { key: 'pregnancy', icon: '🤰', label: 'Pregnancy' },
-            { key: 'sexualHealth', icon: '❤️', label: 'Sexual Health' },
-            { key: 'fitNote', icon: '📝', label: 'Fit Note' },
-            { key: 'mentalHealth', icon: '🧠', label: 'Mental Health' },
-          ].map(pw => (
-            <button key={pw.key} onClick={() => setExpandedPathway(expandedPathway === pw.key ? null : pw.key)}
-              className={`p-2.5 rounded-xl border text-center transition-all ${expandedPathway === pw.key ? 'bg-triage-blue/10 border-triage-blue/25' : 'bg-[rgba(255,255,255,0.02)] border-[rgba(255,255,255,0.06)] hover:border-[rgba(255,255,255,0.12)]'}`}>
-              <div className="text-xl mb-0.5">{pw.icon}</div>
-              <div className="text-[10px] text-[rgba(255,255,255,0.6)] font-medium">{pw.label}</div>
-            </button>
-          ))}
-        </div>
+        expanded={expandedStep === 6} onToggle={() => toggle(6)} completed={completedSteps.has(6)}
+        badge={scanResults?.hasPathway ? 'MATCH' : null} badgeColor="blue">
 
-        {expandedPathway && data.pathways[expandedPathway] && (
-          <div className="animate-fade-slide mb-3">
-            <div className="text-triage-blue font-bold text-sm mb-2">{data.pathways[expandedPathway].icon} {data.pathways[expandedPathway].title}</div>
-            {data.pathways[expandedPathway].routes.map((r, i) => {
-              const pc = r.priority === 'red' ? 'red' : r.priority === 'amber' ? 'amber' : 'green';
-              const pcc = C[pc];
-              return (
-                <div key={i} className={`${pcc.bg} border ${pcc.border} rounded-xl p-2.5 mb-1.5`}>
-                  <div className="text-white text-xs font-semibold">{r.condition}</div>
-                  {r.examples && <div className="text-[rgba(255,255,255,0.4)] text-[11px] mt-0.5">{r.examples}</div>}
-                  <div className={`${pcc.text} text-[11px] font-semibold mt-1`}>→ {r.action}</div>
-                  {r.link && <a href={`https://${r.link}`} target="_blank" rel="noopener noreferrer" className="text-triage-blue text-[11px] underline flex items-center gap-1 mt-0.5">{r.link} <ExternalLink size={10} /></a>}
-                </div>
-              );
-            })}
-            <button onClick={() => selectOutcome(`→ Signposted: ${data.pathways[expandedPathway].title}`, 'blue')}
-              className="w-full bg-triage-blue/10 border border-triage-blue/20 text-triage-blue rounded-xl py-2 text-center font-semibold text-xs mt-2">
-              ✅ Signposted to {data.pathways[expandedPathway].title}
-            </button>
+        {/* Scanner-matched pathways banner */}
+        {scanResults?.pathways?.length > 0 && (
+          <div className="bg-triage-blue/8 border border-triage-blue/20 rounded-xl p-2.5 mb-3">
+            <div className="text-triage-blue font-bold text-xs mb-1">🔍 SCANNER MATCHED {scanResults.pathways.length} PATHWAY{scanResults.pathways.length > 1 ? 'S' : ''}:</div>
+            <div className="flex flex-wrap gap-1">
+              {scanResults.pathways.map(p => <span key={p.id} className="bg-triage-blue/20 px-2 py-0.5 rounded text-[11px] text-triage-blue font-medium">{p.pathway}</span>)}
+            </div>
           </div>
         )}
 
+        {/* Local search */}
+        <input
+          type="text" value={pathwaySearch} onChange={e => setPathwaySearch(e.target.value)}
+          placeholder="Search pathways..."
+          className="w-full px-3 py-2 rounded-xl bg-[rgba(255,255,255,0.04)] border border-[rgba(255,255,255,0.08)] focus:border-triage-blue/40 focus:outline-none text-white text-xs mb-3 placeholder:text-[rgba(255,255,255,0.25)]"
+        />
+
+        {/* Pathway grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mb-3">
+          {(() => {
+            const searchLower = pathwaySearch.toLowerCase();
+            const matchedIds = new Set((scanResults?.pathways || []).map(p => p.id));
+            const filtered = quickMatchPathways.filter(p =>
+              !searchLower || p.pathway.toLowerCase().includes(searchLower) ||
+              p.symptoms.toLowerCase().includes(searchLower) ||
+              p.action.toLowerCase().includes(searchLower) ||
+              p.keywords.some(k => k.toLowerCase().includes(searchLower))
+            );
+            // Sort: scanner-matched first, then 999 items, then rest
+            const sorted = [...filtered].sort((a, b) => {
+              const aMatch = matchedIds.has(a.id) ? 0 : 1;
+              const bMatch = matchedIds.has(b.id) ? 0 : 1;
+              if (aMatch !== bMatch) return aMatch - bMatch;
+              return 0;
+            });
+            return sorted.map(p => {
+              const isMatched = matchedIds.has(p.id);
+              const is999 = p.action.includes('999');
+              const borderClass = isMatched ? 'border-triage-blue/40 bg-triage-blue/8' : is999 ? 'border-triage-red/30 bg-triage-red/5' : 'border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.02)]';
+              return (
+                <div key={p.id} className={`rounded-xl border p-2.5 transition-all hover:border-[rgba(255,255,255,0.15)] ${borderClass}`}>
+                  <div className="flex items-start justify-between gap-1">
+                    <div className={`font-bold text-xs ${is999 ? 'text-triage-red' : isMatched ? 'text-triage-blue' : 'text-[rgba(255,255,255,0.8)]'}`}>{p.pathway}</div>
+                    {isMatched && <span className="text-[9px] bg-triage-blue/20 text-triage-blue px-1.5 py-0.5 rounded font-bold flex-shrink-0">MATCH</span>}
+                  </div>
+                  <div className="text-[rgba(255,255,255,0.4)] text-[10px] mt-0.5 leading-relaxed">{p.symptoms}</div>
+                  <div className={`text-[11px] font-semibold mt-1.5 ${is999 ? 'text-triage-red' : 'text-[rgba(255,255,255,0.6)]'}`}>→ {p.action}</div>
+                  {p.contact && (
+                    <div className="flex items-center gap-1 mt-1">
+                      <span className="text-triage-blue text-[10px]">{p.contact}</span>
+                      <button onClick={(e) => { e.stopPropagation(); navigator.clipboard.writeText(p.contact); showToast('Copied: ' + p.contact); }}
+                        className="text-[rgba(255,255,255,0.3)] hover:text-triage-blue transition-colors"><Copy size={10} /></button>
+                    </div>
+                  )}
+                  <button onClick={() => selectOutcome(`→ Signposted: ${p.pathway} — ${p.action}${p.contact ? ' (' + p.contact + ')' : ''}`, is999 ? 'red' : 'blue')}
+                    className={`w-full rounded-lg py-1.5 text-[10px] font-semibold text-center mt-2 ${is999 ? 'bg-triage-red/15 border border-triage-red/25 text-triage-red' : 'bg-triage-blue/10 border border-triage-blue/20 text-triage-blue'}`}>
+                    ✅ Signposted
+                  </button>
+                </div>
+              );
+            });
+          })()}
+        </div>
+
         <button onClick={() => advanceToNext(6)} className="w-full text-center text-xs text-[rgba(255,255,255,0.4)] hover:text-triage-blue py-2 border-t border-[rgba(255,255,255,0.04)]">
-          Doesn't fit a specific pathway → Step 7 ↓
+          Doesn&apos;t fit a specific pathway → Step 7 ↓
         </button>
       </FlowStep>
 
@@ -916,9 +944,53 @@ const DecisionFlow = ({ data, settings, onRecord, showToast }) => {
         <div className="text-[rgba(255,255,255,0.3)] text-xs mt-1">GP Triager from 8am · Duty clinician on site</div>
       </div>
 
+      {/* ---- QUICK ACTION BAR (fixed bottom) ---- */}
+      <div className="fixed bottom-0 left-0 right-0 z-30 bg-[#0A0A0F]/95 backdrop-blur-md border-t border-[rgba(255,255,255,0.06)] p-2">
+        <div className="flex gap-2 max-w-lg mx-auto">
+          <button onClick={() => setQuickAction(quickAction === '999' ? null : '999')}
+            className="flex-1 bg-triage-red/20 border border-triage-red/30 text-triage-red rounded-xl py-2 text-[11px] font-bold text-center">
+            🚨 999
+          </button>
+          <button onClick={() => setQuickAction(quickAction === 'crisis' ? null : 'crisis')}
+            className="flex-1 bg-triage-amber/20 border border-triage-amber/30 text-triage-amber rounded-xl py-2 text-[11px] font-bold text-center">
+            📞 Crisis
+          </button>
+          <button onClick={() => { setExpandedStep(8); setTimeout(() => document.getElementById('flow-step-8')?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100); }}
+            className="flex-1 bg-triage-blue/20 border border-triage-blue/30 text-triage-blue rounded-xl py-2 text-[11px] font-bold text-center">
+            ➡️ Tier 2
+          </button>
+          <button onClick={() => {
+            const parts = [];
+            if (scanText) parts.push(`Patient: "${scanText}"`);
+            if (emisFindings) parts.push(`EMIS: ${emisFindings}`);
+            if (scanResults?.red.length) parts.push(`Red flags: ${scanResults.red.map(r => r.symptom).join(', ')}`);
+            if (scanResults?.amber.length) parts.push(`Amber: ${scanResults.amber.map(a => a.category).join(', ')}`);
+            if (scanResults?.risk.length) parts.push(`High-risk: ${scanResults.risk.map(r => r.group).join(', ')}`);
+            if (scanResults?.hasChange) parts.push(`Change words: ${scanResults.changeWords.join(', ')}`);
+            if (parts.length) { navigator.clipboard.writeText(parts.join('\n')); showToast('Copied to clipboard'); }
+            else showToast('Nothing to copy yet');
+          }}
+            className="flex-1 bg-[rgba(255,255,255,0.05)] border border-[rgba(255,255,255,0.1)] text-[rgba(255,255,255,0.6)] rounded-xl py-2 text-[11px] font-bold text-center">
+            📋 Copy
+          </button>
+        </div>
+        {quickAction === '999' && (
+          <div className="max-w-lg mx-auto mt-2 bg-triage-red/10 border border-triage-red/25 rounded-xl p-2.5 animate-fade-slide">
+            <div className="text-triage-red font-bold text-xs">Call 999. Inform duty clinician.</div>
+            <div className="text-[rgba(255,255,255,0.5)] text-[11px] mt-0.5">On-site ambulance: <strong className="text-white">020 3162 7525</strong></div>
+          </div>
+        )}
+        {quickAction === 'crisis' && (
+          <div className="max-w-lg mx-auto mt-2 bg-triage-amber/10 border border-triage-amber/25 rounded-xl p-2.5 animate-fade-slide">
+            <div className="text-triage-amber font-bold text-xs">Crisis Lines</div>
+            <div className="text-[rgba(255,255,255,0.5)] text-[11px] mt-0.5">Adults: <strong className="text-white">0800 028 8000</strong> | CAMHS &lt;18: <strong className="text-white">0203 228 5980</strong></div>
+          </div>
+        )}
+      </div>
+
       {/* ---- OUTCOME BAR (sticky bottom) ---- */}
       {outcome && (
-        <div className="fixed bottom-16 left-0 right-0 z-30 p-3">
+        <div className="fixed bottom-14 left-0 right-0 z-40 p-3">
           <div className={`max-w-lg mx-auto ${C[outcome.color]?.bg || C.blue.bg} border ${C[outcome.color]?.border || C.blue.border} rounded-2xl p-3 backdrop-blur-xl shadow-2xl`}>
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2 flex-1 min-w-0">
