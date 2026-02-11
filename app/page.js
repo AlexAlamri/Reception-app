@@ -348,6 +348,7 @@ const DecisionFlow = ({ data, settings, onRecord, showToast }) => {
   const [selfCareChecks, setSelfCareChecks] = useState(new Array(7).fill(false));
   const [emisChecks, setEmisChecks] = useState(new Array(5).fill(false));
   const [emisFindings, setEmisFindings] = useState(''); // free-text note of what they found
+  const [expandedSystems, setExpandedSystems] = useState({});
 
   const scanResults = useKeywordScanner(scanText, data.redFlags, data.amberFlags, data.pharmacyFirst, data.highRiskGroups);
 
@@ -371,10 +372,11 @@ const DecisionFlow = ({ data, settings, onRecord, showToast }) => {
   };
 
   const resetFlow = () => {
-    setScanText(''); setExpandedStep(null); setOutcome(null); 
+    setScanText(''); setExpandedStep(null); setOutcome(null);
     setCompletedSteps(new Set()); setExpandedBooking(null);
     setExpandedPathway(null); setSelfCareChecks(new Array(7).fill(false));
     setEmisChecks(new Array(5).fill(false)); setEmisFindings('');
+    setExpandedSystems({});
     window.scrollTo(0, 0);
   };
 
@@ -445,17 +447,41 @@ const DecisionFlow = ({ data, settings, onRecord, showToast }) => {
         {scanResults?.red.length > 0 && (
           <div className="mb-3 bg-triage-red/10 border border-triage-red/25 rounded-xl p-3">
             <div className="text-triage-red font-bold text-xs mb-1.5">⚡ MATCHED IN PATIENT'S WORDS:</div>
-            {scanResults.red.map(f => <div key={f.id} className="text-white text-sm mb-1 flex items-start gap-2"><span className="text-triage-red mt-0.5">•</span>{f.description}</div>)}
+            {scanResults.red.map((f, i) => <div key={i} className="text-white text-sm mb-1 flex items-start gap-2"><span className="text-triage-red mt-0.5">•</span><span>{f.symptom} — <span className="text-triage-red font-semibold">{f.action}</span></span></div>)}
           </div>
         )}
         <div className="text-[rgba(255,255,255,0.4)] text-xs mb-2 font-semibold">STOP if patient mentions ANY:</div>
-        <div className="space-y-1.5 mb-4 max-h-48 overflow-y-auto pr-1">
-          {data.redFlags.map(f => (
-            <div key={f.id} className="flex items-start gap-2">
-              <div className="w-1.5 h-1.5 rounded-full bg-triage-red mt-1.5 flex-shrink-0" />
-              <span className="text-[rgba(255,255,255,0.55)] text-xs leading-relaxed">{f.description}</span>
-            </div>
-          ))}
+        <div className="space-y-1 mb-4 max-h-64 overflow-y-auto pr-1">
+          {(() => {
+            const grouped = {};
+            data.redFlags.forEach(f => { if (!grouped[f.system]) grouped[f.system] = []; grouped[f.system].push(f); });
+            const matchedSystems = scanResults?.red.length > 0 ? new Set(scanResults.red.map(f => f.system)) : new Set();
+            return Object.entries(grouped).map(([system, flags]) => {
+              const isMatched = matchedSystems.has(system);
+              const isOpen = expandedSystems[system] ?? isMatched;
+              return (
+                <div key={system} className={`rounded-lg border ${isMatched ? 'border-triage-red/30 bg-triage-red/5' : 'border-[rgba(255,255,255,0.06)] bg-[rgba(255,255,255,0.02)]'}`}>
+                  <button onClick={() => setExpandedSystems(prev => ({ ...prev, [system]: !isOpen }))}
+                    className="w-full flex items-center justify-between px-2.5 py-1.5 text-left">
+                    <span className={`text-[11px] font-bold tracking-wide ${isMatched ? 'text-triage-red' : 'text-[rgba(255,255,255,0.5)]'}`}>
+                      {isMatched && '🚨 '}{system.toUpperCase()} ({flags.length})
+                    </span>
+                    {isOpen ? <ChevronUp size={12} className="text-[rgba(255,255,255,0.3)]" /> : <ChevronDown size={12} className="text-[rgba(255,255,255,0.3)]" />}
+                  </button>
+                  {isOpen && (
+                    <div className="px-2.5 pb-2 space-y-1">
+                      {flags.map((f, i) => (
+                        <div key={i} className="flex items-start gap-2">
+                          <div className="w-1.5 h-1.5 rounded-full bg-triage-red mt-1.5 flex-shrink-0" />
+                          <span className="text-[rgba(255,255,255,0.55)] text-[11px] leading-relaxed">{f.symptom}</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              );
+            });
+          })()}
         </div>
         <div className="flex gap-2 mb-2">
           <a href="tel:999" className="flex-1 bg-triage-red/20 border border-triage-red/30 text-triage-red rounded-xl py-3 text-center font-bold text-sm active:scale-95 transition-transform flex items-center justify-center gap-2">
@@ -465,7 +491,7 @@ const DecisionFlow = ({ data, settings, onRecord, showToast }) => {
             A&E + Alert Duty
           </button>
         </div>
-        <div className="text-[rgba(255,255,255,0.3)] text-[10px] text-center mb-3">On-site ambulance: 020 3162 7525 · Crisis: 0800 028 8000</div>
+        <div className="text-[rgba(255,255,255,0.3)] text-[10px] text-center mb-3">On-site ambulance: 020 3162 7525 | Crisis: 0800 028 8000 | CAMHS: 0203 228 5980</div>
         <button onClick={() => advanceToNext(1)} className="w-full text-center text-xs text-[rgba(255,255,255,0.4)] hover:text-triage-blue py-2 border-t border-[rgba(255,255,255,0.04)]">
           No red flags → Continue to Step 2 ↓
         </button>
