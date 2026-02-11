@@ -63,19 +63,20 @@ function useKeywordScanner(text, redFlags, amberFlags, pharmacyFirst, highRiskGr
   return useMemo(() => {
     if (!text || text.length < 2) return null;
     const lower = text.toLowerCase();
-    const red = redFlags.filter(f => f.keywords.some(k => lower.includes(k.toLowerCase())));
-    const amber = amberFlags.filter(f => f.keywords.some(k => lower.includes(k.toLowerCase())));
-    const pharmacy = pharmacyFirst.filter(c => lower.includes(c.name.toLowerCase()));
+    const kw = (k) => { const kl = k.toLowerCase(); return lower.includes(kl) || kl.includes(lower); };
+    const red = redFlags.filter(f => f.keywords.some(k => kw(k)));
+    const amber = amberFlags.filter(f => f.keywords.some(k => kw(k)) || (f.searchTerms && f.searchTerms.some(t => kw(t))));
+    const pharmacy = pharmacyFirst.filter(c => kw(c.name));
     const risk = highRiskGroups.filter(g => {
       const terms = g.group.toLowerCase().split(/[\s/,]+/);
-      return terms.some(t => t.length > 3 && lower.includes(t));
+      return terms.some(t => t.length > 3 && (lower.includes(t) || t.includes(lower)));
     });
     const changeWords = CHANGE_WORDS.filter(w => lower.includes(w));
     const hasChange = changeWords.length > 0;
-    const matchedPathways = quickMatchPathways.filter(p => p.keywords.some(k => lower.includes(k.toLowerCase())));
+    const matchedPathways = quickMatchPathways.filter(p => p.keywords.some(k => kw(k)));
     const CANCER_KEYWORDS = ['lump', 'unexplained weight loss', 'weight loss unexplained', 'unexplained bleeding', 'persistent bowel change', 'difficulty swallowing', 'hoarseness', 'postmenopausal bleeding', 'night sweats', 'blood in stool', 'blood in urine', 'mole changed', 'mole growing'];
-    const cancer = CANCER_KEYWORDS.filter(k => lower.includes(k));
-    return { red, amber, pharmacy, risk, changeWords, hasChange, pathways: matchedPathways, cancer, hasPathway: matchedPathways.length > 0, hasCancer: cancer.length > 0, hasAny: red.length + amber.length + pharmacy.length + risk.length + (hasChange ? 1 : 0) > 0 };
+    const cancer = CANCER_KEYWORDS.filter(k => lower.includes(k) || k.includes(lower));
+    return { red, amber, pharmacy, risk, changeWords, hasChange, pathways: matchedPathways, cancer, hasPathway: matchedPathways.length > 0, hasCancer: cancer.length > 0, hasAny: red.length + amber.length + pharmacy.length + risk.length + matchedPathways.length + (hasChange ? 1 : 0) > 0 };
   }, [text, redFlags, amberFlags, pharmacyFirst, highRiskGroups]);
 }
 
@@ -1102,7 +1103,7 @@ const SearchScreen = ({ data }) => {
       {search.length >= 2 && !results?.hasAny && <p className="text-center text-[rgba(255,255,255,0.3)] mt-8 text-sm">No matches. If unsure → GP Triager.</p>}
       {results?.red.length > 0 && (
         <div className="mb-4"><h2 className="font-bold text-triage-red mb-2 text-sm flex items-center gap-2"><AlertTriangle size={16} />RED FLAGS — Call 999</h2>
-          {results.red.map(f => <GlassCard key={f.id} color="red" className="!p-3 !mb-2"><div className="text-[rgba(255,255,255,0.85)] text-sm">{f.description}</div><div className="text-triage-red font-bold text-xs mt-1">→ {f.action}</div></GlassCard>)}
+          {results.red.map((f, i) => <GlassCard key={`${f.system}-${i}`} color="red" className="!p-3 !mb-2"><div className="text-[rgba(255,255,255,0.85)] text-sm">{f.symptom}</div><div className="text-triage-red font-bold text-xs mt-1">→ {f.action}</div></GlassCard>)}
         </div>
       )}
       {results?.amber.length > 0 && (
