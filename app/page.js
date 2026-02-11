@@ -398,10 +398,10 @@ const DecisionFlow = ({ data, settings, onRecord, showToast }) => {
       </div>
 
       {/* ---- KEYWORD SCANNER ---- */}
-      <div className="mb-3">
+      <div className="sticky top-0 z-20 bg-[#0A0A0F]/95 backdrop-blur-md pb-3">
         <div className="relative">
           <Search className="absolute left-3 top-3 text-[rgba(255,255,255,0.25)]" size={16} />
-          <textarea value={scanText} onChange={e => setScanText(e.target.value)}
+          <textarea value={scanText} onChange={e => setScanText(e.target.value)} autoFocus={true}
             placeholder="Paste patient's words from ANIMA here to scan for flags..."
             rows={2} className="w-full pl-9 pr-9 py-2.5 rounded-xl bg-[rgba(255,255,255,0.04)] border border-[rgba(255,255,255,0.08)] focus:border-triage-blue/40 focus:outline-none text-white text-sm resize-none leading-relaxed" />
           {scanText && <button onClick={() => setScanText('')} className="absolute right-3 top-3 text-[rgba(255,255,255,0.25)] hover:text-white"><X size={16} /></button>}
@@ -409,10 +409,12 @@ const DecisionFlow = ({ data, settings, onRecord, showToast }) => {
         {scanResults && (
           <div className="flex gap-1.5 mt-2 flex-wrap">
             {scanResults.red.length > 0 && <button onClick={() => toggle(1)} className="bg-triage-red/15 border border-triage-red/30 text-triage-red px-2.5 py-1 rounded-full text-[11px] font-bold animate-pulse">🚨 {scanResults.red.length} RED FLAG{scanResults.red.length > 1 ? 'S' : ''}</button>}
+            {scanResults.hasCancer && <button onClick={() => toggle(5)} className="bg-triage-red/15 border border-triage-red/30 text-triage-red px-2.5 py-1 rounded-full text-[11px] font-bold">🎗️ CANCER?</button>}
             {scanResults.risk.length > 0 && <button onClick={() => toggle(4)} className="bg-triage-amber/15 border border-triage-amber/30 text-triage-amber px-2.5 py-1 rounded-full text-[11px] font-bold">🛡️ HIGH RISK</button>}
             {scanResults.amber.length > 0 && <button onClick={() => toggle(5)} className="bg-triage-amber/15 border border-triage-amber/30 text-triage-amber px-2.5 py-1 rounded-full text-[11px] font-bold">⚠️ {scanResults.amber.length} AMBER</button>}
             {scanResults.pharmacy.length > 0 && <button onClick={() => toggle(7)} className="bg-triage-green/15 border border-triage-green/30 text-triage-green px-2.5 py-1 rounded-full text-[11px] font-bold">💊 Pharmacy</button>}
-            {scanResults.hasChange && <button onClick={() => toggle(3)} className="bg-triage-teal/15 border border-triage-teal/30 text-triage-teal px-2.5 py-1 rounded-full text-[11px] font-bold">🔄 ONGOING?</button>}
+            {scanResults.hasChange && <button onClick={() => toggle(3)} className="bg-triage-teal/15 border border-triage-teal/30 text-triage-teal px-2.5 py-1 rounded-full text-[11px] font-bold">🔄 CHANGE</button>}
+            {scanResults.hasPathway && <button onClick={() => toggle(6)} className="bg-triage-blue/15 border border-triage-blue/30 text-triage-blue px-2.5 py-1 rounded-full text-[11px] font-bold">🔍 PATHWAY</button>}
             {!scanResults.hasAny && <span className="text-[rgba(255,255,255,0.25)] text-xs py-1">No keyword matches — work through steps below</span>}
           </div>
         )}
