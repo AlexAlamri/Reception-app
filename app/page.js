@@ -349,6 +349,8 @@ const DecisionFlow = ({ data, settings, onRecord, showToast }) => {
   const [emisChecks, setEmisChecks] = useState(new Array(5).fill(false));
   const [emisFindings, setEmisFindings] = useState(''); // free-text note of what they found
   const [expandedSystems, setExpandedSystems] = useState({});
+  const [isClinicalAdmin, setIsClinicalAdmin] = useState(false);
+  const [newOngoing, setNewOngoing] = useState(null);
 
   const scanResults = useKeywordScanner(scanText, data.redFlags, data.amberFlags, data.pharmacyFirst, data.highRiskGroups);
 
@@ -376,7 +378,7 @@ const DecisionFlow = ({ data, settings, onRecord, showToast }) => {
     setCompletedSteps(new Set()); setExpandedBooking(null);
     setExpandedPathway(null); setSelfCareChecks(new Array(7).fill(false));
     setEmisChecks(new Array(5).fill(false)); setEmisFindings('');
-    setExpandedSystems({});
+    setExpandedSystems({}); setIsClinicalAdmin(false); setNewOngoing(null);
     window.scrollTo(0, 0);
   };
 
@@ -502,158 +504,118 @@ const DecisionFlow = ({ data, settings, onRecord, showToast }) => {
           ═══════════════════════════════════════════════════ */}
       <FlowStep num={2} color="blue" title="✅ CHECK EMIS (mandatory)" subtitle="Look for plans, alerts, flags, letters, results"
         expanded={expandedStep === 2} onToggle={() => toggle(2)} completed={completedSteps.has(2)}>
-        
-        <div className="bg-triage-red/5 border border-triage-red/15 rounded-xl p-2.5 mb-3">
-          <div className="text-triage-red text-[11px] font-semibold">⛔ Do NOT skip this step. Do NOT interpret results or tell the patient a diagnosis.</div>
-        </div>
 
-        <div className="bg-triage-blue/6 border border-triage-blue/15 rounded-xl p-3 mb-3">
-          <div className="text-triage-blue font-bold text-xs mb-2">CONFIRM YOU CHECKED:</div>
-          {[
-            'Recent consultation notes — is there a follow-up plan?',
-            'Recall alerts — bloods, annual review, smear, vaccines due?',
-            'High-risk flags — pregnant, immunosuppressed, safeguarding, LD, <1yr?',
-            'Hospital letters / discharge summaries relevant to this request?',
-            'Recent test results (note they exist — do NOT interpret)',
-          ].map((t, i) => (
-            <label key={i} className="flex items-center gap-2.5 py-1 cursor-pointer group">
-              <div onClick={() => { const n = [...emisChecks]; n[i] = !n[i]; setEmisChecks(n); }}
-                className={`w-5 h-5 rounded-md border flex items-center justify-center flex-shrink-0 transition-all ${emisChecks[i] ? 'bg-triage-blue/30 border-triage-blue/50' : 'border-[rgba(255,255,255,0.15)] group-hover:border-[rgba(255,255,255,0.25)]'}`}>
-                {emisChecks[i] && <Check size={12} className="text-triage-blue" />}
-              </div>
-              <span className={`text-xs ${emisChecks[i] ? 'text-[rgba(255,255,255,0.7)]' : 'text-[rgba(255,255,255,0.4)]'}`}>{t}</span>
-            </label>
-          ))}
-        </div>
-
+        {/* Clinical Admin Toggle */}
         <div className="mb-3">
-          <div className="text-[rgba(255,255,255,0.5)] text-xs font-bold mb-1.5">📝 KEY EMIS FINDINGS (brief note):</div>
-          <textarea value={emisFindings} onChange={e => setEmisFindings(e.target.value)}
-            placeholder="e.g. 'Diabetes recall due. Last seen GP 3 weeks ago re: back pain. No alerts.'"
-            rows={2} className="w-full px-3 py-2 rounded-xl bg-[rgba(255,255,255,0.04)] border border-[rgba(255,255,255,0.08)] focus:border-triage-blue/40 focus:outline-none text-white text-xs resize-none" />
-          <div className="text-[rgba(255,255,255,0.25)] text-[10px] mt-1">This will be included if you forward to GP Triager</div>
+          <button onClick={() => setIsClinicalAdmin(!isClinicalAdmin)}
+            className={`w-full flex items-center justify-between p-3 rounded-xl border text-xs font-semibold transition-all ${isClinicalAdmin ? 'bg-triage-violet/10 border-triage-violet/30 text-triage-violet' : 'bg-[rgba(255,255,255,0.03)] border-[rgba(255,255,255,0.1)] text-[rgba(255,255,255,0.5)] hover:border-[rgba(255,255,255,0.2)]'}`}>
+            <span>📋 Is this CLINICAL ADMIN? (bloods/ECG/smear/results/referral)</span>
+            <ChevronDown size={14} className={`transition-transform ${isClinicalAdmin ? 'rotate-180' : ''}`} />
+          </button>
         </div>
 
-        <button onClick={() => advanceToNext(2)} 
-          disabled={!emisChecks.some(Boolean)}
-          className={`w-full rounded-xl py-2.5 text-center font-semibold text-xs flex items-center justify-center gap-2 transition-all ${emisChecks.some(Boolean) ? 'bg-triage-blue/15 border border-triage-blue/25 text-triage-blue' : 'bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.06)] text-[rgba(255,255,255,0.2)] cursor-not-allowed'}`}>
-          <Check size={14} />EMIS Checked → Continue to Step 3
-        </button>
+        {isClinicalAdmin ? (
+          <div className="space-y-2 mb-3 animate-fade-slide">
+            <div className="bg-triage-green/6 border border-triage-green/15 rounded-xl p-3">
+              <div className="text-triage-green font-bold text-xs mb-1">Plan/letter/recall exists in EMIS</div>
+              <div className="text-[rgba(255,255,255,0.4)] text-[11px] mb-2">→ Book direct</div>
+              <button onClick={() => selectOutcome('→ Clinical admin: direct booked per EMIS plan' + (emisFindings ? '. EMIS: ' + emisFindings : ''), 'green')}
+                className="bg-triage-green/15 border border-triage-green/25 text-triage-green rounded-lg py-1.5 px-3 text-[11px] font-semibold">✅ Book direct</button>
+            </div>
+            <div className="bg-triage-blue/6 border border-triage-blue/15 rounded-xl p-3">
+              <div className="text-triage-blue font-bold text-xs mb-1">Chasing hospital results</div>
+              <div className="text-[rgba(255,255,255,0.4)] text-[11px] mb-2">→ Direct back to hospital / CHECK & CONFIRM referral date</div>
+              <button onClick={() => selectOutcome('→ Clinical admin: directed to hospital for results/referral date' + (emisFindings ? '. EMIS: ' + emisFindings : ''), 'blue')}
+                className="bg-triage-blue/15 border border-triage-blue/25 text-triage-blue rounded-lg py-1.5 px-3 text-[11px] font-semibold">📋 Action this</button>
+            </div>
+            <div className="bg-triage-amber/6 border border-triage-amber/15 rounded-xl p-3">
+              <div className="text-triage-amber font-bold text-xs mb-1">Chasing GP results</div>
+              <div className="text-[rgba(255,255,255,0.4)] text-[11px] mb-2">→ Relay clinician comment. If NOT commented &gt;7 working days → EMIS Task</div>
+              <button onClick={() => selectOutcome('→ Clinical admin: GP results — relayed comment or raised EMIS task (>7 days)' + (emisFindings ? '. EMIS: ' + emisFindings : ''), 'amber')}
+                className="bg-triage-amber/15 border border-triage-amber/25 text-triage-amber rounded-lg py-1.5 px-3 text-[11px] font-semibold">📋 Action this</button>
+            </div>
+          </div>
+        ) : (
+          <>
+            <div className="bg-triage-red/5 border border-triage-red/15 rounded-xl p-2.5 mb-3">
+              <div className="text-triage-red text-[11px] font-semibold">⛔ Do NOT skip this step. Do NOT interpret results or tell the patient a diagnosis.</div>
+            </div>
+
+            <div className="bg-triage-blue/6 border border-triage-blue/15 rounded-xl p-3 mb-3">
+              <div className="text-triage-blue font-bold text-xs mb-2">CONFIRM YOU CHECKED:</div>
+              {[
+                'Recent consultation notes — is there a follow-up plan?',
+                'Recall alerts — bloods, annual review, smear, vaccines due?',
+                'High-risk flags — pregnant, immunosuppressed, safeguarding, LD, <1yr?',
+                'Hospital letters / discharge summaries relevant to this request?',
+                'Recent test results (note they exist — do NOT interpret)',
+              ].map((t, i) => (
+                <label key={i} className="flex items-center gap-2.5 py-1 cursor-pointer group">
+                  <div onClick={() => { const n = [...emisChecks]; n[i] = !n[i]; setEmisChecks(n); }}
+                    className={`w-5 h-5 rounded-md border flex items-center justify-center flex-shrink-0 transition-all ${emisChecks[i] ? 'bg-triage-blue/30 border-triage-blue/50' : 'border-[rgba(255,255,255,0.15)] group-hover:border-[rgba(255,255,255,0.25)]'}`}>
+                    {emisChecks[i] && <Check size={12} className="text-triage-blue" />}
+                  </div>
+                  <span className={`text-xs ${emisChecks[i] ? 'text-[rgba(255,255,255,0.7)]' : 'text-[rgba(255,255,255,0.4)]'}`}>{t}</span>
+                </label>
+              ))}
+            </div>
+
+            <div className="mb-3">
+              <div className="text-[rgba(255,255,255,0.5)] text-xs font-bold mb-1.5">📝 KEY EMIS FINDINGS (brief note):</div>
+              <textarea value={emisFindings} onChange={e => setEmisFindings(e.target.value)}
+                placeholder="e.g. 'Diabetes recall due. Last seen GP 3 weeks ago re: back pain. No alerts.'"
+                rows={2} className="w-full px-3 py-2 rounded-xl bg-[rgba(255,255,255,0.04)] border border-[rgba(255,255,255,0.08)] focus:border-triage-blue/40 focus:outline-none text-white text-xs resize-none" />
+              <div className="text-[rgba(255,255,255,0.25)] text-[10px] mt-1">This will be included if you forward to GP Triager</div>
+            </div>
+
+            <button onClick={() => advanceToNext(2)}
+              disabled={!emisChecks.some(Boolean)}
+              className={`w-full rounded-xl py-2.5 text-center font-semibold text-xs flex items-center justify-center gap-2 transition-all ${emisChecks.some(Boolean) ? 'bg-triage-blue/15 border border-triage-blue/25 text-triage-blue' : 'bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.06)] text-[rgba(255,255,255,0.2)] cursor-not-allowed'}`}>
+              <Check size={14} />EMIS Checked → Continue to Step 3
+            </button>
+          </>
+        )}
       </FlowStep>
 
       {/* ═══════════════════════════════════════════════════
           STEP 3: NEW OR ONGOING?  (CRUCIAL NEW STEP)
           ═══════════════════════════════════════════════════ */}
-      <FlowStep num={3} color="teal" title="🔄 NEW problem or ONGOING?" subtitle="Has a GP already reviewed THIS specific issue?"
+      <FlowStep num={3} color="teal" title="🔄 NEW or ONGOING?" subtitle="Based on EMIS: has a clinician already reviewed THIS specific issue?"
         expanded={expandedStep === 3} onToggle={() => toggle(3)} completed={completedSteps.has(3)}
         badge={scanResults?.hasChange ? 'CHANGE?' : null} badgeColor="amber">
-        
-        <div className="text-[rgba(255,255,255,0.5)] text-xs mb-2">
-          Based on EMIS: <strong className="text-[rgba(255,255,255,0.7)]">has a clinician already reviewed THIS specific problem?</strong>
-        </div>
-        
-        <div className="bg-triage-red/5 border border-triage-red/15 rounded-xl p-2.5 mb-3">
-          <div className="text-triage-red text-[11px] font-semibold">⛔ Do NOT book a new GP appointment for a NEW problem without going through the GP Triager.</div>
+
+        {/* Two large choice buttons */}
+        <div className="flex gap-3 mb-3">
+          <button onClick={() => setNewOngoing('plan-exists')}
+            className={`flex-1 p-4 rounded-xl border text-left transition-all ${newOngoing === 'plan-exists' ? 'border-triage-green/50 bg-triage-green/10' : 'border-triage-green/30 bg-triage-green/6 hover:bg-triage-green/10'}`}>
+            <div className="text-triage-green font-bold text-sm mb-0.5">✅ PLAN EXISTS</div>
+            <div className="text-triage-green/80 text-[11px] font-medium">(ongoing/planned/due)</div>
+            <div className="text-[rgba(255,255,255,0.35)] text-[10px] mt-2 leading-relaxed">Follow-up → direct book per plan | Recall → book per SOP | Admin (GP reviewed) → Tier 2</div>
+          </button>
+          <button onClick={() => { setNewOngoing('no-plan'); advanceToNext(3); }}
+            className={`flex-1 p-4 rounded-xl border text-left transition-all border-triage-blue/30 bg-triage-blue/6 hover:bg-triage-blue/10 ${scanResults?.hasChange ? 'ring-2 ring-triage-blue/40 animate-pulse' : ''}`}>
+            <div className="text-triage-blue font-bold text-sm mb-0.5">➡️ NO PLAN / WORSENED / NEW</div>
+            <div className="text-[rgba(255,255,255,0.35)] text-[10px] mt-2 leading-relaxed">No record of assessment → continue | Worsened → continue</div>
+          </button>
         </div>
 
-        {scanResults?.hasChange && (
-          <div className="mb-3 bg-triage-amber/10 border border-triage-amber/25 rounded-xl p-3">
-            <div className="text-triage-amber font-bold text-xs mb-1">⚡ CHANGE WORDS DETECTED:</div>
-            <div className="flex flex-wrap gap-1 mt-1">
-              {scanResults.changeWords.map((w, i) => <span key={i} className="bg-triage-amber/20 px-2 py-0.5 rounded text-[11px] text-triage-amber font-medium">"{w}"</span>)}
-            </div>
-            <div className="text-[rgba(255,255,255,0.45)] text-[11px] mt-1.5">Patient may be describing a worsening or recurring issue — check EMIS carefully.</div>
+        {/* Sub-options when PLAN EXISTS is selected */}
+        {newOngoing === 'plan-exists' && (
+          <div className="flex gap-2 mb-3 animate-fade-slide">
+            <button onClick={() => selectOutcome('→ Direct booked (ongoing — plan in EMIS)' + (emisFindings ? '. EMIS: ' + emisFindings : ''), 'teal')}
+              className="flex-1 bg-triage-green/15 border border-triage-green/25 text-triage-green rounded-xl py-2.5 text-xs font-semibold text-center">
+              ✅ Direct book
+            </button>
+            <button onClick={() => selectOutcome('→ Forward to Tier 2 (ongoing — plan in EMIS)' + (emisFindings ? '. EMIS: ' + emisFindings : ''), 'blue')}
+              className="flex-1 bg-triage-blue/15 border border-triage-blue/25 text-triage-blue rounded-xl py-2.5 text-xs font-semibold text-center">
+              📨 Forward to Tier 2
+            </button>
           </div>
         )}
 
-        {/* Option A: ONGOING + plan exists → Direct book */}
-        <div className="bg-triage-teal/6 border border-triage-teal/15 rounded-xl p-3 mb-2">
-          <div className="text-triage-teal font-bold text-xs mb-1">A) ONGOING — clear plan or due item in EMIS</div>
-          <div className="text-[rgba(255,255,255,0.45)] text-xs mb-2">
-            GP has reviewed this before. EMIS shows a clear follow-up plan, recall alert, or documented next step.
-            Patient is <strong className="text-[rgba(255,255,255,0.6)]">not worse</strong> — just needs what was planned.
-          </div>
-          <div className="flex gap-2">
-            <button onClick={() => { selectOutcome('→ Direct booked (ongoing — plan in EMIS)' + (emisFindings ? '. EMIS: ' + emisFindings : ''), 'teal'); }}
-              className="flex-1 bg-triage-teal/15 border border-triage-teal/25 text-triage-teal rounded-lg py-2 text-[11px] font-semibold text-center">
-              ✅ Follow plan / Direct book
-            </button>
-            <button onClick={() => { selectOutcome('→ Clinical admin/query → GP Triager via eConsult (ongoing)' + (emisFindings ? '. EMIS: ' + emisFindings : ''), 'blue'); }}
-              className="flex-1 bg-triage-blue/15 border border-triage-blue/25 text-triage-blue rounded-lg py-2 text-[11px] font-semibold text-center">
-              📨 Admin/query → eConsult
-            </button>
-          </div>
-        </div>
-
-        {/* Option B: ONGOING + worsened → check amber flags then GP Triager */}
-        <div className="bg-triage-amber/6 border border-triage-amber/15 rounded-xl p-3 mb-2">
-          <div className="text-triage-amber font-bold text-xs mb-1">B) ONGOING — but WORSENED or CHANGED</div>
-          <div className="text-[rgba(255,255,255,0.45)] text-xs mb-1">
-            Patient has been seen, but now says: <strong className="text-[rgba(255,255,255,0.6)]">"worse"</strong>, <strong className="text-[rgba(255,255,255,0.6)]">"not improving"</strong>, <strong className="text-[rgba(255,255,255,0.6)]">"different"</strong>, <strong className="text-[rgba(255,255,255,0.6)]">"come back"</strong>, or <strong className="text-[rgba(255,255,255,0.6)]">new symptoms on top</strong>.
-          </div>
-          <div className="text-[rgba(255,255,255,0.35)] text-[10px] mb-2 italic">
-            Still check Steps 4 & 5 (high-risk / amber flags) before sending — worsened symptoms may now be urgent.
-          </div>
-          <button onClick={() => { markStepDone(3); setExpandedStep(4); }}
-            className="w-full bg-triage-amber/15 border border-triage-amber/25 text-triage-amber rounded-lg py-2 text-[11px] font-semibold text-center">
-            ⚠️ Worsened → Check Steps 4 & 5 first ↓
-          </button>
-        </div>
-
-        {/* Option C: Planned/due item found (even if NEW request) */}
-        <div className="bg-triage-green/6 border border-triage-green/15 rounded-xl p-3 mb-2">
-          <div className="text-triage-green font-bold text-xs mb-1">C) PLANNED or DUE item found in EMIS</div>
-          <div className="text-[rgba(255,255,255,0.45)] text-xs mb-2">
-            Patient is asking for something EMIS shows is due: smear recall, annual review, bloods, vaccine, dressing change, postnatal check.
-          </div>
-          <button onClick={() => { setExpandedBooking('show-all'); }}
-            className="w-full bg-triage-green/10 border border-triage-green/20 text-triage-green rounded-lg py-2 text-[11px] font-semibold text-center">
-            📋 View direct booking reference ↓
-          </button>
-        </div>
-
-        {/* Option D: NEW problem */}
-        <div className="bg-triage-violet/6 border border-triage-violet/15 rounded-xl p-3 mb-2">
-          <div className="text-triage-violet font-bold text-xs mb-1">D) NEW — not previously reviewed by a GP</div>
-          <div className="text-[rgba(255,255,255,0.45)] text-xs mb-2">
-            No record of this specific issue being assessed. Continue through Steps 4–8 to find the right pathway.
-          </div>
-          <button onClick={() => advanceToNext(3)}
-            className="w-full bg-triage-violet/15 border border-triage-violet/25 text-triage-violet rounded-lg py-2 text-[11px] font-semibold text-center">
-            NEW problem → Continue Step 4 ↓
-          </button>
-        </div>
-
-        {/* Direct booking reference (expandable) */}
-        {expandedBooking && (
-          <div className="mt-3 pt-3 border-t border-[rgba(255,255,255,0.06)] animate-fade-slide">
-            <div className="text-[rgba(255,255,255,0.45)] text-xs font-bold mb-2">DIRECT BOOKING REFERENCE:</div>
-            <div className="space-y-1.5">
-              {data.directBooking.map(it => (
-                <div key={it.id}>
-                  <button onClick={() => setExpandedBooking(expandedBooking === it.id ? 'show-all' : it.id)}
-                    className={`w-full text-left p-2 rounded-lg border text-xs transition-all ${expandedBooking === it.id ? 'bg-triage-teal/8 border-triage-teal/20' : 'bg-[rgba(255,255,255,0.02)] border-[rgba(255,255,255,0.05)] hover:border-[rgba(255,255,255,0.1)]'}`}>
-                    <div className="flex items-center justify-between">
-                      <span className="text-[rgba(255,255,255,0.7)] font-medium">{it.item}</span>
-                      <ChevronRight size={14} className={`text-[rgba(255,255,255,0.2)] transition-transform ${expandedBooking === it.id ? 'rotate-90' : ''}`} />
-                    </div>
-                  </button>
-                  {expandedBooking === it.id && (
-                    <div className="ml-3 mt-1 mb-1 pl-3 border-l-2 border-triage-teal/20 text-xs space-y-1 animate-fade-slide">
-                      <div className="text-[rgba(255,255,255,0.5)]"><strong className="text-[rgba(255,255,255,0.7)]">Check:</strong> {it.emis_check}</div>
-                      <div className="text-[rgba(255,255,255,0.5)]"><strong className="text-[rgba(255,255,255,0.7)]">Book:</strong> {it.bookWith}</div>
-                      <div className="text-triage-amber text-[11px] font-medium">⚠️ {it.warning}</div>
-                      <button onClick={() => selectOutcome(`→ Direct booked: ${it.item}` + (emisFindings ? '. EMIS: ' + emisFindings : ''), 'teal')}
-                        className="mt-1 bg-triage-teal/15 border border-triage-teal/25 text-triage-teal rounded-lg py-1.5 px-3 text-[11px] font-semibold">
-                        ✅ Booked this
-                      </button>
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
+        {/* Warning texts */}
+        <div className="text-triage-amber text-[11px] font-medium mt-2">⚠️ If patient says &apos;worse&apos;, &apos;not improving&apos;, or &apos;different&apos; → treat as NEW</div>
+        <div className="text-triage-red text-[11px] font-semibold mt-1">⛔ Do NOT book a new GP appointment for a new problem without triage steps</div>
       </FlowStep>
 
       {/* ═══════════════════════════════════════════════════
