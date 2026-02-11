@@ -18,7 +18,8 @@ import {
   contacts as defaultContacts,
   scripts as defaultScripts,
   pathways as defaultPathways,
-  trainingScenarios as defaultTraining
+  trainingScenarios as defaultTraining,
+  quickMatchPathways
 } from '../lib/data';
 import { sopMeta, sopSections } from '../lib/sop-content';
 import { flowchartMeta, flowchartSections } from '../lib/flowchart-content';
@@ -70,7 +71,10 @@ function useKeywordScanner(text, redFlags, amberFlags, pharmacyFirst, highRiskGr
     });
     const changeWords = CHANGE_WORDS.filter(w => lower.includes(w));
     const hasChange = changeWords.length > 0;
-    return { red, amber, pharmacy, risk, changeWords, hasChange, hasAny: red.length + amber.length + pharmacy.length + risk.length + (hasChange ? 1 : 0) > 0 };
+    const matchedPathways = quickMatchPathways.filter(p => p.keywords.some(k => lower.includes(k.toLowerCase())));
+    const CANCER_KEYWORDS = ['lump', 'unexplained weight loss', 'weight loss unexplained', 'unexplained bleeding', 'persistent bowel change', 'difficulty swallowing', 'hoarseness', 'postmenopausal bleeding', 'night sweats', 'blood in stool', 'blood in urine', 'mole changed', 'mole growing'];
+    const cancer = CANCER_KEYWORDS.filter(k => lower.includes(k));
+    return { red, amber, pharmacy, risk, changeWords, hasChange, pathways: matchedPathways, cancer, hasPathway: matchedPathways.length > 0, hasCancer: cancer.length > 0, hasAny: red.length + amber.length + pharmacy.length + risk.length + (hasChange ? 1 : 0) > 0 };
   }, [text, redFlags, amberFlags, pharmacyFirst, highRiskGroups]);
 }
 
