@@ -402,7 +402,7 @@ const DecisionFlow = ({ data, settings, onRecord, showToast }) => {
         <div>
           <h1 className="text-lg font-black text-white tracking-tight">Process ANIMA Request</h1>
           <p className="text-[10px] text-[rgba(255,255,255,0.3)] mt-0.5">
-            {settings.practiceName} · SOP v1.0 · Work through steps in order ↓
+            {settings.practiceName} · SOP v3.1 · Work through steps in order ↓
           </p>
         </div>
         {(outcome || completedSteps.size > 0) && (
@@ -1092,33 +1092,315 @@ const DecisionFlow = ({ data, settings, onRecord, showToast }) => {
   );
 };
 
-// ============ SEARCH SCREEN ============
-const SearchScreen = ({ data }) => {
-  const [search, setSearch] = useState('');
-  const results = useKeywordScanner(search, data.redFlags, data.amberFlags, data.pharmacyFirst, data.highRiskGroups);
+// ============ SYMPTOM CHECKER ============
+const SymptomChecker = ({ data, showToast }) => {
+  const [text, setText] = useState('');
+  const scanResults = useKeywordScanner(text, data.redFlags, data.amberFlags, data.pharmacyFirst, data.highRiskGroups);
+
+  const hasInput = text.length >= 2;
+  const isRed = scanResults?.red.length > 0 || scanResults?.hasCancer;
+  const isAmber = scanResults?.amber.length > 0 || scanResults?.risk.length > 0;
+  const isGreen = scanResults?.pharmacy.length > 0;
+  const hasPathway = scanResults?.hasPathway;
+  const urgency = isRed ? 'red' : isAmber ? 'amber' : (isGreen || hasPathway) ? 'green' : null;
+
+  const buildSummary = () => {
+    const p = [`SYMPTOM CHECK — ${new Date().toLocaleString('en-GB')}`, `Patient says: "${text}"`, ''];
+    if (scanResults?.red.length) { p.push('RED FLAGS:'); scanResults.red.forEach(r => p.push(`  [${r.system}] ${r.symptom} → ${r.action}`)); p.push(''); }
+    if (scanResults?.hasCancer) { p.push('CANCER KEYWORDS: ' + scanResults.cancer.join(', ')); p.push('  → GP Triager for urgent 2WW (NICE NG12)'); p.push(''); }
+    if (scanResults?.amber.length) { p.push('AMBER FLAGS:'); scanResults.amber.forEach(a => p.push(`  ${a.category} → ${a.action}`)); p.push(''); }
+    if (scanResults?.risk.length) { p.push('HIGH RISK:'); scanResults.risk.forEach(r => p.push(`  ${r.group} → ${r.action}`)); p.push(''); }
+    if (scanResults?.pathways?.length) { p.push('PATHWAY MATCH:'); scanResults.pathways.forEach(pw => p.push(`  ${pw.pathway}: ${pw.action}${pw.contact ? ' (' + pw.contact + ')' : ''}`)); p.push(''); }
+    if (scanResults?.pharmacy.length) { p.push('PHARMACY FIRST:'); scanResults.pharmacy.forEach(ph => p.push(`  ${ph.name} (${ph.ageRange})`)); p.push(''); }
+    if (scanResults?.hasChange) { p.push('CHANGE/WORSENING: ' + scanResults.changeWords.join(', ')); p.push(''); }
+    if (hasInput && !scanResults?.hasAny) p.push('No flags detected.');
+    return p.join('\n');
+  };
+
   return (
-    <div className="p-4 pb-24 max-w-lg mx-auto">
-      <h1 className="text-lg font-black mb-3 flex items-center gap-2 text-white"><Search size={20} className="text-triage-blue" />Quick Lookup</h1>
-      <SearchBar value={search} onChange={setSearch} placeholder="Type symptom or keyword..." />
-      {search.length >= 2 && !results?.hasAny && <p className="text-center text-[rgba(255,255,255,0.3)] mt-8 text-sm">No matches. If unsure → GP Triager.</p>}
-      {results?.red.length > 0 && (
-        <div className="mb-4"><h2 className="font-bold text-triage-red mb-2 text-sm flex items-center gap-2"><AlertTriangle size={16} />RED FLAGS — Call 999</h2>
-          {results.red.map((f, i) => <GlassCard key={`${f.system}-${i}`} color="red" className="!p-3 !mb-2"><div className="text-[rgba(255,255,255,0.85)] text-sm">{f.symptom}</div><div className="text-triage-red font-bold text-xs mt-1">→ {f.action}</div></GlassCard>)}
+    <div className="p-3 sm:p-4 pb-24 max-w-lg mx-auto">
+      {/* Header */}
+      <div className="mb-3">
+        <h1 className="text-lg font-black text-white tracking-tight flex items-center gap-2">
+          <ClipboardCheck size={20} className="text-triage-blue" />Symptom Checker
+        </h1>
+        <p className="text-[10px] text-[rgba(255,255,255,0.3)] mt-0.5">
+          Paste the patient&apos;s words below · Scans for red/amber flags · Shows next steps &amp; signposting
+        </p>
+      </div>
+
+      {/* Input */}
+      <div className="sticky top-0 z-20 bg-[#0A0A0F]/95 backdrop-blur-md pb-3">
+        <div className="relative">
+          <Search className="absolute left-3 top-3 text-[rgba(255,255,255,0.25)]" size={16} />
+          <textarea value={text} onChange={e => setText(e.target.value)} autoFocus
+            placeholder="Type or paste the patient's words here to check symptoms..."
+            rows={3} className="w-full pl-9 pr-9 py-3 rounded-2xl bg-[rgba(255,255,255,0.04)] border border-[rgba(255,255,255,0.08)] focus:border-triage-blue/40 focus:outline-none text-white text-sm resize-none leading-relaxed placeholder:text-[rgba(255,255,255,0.25)]" />
+          {text && <button onClick={() => setText('')} className="absolute right-3 top-3 text-[rgba(255,255,255,0.3)] hover:text-white"><X size={16} /></button>}
+        </div>
+      </div>
+
+      {/* Urgency Banner */}
+      {hasInput && urgency && (
+        <div className={`mb-4 rounded-2xl p-4 border animate-fade-slide ${urgency === 'red' ? 'bg-triage-red/10 border-triage-red/30' : urgency === 'amber' ? 'bg-triage-amber/10 border-triage-amber/30' : 'bg-triage-green/10 border-triage-green/30'}`}>
+          <div className={`font-black text-sm ${urgency === 'red' ? 'text-triage-red' : urgency === 'amber' ? 'text-triage-amber' : 'text-triage-green'}`}>
+            {urgency === 'red' && '🚨 RED FLAG — CALL 999 / A&E NOW'}
+            {urgency === 'amber' && '⚠️ AMBER — Same-Day GP Triager'}
+            {urgency === 'green' && '✅ PATHWAY / PHARMACY FIRST MATCH'}
+          </div>
+          <div className="text-[rgba(255,255,255,0.5)] text-xs mt-1">
+            {urgency === 'red' && 'Stop — do not continue triage. Call 999 and alert duty clinician on site.'}
+            {urgency === 'amber' && 'Forward to Tier 2 with flags. Tier 2 books same-day duty GP within 1 hour.'}
+            {urgency === 'green' && 'Signpost to matched pathway or Pharmacy First. Always safety-net the patient.'}
+          </div>
+          {urgency === 'red' && (
+            <div className="flex gap-2 mt-3">
+              <a href="tel:999" className="flex items-center gap-2 bg-triage-red/20 border border-triage-red/30 text-triage-red rounded-xl px-4 py-2 font-bold text-sm active:scale-95 transition-transform"><Phone size={16} />CALL 999</a>
+              <a href="tel:02031627525" className="flex items-center gap-2 bg-triage-red/10 border border-triage-red/20 text-triage-red/80 rounded-xl px-3 py-2 font-semibold text-xs">On-site Ambulance</a>
+            </div>
+          )}
         </div>
       )}
-      {results?.amber.length > 0 && (
-        <div className="mb-4"><h2 className="font-bold text-triage-amber mb-2 text-sm flex items-center gap-2"><AlertCircle size={16} />AMBER — Same-Day</h2>
-          {results.amber.map(f => <GlassCard key={f.id} color="amber" className="!p-3 !mb-2"><div className="text-triage-amber font-bold text-xs">{f.category}</div><div className="flex flex-wrap gap-1 mt-1">{f.keywords.slice(0, 6).map((k, i) => <span key={i} className="bg-[rgba(255,255,255,0.04)] px-1.5 py-0.5 rounded text-[10px] text-[rgba(255,255,255,0.4)]">{k}</span>)}</div><div className="text-triage-amber text-xs font-medium mt-1.5">→ {f.action}</div></GlassCard>)}
+
+      {/* No results */}
+      {hasInput && !scanResults?.hasAny && (
+        <div className="text-center py-8">
+          <div className="w-14 h-14 bg-triage-green/10 rounded-2xl flex items-center justify-center mx-auto mb-3"><CheckCircle size={28} className="text-triage-green" /></div>
+          <div className="text-triage-green font-bold text-sm mb-1">No flags detected</div>
+          <div className="text-[rgba(255,255,255,0.4)] text-xs leading-relaxed max-w-xs mx-auto">
+            Consider: Self-care (CalmCare / Healthier Together) or Pharmacy First if eligible.<br />
+            If the patient seems unwell or you&apos;re uncertain → always escalate.
+          </div>
         </div>
       )}
-      {results?.pharmacy.length > 0 && (
-        <div className="mb-4"><h2 className="font-bold text-triage-green mb-2 text-sm flex items-center gap-2"><Pill size={16} />Pharmacy First</h2>
-          {results.pharmacy.map(c => <GlassCard key={c.id} color="green" className="!p-3 !mb-2"><span className="text-lg mr-2">{c.icon}</span><span className="font-bold text-white text-sm">{c.name}</span><span className="text-[rgba(255,255,255,0.3)] text-xs ml-2">({c.ageRange})</span></GlassCard>)}
+
+      {/* RED FLAGS */}
+      {scanResults?.red.length > 0 && (
+        <div className="mb-4">
+          <div className="flex items-center gap-2 mb-2"><AlertTriangle size={16} className="text-triage-red" /><h2 className="font-black text-triage-red text-sm">RED FLAGS — Call 999</h2></div>
+          {scanResults.red.map((f, i) => (
+            <GlassCard key={`red-${f.system}-${i}`} color="red" className="!p-3 !mb-2">
+              <div className="text-triage-red/70 font-bold text-[10px] uppercase tracking-wider mb-0.5">{f.system}</div>
+              <div className="text-[rgba(255,255,255,0.85)] text-sm">{f.symptom}</div>
+              <div className="text-triage-red font-bold text-xs mt-1.5">→ {f.action}</div>
+              {f.niceRef && <div className="text-[rgba(255,255,255,0.25)] text-[10px] mt-1">{f.niceRef}</div>}
+            </GlassCard>
+          ))}
+          <div className="bg-triage-blue/6 border border-triage-blue/15 rounded-xl p-2.5 mt-1">
+            <div className="text-[rgba(255,255,255,0.4)] text-[10px]">On-site ambulance: <strong className="text-white">020 3162 7525</strong> · Crisis: <strong className="text-white">0800 028 8000</strong> · CAMHS: <strong className="text-white">0203 228 5980</strong></div>
+          </div>
         </div>
       )}
-      {results?.risk.length > 0 && (
-        <div className="mb-4"><h2 className="font-bold text-triage-amber mb-2 text-sm flex items-center gap-2"><Shield size={16} />High-Risk</h2>
-          {results.risk.map(g => <GlassCard key={g.id} color="amber" className="!p-3 !mb-2"><div className="flex items-center gap-2"><span className="text-lg">{g.icon}</span><span className="text-white font-semibold text-sm">{g.group}</span></div><div className="text-[rgba(255,255,255,0.4)] text-xs mt-1">{g.action}</div></GlassCard>)}
+
+      {/* CANCER KEYWORDS */}
+      {scanResults?.hasCancer && (
+        <div className="mb-4">
+          <div className="flex items-center gap-2 mb-2"><span className="text-sm">🎗️</span><h2 className="font-black text-triage-red text-sm">POSSIBLE CANCER — 2WW Pathway</h2></div>
+          <GlassCard color="red" className="!p-3">
+            <div className="text-[rgba(255,255,255,0.7)] text-sm mb-1">Matched: <strong className="text-triage-red">{scanResults.cancer.join(', ')}</strong></div>
+            <div className="text-triage-red font-bold text-xs">→ ESCALATE to GP Triager (Tier 3) for urgent 2WW referral (NICE NG12)</div>
+            <div className="text-[rgba(255,255,255,0.3)] text-[10px] mt-1">Do NOT book routine. Do NOT use self-care.</div>
+          </GlassCard>
+        </div>
+      )}
+
+      {/* AMBER FLAGS */}
+      {scanResults?.amber.length > 0 && (
+        <div className="mb-4">
+          <div className="flex items-center gap-2 mb-2"><AlertCircle size={16} className="text-triage-amber" /><h2 className="font-black text-triage-amber text-sm">AMBER FLAGS — Same-Day GP</h2></div>
+          {scanResults.amber.map(f => (
+            <GlassCard key={f.id} color="amber" className="!p-3 !mb-2">
+              <div className="text-triage-amber font-bold text-xs">{f.category}</div>
+              <div className="text-[rgba(255,255,255,0.5)] text-xs mt-0.5">→ {f.action}</div>
+              {f.niceRef && <div className="text-[rgba(255,255,255,0.25)] text-[10px] mt-1">{f.niceRef}</div>}
+            </GlassCard>
+          ))}
+        </div>
+      )}
+
+      {/* HIGH RISK GROUPS */}
+      {scanResults?.risk.length > 0 && (
+        <div className="mb-4">
+          <div className="flex items-center gap-2 mb-2"><Shield size={16} className="text-triage-amber" /><h2 className="font-black text-triage-amber text-sm">HIGH RISK GROUP</h2></div>
+          {scanResults.risk.map(g => (
+            <GlassCard key={g.id} color="amber" className="!p-3 !mb-2">
+              <div className="flex items-start gap-2.5">
+                <span className="text-lg flex-shrink-0">{g.icon}</span>
+                <div>
+                  <div className="text-[rgba(255,255,255,0.85)] font-semibold text-sm">{g.group}</div>
+                  <div className="text-triage-amber text-xs mt-0.5">→ {g.action}</div>
+                  {g.note && <div className="text-[rgba(255,255,255,0.35)] text-[10px] mt-1">{g.note}</div>}
+                </div>
+              </div>
+            </GlassCard>
+          ))}
+        </div>
+      )}
+
+      {/* PATHWAY MATCHES (Signposting) */}
+      {scanResults?.pathways?.length > 0 && (
+        <div className="mb-4">
+          <div className="flex items-center gap-2 mb-2"><ExternalLink size={16} className="text-triage-blue" /><h2 className="font-black text-triage-blue text-sm">SIGNPOST TO PATHWAY</h2></div>
+          {scanResults.pathways.map(pw => {
+            const is999 = pw.action.includes('999');
+            const isPhone = pw.contact && (pw.contact.match(/^\d/) || pw.contact === '999');
+            return (
+              <GlassCard key={pw.id} color={is999 ? 'red' : 'blue'} className="!p-3 !mb-2">
+                <div className={`font-bold text-xs ${is999 ? 'text-triage-red' : 'text-triage-blue'}`}>{pw.pathway}</div>
+                <div className="text-[rgba(255,255,255,0.5)] text-[11px] mt-0.5">{pw.symptoms}</div>
+                <div className={`font-semibold text-xs mt-1.5 ${is999 ? 'text-triage-red' : 'text-[rgba(255,255,255,0.7)]'}`}>→ {pw.action}</div>
+                {pw.contact && (
+                  <div className="mt-2">
+                    {isPhone ? (
+                      <a href={`tel:${pw.contact.replace(/[^\d+]/g, '')}`} className="inline-flex items-center gap-1.5 bg-triage-blue/10 border border-triage-blue/20 text-triage-blue rounded-lg px-3 py-1.5 text-[11px] font-semibold">
+                        <Phone size={12} />{pw.contact}
+                      </a>
+                    ) : pw.contact !== 'Same-day' && (
+                      <button onClick={() => window.open(pw.contact.startsWith('http') ? pw.contact : `https://${pw.contact}`, '_blank')}
+                        className="inline-flex items-center gap-1.5 bg-triage-blue/10 border border-triage-blue/20 text-triage-blue rounded-lg px-3 py-1.5 text-[11px] font-semibold">
+                        <Globe size={12} />{pw.contact} <ExternalLink size={10} />
+                      </button>
+                    )}
+                  </div>
+                )}
+              </GlassCard>
+            );
+          })}
+        </div>
+      )}
+
+      {/* PHARMACY FIRST */}
+      {scanResults?.pharmacy.length > 0 && (
+        <div className="mb-4">
+          <div className="flex items-center gap-2 mb-2"><Pill size={16} className="text-triage-green" /><h2 className="font-black text-triage-green text-sm">PHARMACY FIRST</h2></div>
+          {scanResults.pharmacy.map(c => (
+            <GlassCard key={c.id} color="green" className="!p-3 !mb-2">
+              <div className="flex items-center gap-2"><span className="text-lg">{c.icon}</span><span className="font-bold text-white text-sm">{c.name}</span><span className="text-[rgba(255,255,255,0.3)] text-xs">({c.ageRange})</span></div>
+              {c.exclusions && <div className="text-[rgba(255,255,255,0.35)] text-[10px] mt-1.5">Exclude if: {c.exclusions.join(' · ')}</div>}
+            </GlassCard>
+          ))}
+          <div className="bg-triage-green/6 border border-triage-green/15 rounded-xl p-3 mt-1">
+            <div className="text-triage-green font-bold text-[11px] mb-1">📢 SAY TO PATIENT:</div>
+            <p className="text-[rgba(255,255,255,0.55)] text-xs italic leading-relaxed">&ldquo;{data.scripts.pharmacyFirst.script}&rdquo;</p>
+            <CopyBtn text={data.scripts.pharmacyFirst.script} label="Copy Script" />
+          </div>
+        </div>
+      )}
+
+      {/* CHANGE/WORSENING */}
+      {scanResults?.hasChange && (
+        <GlassCard color="teal" className="!p-3 mb-4">
+          <div className="text-triage-teal font-bold text-xs mb-1">🔄 CHANGE / WORSENING DETECTED</div>
+          <div className="text-[rgba(255,255,255,0.5)] text-xs">Words found: <strong className="text-triage-teal">{scanResults.changeWords.join(', ')}</strong></div>
+          <div className="text-[rgba(255,255,255,0.4)] text-[11px] mt-1">→ Treat as NEW problem. Do not use self-care. Forward to Tier 2.</div>
+        </GlassCard>
+      )}
+
+      {/* NEXT STEPS (Tier Guidance) */}
+      {hasInput && scanResults?.hasAny && (
+        <div className="mb-4">
+          <div className="flex items-center gap-2 mb-2"><ArrowRight size={16} className="text-triage-violet" /><h2 className="font-black text-triage-violet text-sm">WHAT TO DO NEXT</h2></div>
+          <div className="space-y-2">
+            <div className="bg-triage-green/4 border border-triage-green/12 rounded-xl p-3">
+              <div className="text-triage-green font-bold text-xs mb-1">TIER 1 — Reception</div>
+              <div className="text-[rgba(255,255,255,0.5)] text-xs leading-relaxed">
+                {isRed ? 'STOP. Call 999 / advise A&E. Alert duty clinician on site. Do NOT continue triage.'
+                  : scanResults?.risk.length > 0 ? 'Forward to Tier 2 with HIGH RISK flag. Do NOT use self-care or Pharmacy First.'
+                  : isAmber ? 'Forward to Tier 2 with amber flag details. Include EMIS findings and patient words.'
+                  : hasPathway ? 'Signpost to matched pathway. Give patient the contact details above. Safety-net.'
+                  : isGreen ? 'Refer to Pharmacy First or send CalmCare/Healthier Together advice. Safety-net.'
+                  : 'Forward to Tier 2 if unsure. Include patient words and EMIS findings.'}
+              </div>
+            </div>
+            {!isRed && (
+              <div className="bg-triage-amber/4 border border-triage-amber/12 rounded-xl p-3">
+                <div className="text-triage-amber font-bold text-xs mb-1">TIER 2 — Triager</div>
+                <div className="text-[rgba(255,255,255,0.5)] text-xs leading-relaxed">
+                  {scanResults?.hasCancer ? 'ESCALATE to Tier 3. Possible 2WW — do not book routine.'
+                    : scanResults?.risk.length > 0 ? 'ESCALATE to Tier 3. High-risk patient with new symptoms.'
+                    : isAmber ? 'Book same-day with duty GP. Action within 1 hour for amber flags, 2 hours otherwise.'
+                    : 'Check if pathway or self-care was missed. If not clear → escalate to Tier 3 within 2 hours.'}
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* COPY SUMMARY */}
+      {hasInput && scanResults?.hasAny && (
+        <button onClick={() => { navigator.clipboard.writeText(buildSummary()); showToast('Summary copied for EMIS'); }}
+          className="w-full bg-[rgba(255,255,255,0.04)] border border-[rgba(255,255,255,0.1)] text-[rgba(255,255,255,0.7)] rounded-xl py-3 text-center font-semibold text-xs flex items-center justify-center gap-2 hover:bg-[rgba(255,255,255,0.06)] mb-4 active:scale-[0.98] transition-all">
+          <Copy size={14} />Copy Summary for EMIS
+        </button>
+      )}
+
+      {/* QUICK CONTACTS (shown when no input) */}
+      {!hasInput && (
+        <div className="mt-2">
+          <div className="text-[rgba(255,255,255,0.4)] text-xs font-bold mb-2">QUICK CONTACTS</div>
+          <div className="grid grid-cols-2 gap-2">
+            <a href="tel:999" className="bg-triage-red/10 border border-triage-red/20 rounded-xl p-3 text-center active:scale-95 transition-transform">
+              <div className="text-triage-red font-bold text-lg">999</div>
+              <div className="text-[rgba(255,255,255,0.3)] text-[10px]">Emergency</div>
+            </a>
+            <a href="tel:08000288000" className="bg-triage-amber/10 border border-triage-amber/20 rounded-xl p-3 text-center active:scale-95 transition-transform">
+              <div className="text-triage-amber font-bold text-xs">0800 028 8000</div>
+              <div className="text-[rgba(255,255,255,0.3)] text-[10px]">Crisis Line (24/7)</div>
+            </a>
+            <a href="tel:02089342802" className="bg-triage-blue/10 border border-triage-blue/20 rounded-xl p-3 text-center active:scale-95 transition-transform">
+              <div className="text-triage-blue font-bold text-xs">0208 934 2802</div>
+              <div className="text-[rgba(255,255,255,0.3)] text-[10px]">Maternity &gt;18wk</div>
+            </a>
+            <a href="tel:02089346799" className="bg-triage-blue/10 border border-triage-blue/20 rounded-xl p-3 text-center active:scale-95 transition-transform">
+              <div className="text-triage-blue font-bold text-xs">020 8934 6799</div>
+              <div className="text-[rgba(255,255,255,0.3)] text-[10px]">Eye Unit (Urgent)</div>
+            </a>
+          </div>
+
+          {/* Signposting Directory */}
+          <div className="text-[rgba(255,255,255,0.4)] text-xs font-bold mb-2 mt-4">SIGNPOSTING DIRECTORY</div>
+          <div className="space-y-1.5">
+            {[
+              { label: 'Eye — CUES/MECS', contact: 'primaryeyecare.co.uk', type: 'web', desc: 'Self-refer to local optician' },
+              { label: 'Injury/Burn — UTC', contact: 'NHS 111', type: 'text', desc: 'Richmond UTC Teddington, 8am–8pm' },
+              { label: 'Pregnancy booking', contact: 'kingstonmaternity.org.uk/pregnancy/referral-form', type: 'web', desc: 'Self-refer online' },
+              { label: 'Maternity >18wk', contact: '0208 934 2802', type: 'phone', desc: '24/7 helpline' },
+              { label: 'Sexual Health', contact: '0208 974 9331', type: 'phone', desc: 'Wolverton Centre, self-referral' },
+              { label: 'Mental Health', contact: 'swlstg.nhs.uk/kingston-talking-therapies', type: 'web', desc: 'Kingston Talking Therapies, self-refer' },
+              { label: 'Pharmacy First', contact: '', type: 'text', desc: 'Sore throat · Earache · Sinusitis · Insect bite · Impetigo · Shingles · UTI (women) · Otitis media' },
+            ].map(s => (
+              <div key={s.label} className="flex items-center justify-between bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.06)] rounded-xl p-2.5">
+                <div className="min-w-0 flex-1">
+                  <div className="text-[rgba(255,255,255,0.7)] text-xs font-semibold">{s.label}</div>
+                  <div className="text-[rgba(255,255,255,0.3)] text-[10px] truncate">{s.desc}</div>
+                </div>
+                {s.type === 'phone' && (
+                  <a href={`tel:${s.contact.replace(/\s/g, '')}`} className="text-triage-blue text-xs font-semibold flex items-center gap-1 ml-2 flex-shrink-0"><Phone size={10} />{s.contact}</a>
+                )}
+                {s.type === 'web' && (
+                  <button onClick={() => window.open(s.contact.startsWith('http') ? s.contact : `https://${s.contact}`, '_blank')}
+                    className="text-triage-blue text-[10px] font-semibold flex items-center gap-1 ml-2 flex-shrink-0"><Globe size={10} />Visit</button>
+                )}
+              </div>
+            ))}
+          </div>
+
+          <div className="text-center text-[rgba(255,255,255,0.15)] text-[10px] mt-4">
+            SOP v3.1 · {sopMeta.practices} · Type above to check symptoms
+          </div>
+        </div>
+      )}
+
+      {/* SAFETY NET (always visible when results shown) */}
+      {hasInput && (
+        <div className="bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.06)] rounded-xl p-3 mt-2 mb-2">
+          <div className="text-[rgba(255,255,255,0.4)] text-[11px]">
+            <strong className="text-[rgba(255,255,255,0.6)]">Always safety-net:</strong> &ldquo;If not improving, or you develop chest pain, severe breathlessness, collapse, confusion, or heavy bleeding — call 999.&rdquo;
+          </div>
+          <div className="text-[rgba(255,255,255,0.25)] text-[10px] mt-1">
+            If unsure at any point → ask a clinician · SOP v3.1 · {sopMeta.practices}
+          </div>
         </div>
       )}
     </div>
@@ -1494,8 +1776,8 @@ const AdminConsole = ({ onBack, data, toast }) => {
 // ============ NAV BAR ============
 const NavBar = ({ screen, onNav, isAdminUser }) => {
   const items = [
-    { id: 'home', icon: Zap, label: 'Process' },
-    { id: 'search', icon: Search, label: 'Lookup' },
+    { id: 'home', icon: Zap, label: 'Triage' },
+    { id: 'check', icon: ClipboardCheck, label: 'Check' },
     { id: 'contacts', icon: Phone, label: 'Contacts' },
     { id: 'sop', icon: BookOpen, label: 'SOP' },
     { id: 'flowchart', icon: GitBranch, label: 'Flowchart' },
@@ -1552,7 +1834,7 @@ export default function App() {
   const renderScreen = () => {
     switch (screen) {
       case 'home': return <DecisionFlow data={data} settings={settings} onRecord={record} showToast={showToast} />;
-      case 'search': return <SearchScreen data={data} />;
+      case 'check': return <SymptomChecker data={data} showToast={showToast} />;
       case 'contacts': return <ContactsScreen contacts={data.contacts} />;
       case 'sop': return <SOPScreen />;
       case 'flowchart': return <FlowchartScreen />;
