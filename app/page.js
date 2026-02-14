@@ -330,27 +330,63 @@ const LoginScreen = ({ onLogin, toast }) => {
 };
 
 // ============ FLOW STEP (ACCORDION) ============
-const FlowStep = ({ num, color, title, subtitle, expanded, onToggle, badge, badgeColor, children, completed }) => {
+const FlowStep = ({ num, color, title, subtitle, expanded, onToggle, badge, badgeColor, children, completed, locked, lockedMsg }) => {
   const c = C[color] || C.gray;
   const bc = C[badgeColor] || C[color] || C.gray;
   return (
-    <div id={`flow-step-${num}`} className={`mb-2 rounded-2xl border transition-all duration-200 ${completed ? 'opacity-50' : ''} ${expanded ? `${c.bg} ${c.border}` : 'bg-[rgba(255,255,255,0.015)] border-[rgba(255,255,255,0.05)]'}`}>
-      <button onClick={onToggle} className="w-full text-left p-3 sm:p-4 flex items-center gap-3">
-        <div className={`w-9 h-9 rounded-xl flex items-center justify-center font-black text-sm flex-shrink-0 ${completed ? 'bg-triage-green/15 border border-triage-green/30 text-triage-green' : `${c.bg} border ${c.border} ${c.text}`}`}>
-          {completed ? <Check size={16} /> : num}
+    <div id={`flow-step-${num}`} className={`mb-2 rounded-2xl border transition-all duration-200 ${completed ? 'opacity-50' : ''} ${locked ? 'opacity-50 pointer-events-none' : ''} ${expanded ? `${c.bg} ${c.border}` : 'bg-[rgba(255,255,255,0.015)] border-[rgba(255,255,255,0.05)]'}`}>
+      <button onClick={locked ? undefined : onToggle} className="w-full text-left p-3 sm:p-4 flex items-center gap-3">
+        <div className={`w-9 h-9 rounded-xl flex items-center justify-center font-black text-sm flex-shrink-0 ${completed ? 'bg-triage-green/15 border border-triage-green/30 text-triage-green' : locked ? 'bg-[rgba(255,255,255,0.03)] border border-[rgba(255,255,255,0.08)] text-[rgba(255,255,255,0.3)]' : `${c.bg} border ${c.border} ${c.text}`}`}>
+          {completed ? <Check size={16} /> : locked ? <Lock size={14} /> : num}
         </div>
         <div className="flex-1 min-w-0">
-          <div className={`font-bold text-sm leading-tight ${expanded ? c.text : 'text-[rgba(255,255,255,0.7)]'}`}>{title}</div>
-          {!expanded && <div className="text-[rgba(255,255,255,0.35)] text-xs mt-0.5 truncate">{subtitle}</div>}
+          <div className={`font-bold text-sm leading-tight ${expanded ? c.text : locked ? 'text-[rgba(255,255,255,0.35)]' : 'text-[rgba(255,255,255,0.7)]'}`}>{locked ? `🔒 ${title}` : title}</div>
+          {!expanded && <div className="text-[rgba(255,255,255,0.35)] text-xs mt-0.5 truncate">{locked && lockedMsg ? lockedMsg : subtitle}</div>}
         </div>
-        {badge && !completed && (
+        {badge && !completed && !locked && (
           <span className={`${bc.bg} border ${bc.border} ${bc.text} px-2 py-0.5 rounded-full text-[10px] font-bold whitespace-nowrap ${badgeColor === 'red' ? 'animate-pulse' : ''}`}>
             {badge}
           </span>
         )}
-        {expanded ? <ChevronUp size={16} className={c.text} /> : <ChevronDown size={16} className="text-[rgba(255,255,255,0.2)]" />}
+        {!locked && (expanded ? <ChevronUp size={16} className={c.text} /> : <ChevronDown size={16} className="text-[rgba(255,255,255,0.2)]" />)}
       </button>
-      {expanded && <div className="px-3 sm:px-4 pb-4 pt-1 border-t border-[rgba(255,255,255,0.04)] animate-fade-slide">{children}</div>}
+      {expanded && !locked && <div className="px-3 sm:px-4 pb-4 pt-1 border-t border-[rgba(255,255,255,0.04)] animate-fade-slide">{children}</div>}
+    </div>
+  );
+};
+
+// ============ STOP ALERT OVERLAY ============
+const StopAlertOverlay = ({ stopMatches, patientWords, onAcknowledge }) => {
+  if (!stopMatches || stopMatches.length === 0) return null;
+  const match = stopMatches[0];
+  return (
+    <div className="fixed inset-0 z-[60] bg-red-900/98 flex flex-col items-center justify-center p-6 text-center" onClick={e => e.stopPropagation()}>
+      <div className="text-6xl mb-4 animate-pulse">🚨</div>
+      <h1 className="text-3xl sm:text-4xl font-black text-white mb-2">STOP — CALL 999 NOW</h1>
+      <div className="text-xl font-bold text-red-200 mb-4 uppercase">{match.system}</div>
+      {patientWords && (
+        <div className="bg-red-800/50 border border-red-500/30 rounded-xl p-4 mb-4 max-w-md w-full">
+          <div className="text-red-300 text-xs font-bold mb-1">PATIENT&apos;S EXACT WORDS:</div>
+          <div className="text-white text-sm italic">&ldquo;{patientWords}&rdquo;</div>
+        </div>
+      )}
+      <div className="bg-red-800/30 border border-red-500/20 rounded-xl p-3 mb-6 max-w-md w-full">
+        <div className="text-red-300 text-xs font-bold mb-1">MATCHED KEYWORDS:</div>
+        <div className="flex flex-wrap gap-1 justify-center">
+          {match.keywords.filter(k => patientWords?.toLowerCase().includes(k.toLowerCase())).map((k, i) => (
+            <span key={i} className="bg-red-700/50 text-white px-2 py-0.5 rounded text-xs">{k}</span>
+          ))}
+        </div>
+      </div>
+      <a href="tel:999" className="block w-full max-w-md bg-white text-red-900 font-black text-lg py-4 rounded-2xl mb-3 hover:bg-red-100 transition-all text-center">
+        📞 CALL 999 — On-site ambulance: 020 3162 7525
+      </a>
+      <button
+        onClick={onAcknowledge}
+        className="w-full max-w-md bg-transparent border border-[rgba(255,255,255,0.2)] text-[rgba(255,255,255,0.5)] text-sm py-3 rounded-2xl hover:bg-[rgba(255,255,255,0.05)] transition-all"
+      >
+        ✓ CHECKED — PROCEED TO RED FLAGS
+      </button>
     </div>
   );
 };
@@ -385,8 +421,21 @@ const DecisionFlow = ({ data, settings, onRecord, showToast }) => {
   const [handoverAvailability, setHandoverAvailability] = useState('');
   const [selfCareOffered, setSelfCareOffered] = useState('');
   const [selfCareReason, setSelfCareReason] = useState('');
+  const [stopAcknowledged, setStopAcknowledged] = useState(false);
+  const [lastStopKey, setLastStopKey] = useState('');
 
   const scanResults = useKeywordScanner(scanText, data.redFlags, data.amberFlags, data.pharmacyFirst, data.highRiskGroups);
+
+  // Re-show STOP overlay if new stop pattern detected
+  useEffect(() => {
+    if (scanResults?.hasStop) {
+      const newKey = scanResults.stop.map(s => s.system).join(',');
+      if (newKey !== lastStopKey) {
+        setStopAcknowledged(false);
+        setLastStopKey(newKey);
+      }
+    }
+  }, [scanResults?.hasStop, scanResults?.stop, lastStopKey]);
 
   const toggle = (step) => setExpandedStep(expandedStep === step ? null : step);
   
@@ -416,6 +465,7 @@ const DecisionFlow = ({ data, settings, onRecord, showToast }) => {
     setPathwaySearch(''); setQuickAction(null);
     setHandoverContact(''); setHandoverAvailability('');
     setSelfCareOffered(''); setSelfCareReason('');
+    setStopAcknowledged(false); setLastStopKey('');
     window.scrollTo(0, 0);
   };
 
@@ -423,12 +473,21 @@ const DecisionFlow = ({ data, settings, onRecord, showToast }) => {
 
   return (
     <div className="p-3 sm:p-4 pb-36 max-w-lg mx-auto">
+      {/* ---- STOP ALERT OVERLAY ---- */}
+      {scanResults?.hasStop && !stopAcknowledged && (
+        <StopAlertOverlay
+          stopMatches={scanResults.stop}
+          patientWords={scanText}
+          onAcknowledge={() => setStopAcknowledged(true)}
+        />
+      )}
+
       {/* ---- HEADER ---- */}
       <div className="flex items-center justify-between mb-3">
         <div>
           <h1 className="text-lg font-black text-white tracking-tight">Process ANIMA Request</h1>
           <p className="text-[10px] text-[rgba(255,255,255,0.3)] mt-0.5">
-            {settings.practiceName} · SOP v1.0 · Work through steps in order ↓
+            {settings.practiceName} · SOP v3.5 · Work through steps in order ↓
           </p>
         </div>
         {(outcome || completedSteps.size > 0) && (
@@ -438,7 +497,7 @@ const DecisionFlow = ({ data, settings, onRecord, showToast }) => {
         )}
       </div>
 
-      {/* ---- KEYWORD SCANNER ---- */}
+      {/* ---- STICKY PATIENT WORDS BANNER + KEYWORD SCANNER ---- */}
       <div className="sticky top-0 z-20 bg-[#0A0A0F]/95 backdrop-blur-md pb-3">
         <div className="relative">
           <Search className="absolute left-3 top-3 text-[rgba(255,255,255,0.25)]" size={16} />
@@ -449,12 +508,16 @@ const DecisionFlow = ({ data, settings, onRecord, showToast }) => {
         </div>
         {scanResults && (
           <div className="flex gap-1.5 mt-2 flex-wrap">
-            {scanResults.red.length > 0 && <button onClick={() => toggle(1)} className="bg-triage-red/15 border border-triage-red/30 text-triage-red px-2.5 py-1 rounded-full text-[11px] font-bold animate-pulse">🚨 {scanResults.red.length} RED FLAG{scanResults.red.length > 1 ? 'S' : ''}</button>}
+            {scanResults.hasStop && <span className="bg-red-600/30 border border-red-500/50 text-red-300 px-2.5 py-1 rounded-full text-[11px] font-bold animate-pulse">🚨 STOP — 999</span>}
+            {scanResults.hasRed && <button onClick={() => toggle(1)} className="bg-triage-red/15 border border-triage-red/30 text-triage-red px-2.5 py-1 rounded-full text-[11px] font-bold animate-pulse">🔴 RED</button>}
+            {scanResults.hasAmber && <button onClick={() => toggle(5)} className="bg-triage-amber/15 border border-triage-amber/30 text-triage-amber px-2.5 py-1 rounded-full text-[11px] font-bold">🟠 AMBER</button>}
+            {scanResults.hasPurple && <span className="bg-purple-500/15 border border-purple-500/30 text-purple-400 px-2.5 py-1 rounded-full text-[11px] font-bold">🟣 PURPLE</span>}
+            {scanResults.hasYellow && <span className="bg-yellow-500/15 border border-yellow-500/30 text-yellow-400 px-2.5 py-1 rounded-full text-[11px] font-bold">🟡 YELLOW</span>}
+            {scanResults.hasGreen && <span className="bg-triage-green/15 border border-triage-green/30 text-triage-green px-2.5 py-1 rounded-full text-[11px] font-bold">🟢 GREEN</span>}
+            {scanResults.hasRisk && <button onClick={() => toggle(4)} className="bg-triage-teal/15 border border-triage-teal/30 text-triage-teal px-2.5 py-1 rounded-full text-[11px] font-bold">⚠️ HIGH RISK</button>}
             {scanResults.hasCancer && <button onClick={() => toggle(5)} className="bg-triage-red/15 border border-triage-red/30 text-triage-red px-2.5 py-1 rounded-full text-[11px] font-bold">🎗️ CANCER?</button>}
-            {scanResults.risk.length > 0 && <button onClick={() => toggle(4)} className="bg-triage-amber/15 border border-triage-amber/30 text-triage-amber px-2.5 py-1 rounded-full text-[11px] font-bold">🛡️ HIGH RISK</button>}
-            {scanResults.amber.length > 0 && <button onClick={() => toggle(5)} className="bg-triage-amber/15 border border-triage-amber/30 text-triage-amber px-2.5 py-1 rounded-full text-[11px] font-bold">⚠️ {scanResults.amber.length} AMBER</button>}
+            {scanResults.hasChange && <button onClick={() => toggle(3)} className="bg-triage-teal/15 border border-triage-teal/30 text-triage-teal px-2.5 py-1 rounded-full text-[11px] font-bold">📈 WORSENING</button>}
             {scanResults.pharmacy.length > 0 && <button onClick={() => toggle(7)} className="bg-triage-green/15 border border-triage-green/30 text-triage-green px-2.5 py-1 rounded-full text-[11px] font-bold">💊 Pharmacy</button>}
-            {scanResults.hasChange && <button onClick={() => toggle(3)} className="bg-triage-teal/15 border border-triage-teal/30 text-triage-teal px-2.5 py-1 rounded-full text-[11px] font-bold">🔄 CHANGE</button>}
             {scanResults.hasPathway && <button onClick={() => toggle(6)} className="bg-triage-blue/15 border border-triage-blue/30 text-triage-blue px-2.5 py-1 rounded-full text-[11px] font-bold">🔍 PATHWAY</button>}
             {!scanResults.hasAny && <span className="text-[rgba(255,255,255,0.25)] text-xs py-1">No keyword matches — work through steps below</span>}
           </div>
@@ -540,7 +603,8 @@ const DecisionFlow = ({ data, settings, onRecord, showToast }) => {
           STEP 2: CHECK EMIS
           ═══════════════════════════════════════════════════ */}
       <FlowStep num={2} color="blue" title="✅ CHECK EMIS (mandatory)" subtitle="Look for plans, alerts, flags, letters, results"
-        expanded={expandedStep === 2} onToggle={() => toggle(2)} completed={completedSteps.has(2)}>
+        expanded={expandedStep === 2} onToggle={() => toggle(2)} completed={completedSteps.has(2)}
+        locked={!completedSteps.has(1)} lockedMsg="Complete Step 1 first">
 
         {/* Clinical Admin Toggle */}
         <div className="mb-3">
@@ -619,7 +683,8 @@ const DecisionFlow = ({ data, settings, onRecord, showToast }) => {
           ═══════════════════════════════════════════════════ */}
       <FlowStep num={3} color="teal" title="🔄 NEW or ONGOING?" subtitle="Based on EMIS: has a clinician already reviewed THIS specific issue?"
         expanded={expandedStep === 3} onToggle={() => toggle(3)} completed={completedSteps.has(3)}
-        badge={scanResults?.hasChange ? 'CHANGE?' : null} badgeColor="amber">
+        badge={scanResults?.hasChange ? 'CHANGE?' : null} badgeColor="amber"
+        locked={!completedSteps.has(2)} lockedMsg="Complete Step 2 first">
 
         {/* Two large choice buttons */}
         <div className="flex gap-3 mb-3">
