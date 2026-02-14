@@ -30,7 +30,7 @@ import {
 import { sopMeta, sopSections } from '../lib/sop-content';
 import { flowchartMeta, flowchartSections } from '../lib/flowchart-content';
 import {
-  getSession, clearSession, authenticateUser, isAdmin,
+  getSession, clearSession, authenticateUser, isAdmin, canAccessTier, getGroupLabel,
   getSettings, saveSettings, getCustomData, saveCustomData, clearCustomData,
   getUsers, saveUsers, exportAllData, importAllData, getAuditLog,
   DEFAULT_SETTINGS, logAction, changePassword, validatePassword,
@@ -236,14 +236,21 @@ const PhoneLink = ({ service, number, hours, priority = 'normal', icon, website,
 };
 
 // ============ AUTH COMPONENTS ============
+const ROLE_LABELS = { reception: 'Reception', tier2: 'Tier 2', tier3: 'GP Triager', partner: 'Partner', admin: 'Admin', staff: 'Reception' };
+
 const UserBadge = ({ session, onLogout }) => (
   <div className="flex items-center justify-between glass border-b border-[rgba(255,255,255,0.06)] px-4 py-2">
-    <div className="flex items-center gap-2 text-sm">
-      <div className="w-6 h-6 rounded-lg bg-triage-blue/20 flex items-center justify-center"><User size={12} className="text-triage-blue" /></div>
-      <span className="text-[rgba(255,255,255,0.5)] font-medium text-xs">{session.name}</span>
-      {session.role === 'admin' && <span className="bg-triage-blue/20 text-triage-blue text-[10px] px-1.5 py-0.5 rounded font-semibold">Admin</span>}
+    <div className="flex items-center gap-2 text-sm min-w-0">
+      <div className="w-6 h-6 rounded-lg bg-triage-blue/20 flex items-center justify-center flex-shrink-0"><User size={12} className="text-triage-blue" /></div>
+      <div className="min-w-0">
+        <div className="flex items-center gap-1.5">
+          <span className="text-[rgba(255,255,255,0.5)] font-medium text-xs truncate">{session.name}</span>
+          <span className="bg-triage-blue/20 text-triage-blue text-[10px] px-1.5 py-0.5 rounded font-semibold flex-shrink-0">{ROLE_LABELS[session.role] || session.role}</span>
+        </div>
+        {session.group && <div className="text-[9px] text-[rgba(255,255,255,0.25)] truncate">{getGroupLabel(session.group)}</div>}
+      </div>
     </div>
-    <button onClick={onLogout} className="flex items-center gap-1 text-[rgba(255,255,255,0.3)] hover:text-triage-red text-xs transition-colors"><LogOut size={12} />Logout</button>
+    <button onClick={onLogout} className="flex items-center gap-1 text-[rgba(255,255,255,0.3)] hover:text-triage-red text-xs transition-colors flex-shrink-0"><LogOut size={12} />Logout</button>
   </div>
 );
 
@@ -325,6 +332,7 @@ const LoginScreen = ({ onLogin, toast }) => {
           {error && <div className="bg-triage-red/10 text-triage-red px-4 py-3 rounded-xl mb-4 text-sm flex items-center gap-2 border border-triage-red/20"><AlertCircle size={18} />{error}</div>}
           <Button type="submit" color="solid" full size="lg" disabled={loading}>{loading ? <><RefreshCw size={20} className="animate-spin" />Signing in...</> : <><Lock size={20} />Sign In</>}</Button>
         </form>
+        <p className="text-center text-[rgba(255,255,255,0.2)] text-xs mt-4">Partner Practice? Use your shared login.</p>
       </div>
     </div>
   );
@@ -1831,7 +1839,8 @@ const AdminConsole = ({ onBack, data, toast }) => {
 };
 
 // ============ NAV BAR ============
-const NavBar = ({ screen, onNav, isAdminUser, currentTier, onTierChange }) => {
+const NavBar = ({ screen, onNav, isAdminUser, currentTier, onTierChange, session }) => {
+  const showTier2 = session && canAccessTier(session, 2);
   const items = [
     { id: 'home', icon: Zap, label: currentTier === 2 ? 'Tier 2' : 'Process' },
     { id: 'search', icon: Search, label: 'Lookup' },
@@ -1842,17 +1851,19 @@ const NavBar = ({ screen, onNav, isAdminUser, currentTier, onTierChange }) => {
   ];
   return (
     <nav className="fixed bottom-0 left-0 right-0 glass-elevated border-t border-[rgba(255,255,255,0.06)] z-40">
-      {/* Tier toggle */}
-      <div className="flex justify-center gap-1 pt-1.5 pb-0.5">
-        <button onClick={() => onTierChange(1)}
-          className={`px-3 py-1 rounded-full text-[9px] font-bold transition-all ${currentTier === 1 ? 'bg-triage-blue/20 text-triage-blue border border-triage-blue/30' : 'text-[rgba(255,255,255,0.3)] hover:text-[rgba(255,255,255,0.5)]'}`}>
-          TIER 1 — Reception
-        </button>
-        <button onClick={() => onTierChange(2)}
-          className={`px-3 py-1 rounded-full text-[9px] font-bold transition-all ${currentTier === 2 ? 'bg-purple-500/20 text-purple-400 border border-purple-500/30' : 'text-[rgba(255,255,255,0.3)] hover:text-[rgba(255,255,255,0.5)]'}`}>
-          TIER 2 — Triager
-        </button>
-      </div>
+      {/* Tier toggle — only show if user can access Tier 2 */}
+      {showTier2 && (
+        <div className="flex justify-center gap-1 pt-1.5 pb-0.5">
+          <button onClick={() => onTierChange(1)}
+            className={`px-3 py-1 rounded-full text-[9px] font-bold transition-all ${currentTier === 1 ? 'bg-triage-blue/20 text-triage-blue border border-triage-blue/30' : 'text-[rgba(255,255,255,0.3)] hover:text-[rgba(255,255,255,0.5)]'}`}>
+            TIER 1 — Reception
+          </button>
+          <button onClick={() => onTierChange(2)}
+            className={`px-3 py-1 rounded-full text-[9px] font-bold transition-all ${currentTier === 2 ? 'bg-purple-500/20 text-purple-400 border border-purple-500/30' : 'text-[rgba(255,255,255,0.3)] hover:text-[rgba(255,255,255,0.5)]'}`}>
+            TIER 2 — Triager
+          </button>
+        </div>
+      )}
       <div className="flex justify-around py-1.5">
         {items.map(i => (
           <button key={i.id} onClick={() => onNav(i.id)}
@@ -1924,7 +1935,7 @@ export default function App() {
       <EmergencyBanner />
       <UserBadge session={session} onLogout={logout} />
       {renderScreen()}
-      <NavBar screen={screen} onNav={nav} isAdminUser={isAdminUser} currentTier={currentTier} onTierChange={(t) => { setCurrentTier(t); setScreen('home'); }} />
+      <NavBar screen={screen} onNav={nav} isAdminUser={isAdminUser} currentTier={currentTier} onTierChange={(t) => { setCurrentTier(t); setScreen('home'); }} session={session} />
       {toast && <Toast {...toast} onClose={() => setToast(null)} />}
       {showPasswordChange && (
         <PasswordChangeModal userId={session.userId} isFirstLogin={session.mustChangePassword}
