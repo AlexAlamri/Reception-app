@@ -21,6 +21,7 @@ import {
   trainingScenarios as defaultTraining,
   quickMatchPathways,
   trainingTopics,
+  tier2Actions,
   purpleFlags,
   yellowFlags,
   greenFlags,
@@ -514,11 +515,11 @@ const DecisionFlow = ({ data, settings, onRecord, showToast }) => {
             {scanResults.hasPurple && <span className="bg-purple-500/15 border border-purple-500/30 text-purple-400 px-2.5 py-1 rounded-full text-[11px] font-bold">🟣 PURPLE</span>}
             {scanResults.hasYellow && <span className="bg-yellow-500/15 border border-yellow-500/30 text-yellow-400 px-2.5 py-1 rounded-full text-[11px] font-bold">🟡 YELLOW</span>}
             {scanResults.hasGreen && <span className="bg-triage-green/15 border border-triage-green/30 text-triage-green px-2.5 py-1 rounded-full text-[11px] font-bold">🟢 GREEN</span>}
-            {scanResults.hasRisk && <button onClick={() => toggle(4)} className="bg-triage-teal/15 border border-triage-teal/30 text-triage-teal px-2.5 py-1 rounded-full text-[11px] font-bold">⚠️ HIGH RISK</button>}
-            {scanResults.hasCancer && <button onClick={() => toggle(5)} className="bg-triage-red/15 border border-triage-red/30 text-triage-red px-2.5 py-1 rounded-full text-[11px] font-bold">🎗️ CANCER?</button>}
-            {scanResults.hasChange && <button onClick={() => toggle(3)} className="bg-triage-teal/15 border border-triage-teal/30 text-triage-teal px-2.5 py-1 rounded-full text-[11px] font-bold">📈 WORSENING</button>}
-            {scanResults.pharmacy.length > 0 && <button onClick={() => toggle(7)} className="bg-triage-green/15 border border-triage-green/30 text-triage-green px-2.5 py-1 rounded-full text-[11px] font-bold">💊 Pharmacy</button>}
-            {scanResults.hasPathway && <button onClick={() => toggle(6)} className="bg-triage-blue/15 border border-triage-blue/30 text-triage-blue px-2.5 py-1 rounded-full text-[11px] font-bold">🔍 PATHWAY</button>}
+            {scanResults.hasRisk && <span className="bg-triage-teal/15 border border-triage-teal/30 text-triage-teal px-2.5 py-1 rounded-full text-[11px] font-bold">⚠️ HIGH RISK</span>}
+            {scanResults.hasCancer && <span className="bg-triage-red/15 border border-triage-red/30 text-triage-red px-2.5 py-1 rounded-full text-[11px] font-bold">🎗️ CANCER?</span>}
+            {scanResults.hasChange && <span className="bg-triage-teal/15 border border-triage-teal/30 text-triage-teal px-2.5 py-1 rounded-full text-[11px] font-bold">📈 WORSENING</span>}
+            {scanResults.pharmacy.length > 0 && <button onClick={() => toggle(4)} className="bg-triage-green/15 border border-triage-green/30 text-triage-green px-2.5 py-1 rounded-full text-[11px] font-bold">💊 Pharmacy</button>}
+            {scanResults.hasPathway && <button onClick={() => toggle(2)} className="bg-triage-blue/15 border border-triage-blue/30 text-triage-blue px-2.5 py-1 rounded-full text-[11px] font-bold">🔍 PATHWAY</button>}
             {!scanResults.hasAny && <span className="text-[rgba(255,255,255,0.25)] text-xs py-1">No keyword matches — work through steps below</span>}
           </div>
         )}
@@ -1197,6 +1198,462 @@ const TrainingScreen = ({ onBack, scenarios }) => {
   );
 };
 
+// ============ TIER 2 WORKFLOW ============
+const Tier2Workflow = ({ data, showToast }) => {
+  const [t2Step, setT2Step] = useState(null);
+  const [t2CompletedSteps, setT2CompletedSteps] = useState(new Set());
+  const [handoverPaste, setHandoverPaste] = useState('');
+  const [t2PatientWords, setT2PatientWords] = useState('');
+  const [purpleGate, setPurpleGate] = useState(null); // null | 'clear' | 'purple'
+  const [amberGate, setAmberGate] = useState(null);
+  const [yellowGate, setYellowGate] = useState(null);
+  const [greenGate, setGreenGate] = useState(null);
+  const [amberSearch, setAmberSearch] = useState('');
+  const [yellowEconsult, setYellowEconsult] = useState(null);
+  const [greenEconsult, setGreenEconsult] = useState(null);
+  // Tier 2→3 handover form
+  const [t2Notes, setT2Notes] = useState('');
+  const [gpQuestion, setGpQuestion] = useState('');
+  const [timeSensitivity, setTimeSensitivity] = useState('SAME-DAY');
+  const [confidence, setConfidence] = useState('MEDIUM');
+  const [econsultTriedFailed, setEconsultTriedFailed] = useState(false);
+
+  const scan = useKeywordScanner(t2PatientWords, data.redFlags, data.amberFlags, data.pharmacyFirst, data.highRiskGroups);
+
+  const t2Toggle = (step) => setT2Step(t2Step === step ? null : step);
+  const t2MarkDone = (step) => setT2CompletedSteps(prev => { const n = new Set(prev); n.add(step); return n; });
+  const t2Advance = (cur) => { t2MarkDone(cur); if (cur + 1 <= 6) setT2Step(cur + 1); };
+
+  const resetT2 = () => {
+    setT2Step(null); setT2CompletedSteps(new Set()); setHandoverPaste(''); setT2PatientWords('');
+    setPurpleGate(null); setAmberGate(null); setYellowGate(null); setGreenGate(null);
+    setAmberSearch(''); setYellowEconsult(null); setGreenEconsult(null);
+    setT2Notes(''); setGpQuestion(''); setTimeSensitivity('SAME-DAY'); setConfidence('MEDIUM');
+    setEconsultTriedFailed(false); window.scrollTo(0, 0);
+  };
+
+  const buildHandover = () => {
+    const ts = new Date().toLocaleString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+    return `TIER 2 → TIER 3 HANDOVER\nDate/Time: ${ts}\nTier 1 handover: ${handoverPaste || 'N/A'}\nTier 2 review: ${t2Notes || 'N/A'}\nPurple: ${purpleGate === 'purple' ? 'YES — matched' : 'Checked — clear'} | Amber: ${amberGate === 'amber' ? 'YES — matched' : amberGate === 'clear' ? 'Checked — clear' : 'Not reached'}\nYellow: ${yellowGate === 'yellow' ? 'YES — matched' : yellowGate === 'clear' ? 'Checked — clear' : 'Not reached'} | Green: ${greenGate === 'green' ? 'YES — matched' : greenGate === 'clear' ? 'Checked — clear' : 'Not reached'}\neConsult tried & failed: ${econsultTriedFailed ? 'Yes' : 'No'}\nQuestion for GP: ${gpQuestion || 'N/A'}\nTime sensitivity: ${timeSensitivity}\nConfidence: ${confidence}`;
+  };
+
+  const filteredAmber = amberSearch
+    ? data.amberFlags.filter(f => JSON.stringify(f).toLowerCase().includes(amberSearch.toLowerCase()))
+    : data.amberFlags;
+
+  return (
+    <div className="p-3 sm:p-4 pb-36 max-w-lg mx-auto">
+      {/* TIER 2 HEADER */}
+      <div className="mb-4">
+        <h1 className="text-lg font-black text-white tracking-tight">TIER 2 — Patient Services Team</h1>
+        <p className="text-[11px] text-triage-amber font-bold mt-1">YOU PROCESS AND BOOK — YOU DO NOT DECIDE CLINICAL URGENCY</p>
+        <p className="text-[10px] text-[rgba(255,255,255,0.4)] mt-1">Match the pattern → take the action. If &gt;60 seconds → escalate to Tier 3.</p>
+        {(t2CompletedSteps.size > 0) && (
+          <button onClick={resetT2} className="mt-2 flex items-center gap-1.5 px-3 py-2 bg-triage-blue/20 border border-triage-blue/30 rounded-xl text-triage-blue text-xs font-bold">
+            <RotateCcw size={14} />New Triage
+          </button>
+        )}
+      </div>
+
+      {/* TIME LIMITS BAR */}
+      <div className="grid grid-cols-3 gap-2 mb-4">
+        <div className="bg-triage-amber/10 border border-triage-amber/25 rounded-xl p-2 text-center">
+          <div className="text-triage-amber font-bold text-[11px]">AMBER</div>
+          <div className="text-[10px] text-[rgba(255,255,255,0.5)]">within 1 hour</div>
+        </div>
+        <div className="bg-yellow-500/10 border border-yellow-500/25 rounded-xl p-2 text-center">
+          <div className="text-yellow-400 font-bold text-[11px]">YELLOW + GREEN</div>
+          <div className="text-[10px] text-[rgba(255,255,255,0.5)]">within 2 hours</div>
+        </div>
+        <div className="bg-triage-red/10 border border-triage-red/25 rounded-xl p-2 text-center">
+          <div className="text-triage-red font-bold text-[11px]">END OF DAY</div>
+          <div className="text-[10px] text-[rgba(255,255,255,0.5)]">auto-escalate</div>
+        </div>
+      </div>
+
+      {/* ═══ T2 STEP 1: RECEIVE & REVIEW ═══ */}
+      <FlowStep num={1} color="blue" title="📋 RECEIVE & REVIEW" subtitle="Read the Tier 1 handover and enter patient words"
+        expanded={t2Step === 1} onToggle={() => t2Toggle(1)} completed={t2CompletedSteps.has(1)}>
+        <div className="space-y-3">
+          <TextArea label="Paste Tier 1 Handover" value={handoverPaste} onChange={setHandoverPaste} placeholder="Paste the Tier 1 handover from clipboard..." rows={4} />
+          {handoverPaste && (
+            <div className="bg-[rgba(255,255,255,0.03)] border border-[rgba(255,255,255,0.08)] rounded-xl p-3">
+              <div className="text-[11px] text-triage-blue font-bold mb-1">HANDOVER RECEIVED</div>
+              <pre className="text-[11px] text-[rgba(255,255,255,0.6)] whitespace-pre-wrap font-sans">{handoverPaste}</pre>
+            </div>
+          )}
+          <TextArea label="Patient's Words (for scanner)" value={t2PatientWords} onChange={setT2PatientWords} placeholder="Enter patient's words for keyword scanning..." rows={2} />
+          {scan && (
+            <div className="flex gap-1.5 flex-wrap">
+              {scan.hasStop && <span className="bg-red-600/30 border border-red-500/50 text-red-300 px-2.5 py-1 rounded-full text-[11px] font-bold animate-pulse">🚨 STOP</span>}
+              {scan.hasRed && <span className="bg-triage-red/15 border border-triage-red/30 text-triage-red px-2.5 py-1 rounded-full text-[11px] font-bold">🔴 RED</span>}
+              {scan.hasAmber && <span className="bg-triage-amber/15 border border-triage-amber/30 text-triage-amber px-2.5 py-1 rounded-full text-[11px] font-bold">🟠 AMBER</span>}
+              {scan.hasPurple && <span className="bg-purple-500/15 border border-purple-500/30 text-purple-400 px-2.5 py-1 rounded-full text-[11px] font-bold">🟣 PURPLE</span>}
+              {scan.hasYellow && <span className="bg-yellow-500/15 border border-yellow-500/30 text-yellow-400 px-2.5 py-1 rounded-full text-[11px] font-bold">🟡 YELLOW</span>}
+              {scan.hasGreen && <span className="bg-triage-green/15 border border-triage-green/30 text-triage-green px-2.5 py-1 rounded-full text-[11px] font-bold">🟢 GREEN</span>}
+              {scan.hasRisk && <span className="bg-triage-teal/15 border border-triage-teal/30 text-triage-teal px-2.5 py-1 rounded-full text-[11px] font-bold">⚠️ HIGH RISK</span>}
+            </div>
+          )}
+          <div className="bg-triage-amber/10 border border-triage-amber/20 rounded-xl p-2.5">
+            <div className="text-[11px] text-triage-amber font-bold">AMBER = within 1 hour | All others = within 2 hours</div>
+            <div className="text-[10px] text-[rgba(255,255,255,0.4)] mt-1">PROCESS and BOOK protocol-clear. Do NOT decide clinical urgency.</div>
+          </div>
+          <button onClick={() => t2Advance(1)} className="w-full py-3 bg-triage-blue/20 border border-triage-blue/30 text-triage-blue rounded-xl font-bold text-sm">
+            Continue to Purple Check →
+          </button>
+        </div>
+      </FlowStep>
+
+      {/* ═══ T2 STEP 2: PURPLE GATE ═══ */}
+      <FlowStep num={2} color="violet" title="🟣 IS THIS PURPLE? — MUST ESCALATE TO TIER 3" subtitle="Check this list FIRST before matching amber/yellow/green"
+        expanded={t2Step === 2} onToggle={() => t2Toggle(2)} completed={t2CompletedSteps.has(2)}
+        locked={!t2CompletedSteps.has(1)} lockedMsg="Complete Step 1 first">
+        <div className="space-y-3">
+          <div className="bg-purple-500/10 border border-purple-500/30 rounded-xl p-2.5">
+            <div className="text-purple-400 text-[11px] font-bold">If ANY purple trigger applies → Tier 3 REGARDLESS — even if it also matches yellow or green.</div>
+          </div>
+          <div className="space-y-2">
+            {purpleFlags.map((pf, i) => {
+              const matched = scan?.purple?.some(p => p.category === pf.category);
+              return (
+                <div key={i} className={`border-l-4 ${matched ? 'border-purple-500 bg-purple-500/10' : 'border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.02)]'} rounded-r-xl p-2.5`}>
+                  <div className={`font-bold text-xs ${matched ? 'text-purple-400' : 'text-[rgba(255,255,255,0.7)]'}`}>{pf.category}</div>
+                  <div className="text-[10px] text-[rgba(255,255,255,0.4)] mt-0.5">{pf.triggers.join(' · ')}</div>
+                  <div className="text-[10px] text-purple-400/70 mt-0.5">{pf.action}</div>
+                </div>
+              );
+            })}
+          </div>
+          {purpleGate === null && (
+            <div className="grid grid-cols-2 gap-2 mt-3">
+              <button onClick={() => { setPurpleGate('clear'); t2Advance(2); }}
+                className="py-3 bg-triage-green/20 border border-triage-green/30 text-triage-green rounded-xl font-bold text-xs">
+                No purple triggers — continue
+              </button>
+              <button onClick={() => { setPurpleGate('purple'); t2MarkDone(2); setT2Step(6); }}
+                className="py-3 bg-purple-500/20 border border-purple-500/30 text-purple-400 rounded-xl font-bold text-xs animate-pulse">
+                PURPLE IDENTIFIED — ESCALATE
+              </button>
+            </div>
+          )}
+          {purpleGate && (
+            <div className={`text-center py-2 rounded-xl text-xs font-bold ${purpleGate === 'clear' ? 'bg-triage-green/10 text-triage-green' : 'bg-purple-500/10 text-purple-400'}`}>
+              {purpleGate === 'clear' ? '✓ No purple — proceeding to amber check' : '🟣 Purple identified — escalating to Tier 3'}
+            </div>
+          )}
+        </div>
+      </FlowStep>
+
+      {/* ═══ T2 STEP 3: AMBER CHECK ═══ */}
+      <FlowStep num={3} color="amber" title="🟠 IS THIS AMBER? — BOOK SAME-DAY" subtitle="Same-day duty GP (action within 1 hour)"
+        expanded={t2Step === 3} onToggle={() => t2Toggle(3)} completed={t2CompletedSteps.has(3)}
+        locked={!t2CompletedSteps.has(2) || purpleGate === 'purple'} lockedMsg={purpleGate === 'purple' ? 'Purple identified — skip to escalation' : 'Complete Step 2 first'}>
+        <div className="space-y-3">
+          <div className="relative">
+            <Search className="absolute left-3 top-2.5 text-[rgba(255,255,255,0.25)]" size={14} />
+            <input type="text" value={amberSearch} onChange={e => setAmberSearch(e.target.value)}
+              placeholder="Filter amber categories..." className="w-full pl-9 pr-3 py-2 rounded-xl bg-[rgba(255,255,255,0.04)] border border-[rgba(255,255,255,0.08)] focus:border-triage-amber/40 focus:outline-none text-white text-xs" />
+          </div>
+          <div className="space-y-2 max-h-80 overflow-y-auto">
+            {filteredAmber.map((af, i) => {
+              const matched = scan?.amber?.some(a => a.category === af.category);
+              return (
+                <div key={i} className={`border-l-4 ${matched ? 'border-triage-amber bg-triage-amber/10' : 'border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.02)]'} rounded-r-xl p-2.5`}>
+                  <div className={`font-bold text-xs ${matched ? 'text-triage-amber' : 'text-[rgba(255,255,255,0.7)]'}`}>{af.category}</div>
+                  <div className="text-[10px] text-[rgba(255,255,255,0.4)] mt-0.5">{af.buzzwords ? af.buzzwords.join(', ') : af.keywords.join(', ')}</div>
+                  <div className="text-[10px] text-triage-amber/70 mt-0.5">{af.action}</div>
+                  {af.notes && <div className="text-[10px] text-[rgba(255,255,255,0.3)] mt-0.5 italic">{af.notes}</div>}
+                </div>
+              );
+            })}
+          </div>
+          {amberGate === null && (
+            <div className="grid grid-cols-2 gap-2 mt-3">
+              <button onClick={() => { setAmberGate('clear'); t2Advance(3); }}
+                className="py-3 bg-triage-blue/20 border border-triage-blue/30 text-triage-blue rounded-xl font-bold text-xs">
+                No amber match — continue
+              </button>
+              <button onClick={() => { setAmberGate('amber'); t2MarkDone(3); showToast('Amber matched — book same-day duty GP'); }}
+                className="py-3 bg-triage-amber/20 border border-triage-amber/30 text-triage-amber rounded-xl font-bold text-xs">
+                Amber matched — booking same-day
+              </button>
+            </div>
+          )}
+          {amberGate && (
+            <div className={`text-center py-2 rounded-xl text-xs font-bold ${amberGate === 'clear' ? 'bg-triage-blue/10 text-triage-blue' : 'bg-triage-amber/10 text-triage-amber'}`}>
+              {amberGate === 'clear' ? '✓ No amber — proceeding to yellow check' : '🟠 Amber matched — book same-day duty GP within 1 hour'}
+            </div>
+          )}
+        </div>
+      </FlowStep>
+
+      {/* ═══ T2 STEP 4: YELLOW CHECK ═══ */}
+      <FlowStep num={4} color="amber" title="🟡 IS THIS YELLOW? — BOOK 1-3 DAYS" subtitle="Book within 1-3 days (action within 2 hours)"
+        expanded={t2Step === 4} onToggle={() => t2Toggle(4)} completed={t2CompletedSteps.has(4)}
+        locked={!t2CompletedSteps.has(3) || purpleGate === 'purple'} lockedMsg="Complete Step 3 first">
+        <div className="space-y-3">
+          <div className="space-y-2 max-h-80 overflow-y-auto">
+            {yellowFlags.map((yf, i) => {
+              const matched = scan?.yellow?.some(y => y.category === yf.category);
+              return (
+                <div key={i} className={`border-l-4 ${matched ? 'border-yellow-400 bg-yellow-500/10' : 'border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.02)]'} rounded-r-xl p-2.5`}>
+                  <div className={`font-bold text-xs ${matched ? 'text-yellow-400' : 'text-[rgba(255,255,255,0.7)]'}`}>
+                    {yf.category}
+                    {yf.econsult && <span className="ml-2 text-[9px] bg-triage-blue/20 text-triage-blue px-1.5 py-0.5 rounded">eConsult?</span>}
+                  </div>
+                  <div className="text-[10px] text-[rgba(255,255,255,0.4)] mt-0.5">{yf.presentation || yf.triggers?.join(' · ')}</div>
+                  {yf.escalateIf && <div className="text-[10px] text-triage-red/70 mt-0.5">Escalate if: {yf.escalateIf}</div>}
+                </div>
+              );
+            })}
+          </div>
+          {/* Mental Health reminder */}
+          <div className="bg-purple-500/10 border border-purple-500/25 rounded-xl p-2.5">
+            <div className="text-purple-400 text-[11px] font-bold">MENTAL HEALTH (non-crisis)</div>
+            <div className="text-[10px] text-[rgba(255,255,255,0.5)] mt-1">Send Kingston Talking Therapies self-referral info (swlstg.nhs.uk) AND book GP review within 1-3 days. Do NOT just signpost.</div>
+          </div>
+          {/* eConsult check */}
+          {yellowEconsult === null && (
+            <div className="bg-triage-blue/10 border border-triage-blue/25 rounded-xl p-2.5">
+              <div className="text-triage-blue text-[11px] font-bold mb-2">eCONSULT CHECK</div>
+              <div className="text-[10px] text-[rgba(255,255,255,0.4)] mb-2">Has this condition already been managed via eConsult?</div>
+              <div className="grid grid-cols-2 gap-2">
+                <button onClick={() => setYellowEconsult('tried')} className="py-2 bg-triage-amber/15 border border-triage-amber/25 text-triage-amber rounded-xl text-xs font-bold">Yes — tried before → face-to-face</button>
+                <button onClick={() => setYellowEconsult('no')} className="py-2 bg-triage-blue/15 border border-triage-blue/25 text-triage-blue rounded-xl text-xs font-bold">No — may suggest eConsult</button>
+              </div>
+            </div>
+          )}
+          {yellowEconsult && (
+            <div className={`text-center py-2 rounded-xl text-xs font-bold ${yellowEconsult === 'tried' ? 'bg-triage-amber/10 text-triage-amber' : 'bg-triage-blue/10 text-triage-blue'}`}>
+              {yellowEconsult === 'tried' ? '→ Book face-to-face (eConsult already tried)' : '→ eConsult may be appropriate'}
+            </div>
+          )}
+          {/* Purple safety net */}
+          <div className="bg-purple-500/10 border border-purple-500/20 rounded-xl p-2">
+            <div className="text-purple-400 text-[10px] font-bold">PURPLE SAFETY NET: If ANY purple trigger applies → ESCALATE regardless of yellow match</div>
+          </div>
+          {yellowGate === null && (
+            <div className="grid grid-cols-2 gap-2 mt-2">
+              <button onClick={() => { setYellowGate('clear'); t2Advance(4); }}
+                className="py-3 bg-triage-blue/20 border border-triage-blue/30 text-triage-blue rounded-xl font-bold text-xs">
+                No yellow match — continue
+              </button>
+              <button onClick={() => { setYellowGate('yellow'); t2MarkDone(4); showToast('Yellow matched — book 1-3 days'); }}
+                className="py-3 bg-yellow-500/20 border border-yellow-500/30 text-yellow-400 rounded-xl font-bold text-xs">
+                Yellow matched — booking 1-3 days
+              </button>
+            </div>
+          )}
+          {yellowGate && (
+            <div className={`text-center py-2 rounded-xl text-xs font-bold ${yellowGate === 'clear' ? 'bg-triage-blue/10 text-triage-blue' : 'bg-yellow-500/10 text-yellow-400'}`}>
+              {yellowGate === 'clear' ? '✓ No yellow — proceeding to green check' : '🟡 Yellow matched — book within 1-3 days'}
+            </div>
+          )}
+        </div>
+      </FlowStep>
+
+      {/* ═══ T2 STEP 5: GREEN CHECK ═══ */}
+      <FlowStep num={5} color="green" title="🟢 IS THIS GREEN? — BOOK 1 WEEK" subtitle="Book within 1 week (action within 2 hours)"
+        expanded={t2Step === 5} onToggle={() => t2Toggle(5)} completed={t2CompletedSteps.has(5)}
+        locked={!t2CompletedSteps.has(4) || purpleGate === 'purple'} lockedMsg="Complete Step 4 first">
+        <div className="space-y-3">
+          {/* Tried and failed rule */}
+          <div className="bg-triage-amber/10 border border-triage-amber/25 rounded-xl p-2.5">
+            <div className="text-triage-amber text-[11px] font-bold">THE &quot;TRIED AND FAILED&quot; RULE</div>
+            <div className="text-[10px] text-[rgba(255,255,255,0.5)] mt-1">If patient already managed via eConsult for THIS condition and it did not work → book face-to-face, NOT another eConsult.</div>
+            <div className="mt-2 space-y-1">
+              <div className="text-[10px] text-[rgba(255,255,255,0.4)]">• Mild eczema: eConsult Rx tried + rash persists → face-to-face</div>
+              <div className="text-[10px] text-[rgba(255,255,255,0.4)]">• Acne: topical Rx via eConsult + no improvement → face-to-face</div>
+              <div className="text-[10px] text-[rgba(255,255,255,0.4)]">• Non-crisis MH: Talking Therapies + eConsult tried, still struggling → face-to-face</div>
+            </div>
+          </div>
+          <div className="space-y-2 max-h-80 overflow-y-auto">
+            {greenFlags.map((gf, i) => {
+              const matched = scan?.green?.some(g => g.category === gf.category);
+              return (
+                <div key={i} className={`border-l-4 ${matched ? 'border-triage-green bg-triage-green/10' : 'border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.02)]'} rounded-r-xl p-2.5`}>
+                  <div className={`font-bold text-xs ${matched ? 'text-triage-green' : 'text-[rgba(255,255,255,0.7)]'}`}>
+                    {gf.category}
+                    {gf.econsult && <span className="ml-2 text-[9px] bg-triage-blue/20 text-triage-blue px-1.5 py-0.5 rounded">eConsult?</span>}
+                  </div>
+                  <div className="text-[10px] text-[rgba(255,255,255,0.4)] mt-0.5">{gf.presentation || gf.triggers?.join(' · ')}</div>
+                  {gf.escalateIf && <div className="text-[10px] text-triage-red/70 mt-0.5">Escalate if: {gf.escalateIf}</div>}
+                </div>
+              );
+            })}
+          </div>
+          {/* eConsult check */}
+          {greenEconsult === null && (
+            <div className="bg-triage-blue/10 border border-triage-blue/25 rounded-xl p-2.5">
+              <div className="text-triage-blue text-[11px] font-bold mb-2">eCONSULT CHECK</div>
+              <div className="text-[10px] text-[rgba(255,255,255,0.4)] mb-2">Has this condition already been managed via eConsult?</div>
+              <div className="grid grid-cols-2 gap-2">
+                <button onClick={() => { setGreenEconsult('tried'); setEconsultTriedFailed(true); }} className="py-2 bg-triage-amber/15 border border-triage-amber/25 text-triage-amber rounded-xl text-xs font-bold">Yes — tried before → face-to-face</button>
+                <button onClick={() => setGreenEconsult('no')} className="py-2 bg-triage-blue/15 border border-triage-blue/25 text-triage-blue rounded-xl text-xs font-bold">No — may suggest eConsult</button>
+              </div>
+            </div>
+          )}
+          {greenEconsult && (
+            <div className={`text-center py-2 rounded-xl text-xs font-bold ${greenEconsult === 'tried' ? 'bg-triage-amber/10 text-triage-amber' : 'bg-triage-blue/10 text-triage-blue'}`}>
+              {greenEconsult === 'tried' ? '→ Book face-to-face (eConsult tried & failed)' : '→ eConsult may be appropriate'}
+            </div>
+          )}
+          {/* Purple safety net */}
+          <div className="bg-purple-500/10 border border-purple-500/20 rounded-xl p-2">
+            <div className="text-purple-400 text-[10px] font-bold">PURPLE SAFETY NET: If ANY purple trigger applies → ESCALATE regardless of green match</div>
+          </div>
+          {greenGate === null && (
+            <div className="grid grid-cols-2 gap-2 mt-2">
+              <button onClick={() => { setGreenGate('clear'); t2Advance(5); }}
+                className="py-3 bg-triage-blue/20 border border-triage-blue/30 text-triage-blue rounded-xl font-bold text-xs">
+                No green match — continue
+              </button>
+              <button onClick={() => { setGreenGate('green'); t2MarkDone(5); showToast('Green matched — book within 1 week'); }}
+                className="py-3 bg-triage-green/20 border border-triage-green/30 text-triage-green rounded-xl font-bold text-xs">
+                Green matched — booking 1 week
+              </button>
+            </div>
+          )}
+          {greenGate && (
+            <div className={`text-center py-2 rounded-xl text-xs font-bold ${greenGate === 'clear' ? 'bg-triage-blue/10 text-triage-blue' : 'bg-triage-green/10 text-triage-green'}`}>
+              {greenGate === 'clear' ? '✓ No green — proceeding to decision point' : '🟢 Green matched — book within 1 week'}
+            </div>
+          )}
+        </div>
+      </FlowStep>
+
+      {/* ═══ T2 STEP 6: DECISION POINT + eCONSULT DISTRIBUTION ═══ */}
+      <FlowStep num={6} color="blue" title="⚖️ DECISION POINT + eCONSULT DISTRIBUTION" subtitle="Final decision — can you process, or must you escalate?"
+        expanded={t2Step === 6} onToggle={() => t2Toggle(6)} completed={t2CompletedSteps.has(6)}
+        locked={!t2CompletedSteps.has(5) && !t2CompletedSteps.has(2)} lockedMsg="Complete previous steps first">
+        <div className="space-y-3">
+          {/* Two-panel layout */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {/* CAN DO panel */}
+            <div className="border-l-4 border-triage-green bg-triage-green/5 rounded-r-xl p-3">
+              <div className="text-triage-green font-bold text-xs mb-2">TIER 2 CAN PROCESS</div>
+              <ul className="space-y-1">
+                {tier2Actions.canDo.map((item, i) => (
+                  <li key={i} className="text-[10px] text-[rgba(255,255,255,0.5)] flex items-start gap-1.5">
+                    <CheckCircle size={10} className="text-triage-green flex-shrink-0 mt-0.5" />{item}
+                  </li>
+                ))}
+              </ul>
+            </div>
+            {/* MUST ESCALATE panel */}
+            <div className="border-l-4 border-triage-red bg-triage-red/5 rounded-r-xl p-3">
+              <div className="text-triage-red font-bold text-xs mb-2">MUST ESCALATE TO TIER 3</div>
+              <ul className="space-y-1">
+                {tier2Actions.mustEscalate.map((item, i) => (
+                  <li key={i} className="text-[10px] text-[rgba(255,255,255,0.5)] flex items-start gap-1.5">
+                    <AlertTriangle size={10} className="text-triage-red flex-shrink-0 mt-0.5" />{item}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+
+          {/* 60-SECOND RULE */}
+          <div className="bg-triage-red/15 border-2 border-triage-red/40 rounded-xl p-4 text-center">
+            <div className="text-triage-red font-black text-lg">60-SECOND RULE</div>
+            <div className="text-[rgba(255,255,255,0.6)] text-xs mt-1">If you&apos;ve been thinking about this for &gt;60 seconds → ESCALATE TO TIER 3</div>
+          </div>
+
+          {/* eCONSULT DISTRIBUTION */}
+          <div className="bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.08)] rounded-xl p-3">
+            <div className="text-triage-blue font-bold text-xs mb-2">eCONSULT DISTRIBUTION (daily task)</div>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <div className="text-triage-green text-[10px] font-bold mb-1">ADMIN → SESSION GP</div>
+                <div className="text-[10px] text-[rgba(255,255,255,0.4)] space-y-0.5">
+                  <div>• Fit note renewal</div>
+                  <div>• Results with GP comment</div>
+                  <div>• ADHD/ASD referrals</div>
+                  <div>• Investigation requests</div>
+                  <div>• Private referrals</div>
+                  <div>• Admin with sign-off</div>
+                </div>
+              </div>
+              <div>
+                <div className="text-triage-red text-[10px] font-bold mb-1">CLINICAL → GP TRIAGER</div>
+                <div className="text-[10px] text-[rgba(255,255,255,0.4)] space-y-0.5">
+                  <div>• Clinical queries</div>
+                  <div>• Medication decisions</div>
+                  <div>• Abnormal results (no plan)</div>
+                  <div>• Complex / multi-problem</div>
+                  <div>• Hidden clinical content</div>
+                  <div>• Anything unclear</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* TIER 2→3 HANDOVER FORM */}
+          <div className="bg-purple-500/5 border border-purple-500/20 rounded-xl p-3">
+            <div className="text-purple-400 font-bold text-sm mb-3">TIER 2 → TIER 3 HANDOVER FORM</div>
+            <div className="space-y-3">
+              <div className="grid grid-cols-2 gap-2 text-[10px]">
+                <div className="bg-[rgba(255,255,255,0.03)] rounded-lg p-2">
+                  <span className="text-[rgba(255,255,255,0.4)]">Purple: </span>
+                  <span className={purpleGate === 'purple' ? 'text-purple-400 font-bold' : 'text-[rgba(255,255,255,0.6)]'}>{purpleGate === 'purple' ? 'YES' : purpleGate === 'clear' ? 'Clear' : '—'}</span>
+                </div>
+                <div className="bg-[rgba(255,255,255,0.03)] rounded-lg p-2">
+                  <span className="text-[rgba(255,255,255,0.4)]">Amber: </span>
+                  <span className={amberGate === 'amber' ? 'text-triage-amber font-bold' : 'text-[rgba(255,255,255,0.6)]'}>{amberGate === 'amber' ? 'YES' : amberGate === 'clear' ? 'Clear' : '—'}</span>
+                </div>
+                <div className="bg-[rgba(255,255,255,0.03)] rounded-lg p-2">
+                  <span className="text-[rgba(255,255,255,0.4)]">Yellow: </span>
+                  <span className={yellowGate === 'yellow' ? 'text-yellow-400 font-bold' : 'text-[rgba(255,255,255,0.6)]'}>{yellowGate === 'yellow' ? 'YES' : yellowGate === 'clear' ? 'Clear' : '—'}</span>
+                </div>
+                <div className="bg-[rgba(255,255,255,0.03)] rounded-lg p-2">
+                  <span className="text-[rgba(255,255,255,0.4)]">Green: </span>
+                  <span className={greenGate === 'green' ? 'text-triage-green font-bold' : 'text-[rgba(255,255,255,0.6)]'}>{greenGate === 'green' ? 'YES' : greenGate === 'clear' ? 'Clear' : '—'}</span>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <input type="checkbox" checked={econsultTriedFailed} onChange={e => setEconsultTriedFailed(e.target.checked)} className="rounded" />
+                <label className="text-[11px] text-[rgba(255,255,255,0.6)]">eConsult tried and failed</label>
+              </div>
+              <TextArea label="Tier 2 Review Notes" value={t2Notes} onChange={setT2Notes} placeholder="Your review notes..." rows={2} />
+              <TextArea label="Specific Question for GP (REQUIRED)" value={gpQuestion} onChange={setGpQuestion} placeholder="What specific question do you need the GP to answer?" rows={2} />
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-[10px] text-[rgba(255,255,255,0.4)] mb-1">Time Sensitivity</label>
+                  <select value={timeSensitivity} onChange={e => setTimeSensitivity(e.target.value)}
+                    className="w-full px-3 py-2 rounded-xl bg-[rgba(255,255,255,0.04)] border border-[rgba(255,255,255,0.08)] text-white text-xs">
+                    <option value="URGENT">URGENT</option>
+                    <option value="SAME-DAY">SAME-DAY</option>
+                    <option value="ROUTINE">ROUTINE</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-[10px] text-[rgba(255,255,255,0.4)] mb-1">Confidence Level</label>
+                  <select value={confidence} onChange={e => setConfidence(e.target.value)}
+                    className="w-full px-3 py-2 rounded-xl bg-[rgba(255,255,255,0.04)] border border-[rgba(255,255,255,0.08)] text-white text-xs">
+                    <option value="HIGH">HIGH</option>
+                    <option value="MEDIUM">MEDIUM</option>
+                    <option value="LOW">LOW</option>
+                  </select>
+                </div>
+              </div>
+              <CopyBtn text={buildHandover()} label="Copy Handover to Clipboard" onCopy={() => showToast('Tier 2→3 handover copied')} />
+            </div>
+          </div>
+
+          <button onClick={resetT2} className="w-full py-3 bg-triage-blue/20 border border-triage-blue/30 text-triage-blue rounded-xl font-bold text-sm mt-3">
+            <RotateCcw size={14} className="inline mr-2" />Start New Triage
+          </button>
+        </div>
+      </FlowStep>
+
+      {/* VERSION TEXT */}
+      <div className="text-center text-[10px] text-[rgba(255,255,255,0.15)] mt-4 mb-20">
+        SOP v3.5 | Tier 2 Flowchart v4.0 | Feb 2026 | Dr Sahar Jahanian
+      </div>
+    </div>
+  );
+};
+
 // ============ SOP VIEWER ============
 const SOPScreen = () => {
   const [expanded, setExpanded] = useState(null);
@@ -1374,9 +1831,9 @@ const AdminConsole = ({ onBack, data, toast }) => {
 };
 
 // ============ NAV BAR ============
-const NavBar = ({ screen, onNav, isAdminUser }) => {
+const NavBar = ({ screen, onNav, isAdminUser, currentTier, onTierChange }) => {
   const items = [
-    { id: 'home', icon: Zap, label: 'Process' },
+    { id: 'home', icon: Zap, label: currentTier === 2 ? 'Tier 2' : 'Process' },
     { id: 'search', icon: Search, label: 'Lookup' },
     { id: 'contacts', icon: Phone, label: 'Contacts' },
     { id: 'sop', icon: BookOpen, label: 'SOP' },
@@ -1384,13 +1841,26 @@ const NavBar = ({ screen, onNav, isAdminUser }) => {
     { id: isAdminUser ? 'admin' : 'training', icon: isAdminUser ? Settings : GraduationCap, label: isAdminUser ? 'Admin' : 'Training' }
   ];
   return (
-    <nav className="fixed bottom-0 left-0 right-0 glass-elevated border-t border-[rgba(255,255,255,0.06)] flex justify-around py-2 z-40">
-      {items.map(i => (
-        <button key={i.id} onClick={() => onNav(i.id)}
-          className={`flex flex-col items-center py-1.5 px-3 rounded-xl transition-all ${screen === i.id ? 'text-triage-blue bg-triage-blue/10' : 'text-[rgba(255,255,255,0.35)] hover:text-[rgba(255,255,255,0.6)]'}`}>
-          <i.icon size={20} /><span className="text-[10px] mt-0.5 font-medium">{i.label}</span>
+    <nav className="fixed bottom-0 left-0 right-0 glass-elevated border-t border-[rgba(255,255,255,0.06)] z-40">
+      {/* Tier toggle */}
+      <div className="flex justify-center gap-1 pt-1.5 pb-0.5">
+        <button onClick={() => onTierChange(1)}
+          className={`px-3 py-1 rounded-full text-[9px] font-bold transition-all ${currentTier === 1 ? 'bg-triage-blue/20 text-triage-blue border border-triage-blue/30' : 'text-[rgba(255,255,255,0.3)] hover:text-[rgba(255,255,255,0.5)]'}`}>
+          TIER 1 — Reception
         </button>
-      ))}
+        <button onClick={() => onTierChange(2)}
+          className={`px-3 py-1 rounded-full text-[9px] font-bold transition-all ${currentTier === 2 ? 'bg-purple-500/20 text-purple-400 border border-purple-500/30' : 'text-[rgba(255,255,255,0.3)] hover:text-[rgba(255,255,255,0.5)]'}`}>
+          TIER 2 — Triager
+        </button>
+      </div>
+      <div className="flex justify-around py-1.5">
+        {items.map(i => (
+          <button key={i.id} onClick={() => onNav(i.id)}
+            className={`flex flex-col items-center py-1.5 px-3 rounded-xl transition-all ${screen === i.id ? 'text-triage-blue bg-triage-blue/10' : 'text-[rgba(255,255,255,0.35)] hover:text-[rgba(255,255,255,0.6)]'}`}>
+            <i.icon size={20} /><span className="text-[10px] mt-0.5 font-medium">{i.label}</span>
+          </button>
+        ))}
+      </div>
     </nav>
   );
 };
@@ -1404,6 +1874,7 @@ export default function App() {
   const [toast, setToast] = useState(null);
   const [settings, setSettingsLocal] = useState(DEFAULT_SETTINGS);
   const [showPasswordChange, setShowPasswordChange] = useState(false);
+  const [currentTier, setCurrentTier] = useState(1);
   const data = useTriageData();
 
   useEffect(() => {
@@ -1433,14 +1904,18 @@ export default function App() {
 
   const renderScreen = () => {
     switch (screen) {
-      case 'home': return <DecisionFlow data={data} settings={settings} onRecord={record} showToast={showToast} />;
+      case 'home': return currentTier === 2
+        ? <Tier2Workflow data={data} showToast={showToast} />
+        : <DecisionFlow data={data} settings={settings} onRecord={record} showToast={showToast} />;
       case 'search': return <SearchScreen data={data} />;
       case 'contacts': return <ContactsScreen contacts={data.contacts} />;
       case 'sop': return <SOPScreen />;
       case 'flowchart': return <FlowchartScreen />;
       case 'training': return <TrainingScreen onBack={() => nav('home')} scenarios={data.training} />;
       case 'admin': return isAdminUser ? <AdminConsole onBack={() => nav('home')} data={data} toast={showToast} /> : <DecisionFlow data={data} settings={settings} onRecord={record} showToast={showToast} />;
-      default: return <DecisionFlow data={data} settings={settings} onRecord={record} showToast={showToast} />;
+      default: return currentTier === 2
+        ? <Tier2Workflow data={data} showToast={showToast} />
+        : <DecisionFlow data={data} settings={settings} onRecord={record} showToast={showToast} />;
     }
   };
 
@@ -1449,7 +1924,7 @@ export default function App() {
       <EmergencyBanner />
       <UserBadge session={session} onLogout={logout} />
       {renderScreen()}
-      <NavBar screen={screen} onNav={nav} isAdminUser={isAdminUser} />
+      <NavBar screen={screen} onNav={nav} isAdminUser={isAdminUser} currentTier={currentTier} onTierChange={(t) => { setCurrentTier(t); setScreen('home'); }} />
       {toast && <Toast {...toast} onClose={() => setToast(null)} />}
       {showPasswordChange && (
         <PasswordChangeModal userId={session.userId} isFirstLogin={session.mustChangePassword}
