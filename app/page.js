@@ -20,7 +20,11 @@ import {
   pathways as defaultPathways,
   trainingScenarios as defaultTraining,
   quickMatchPathways,
-  trainingTopics
+  trainingTopics,
+  purpleFlags,
+  yellowFlags,
+  greenFlags,
+  stopPatterns
 } from '../lib/data';
 import { sopMeta, sopSections } from '../lib/sop-content';
 import { flowchartMeta, flowchartSections } from '../lib/flowchart-content';
@@ -66,8 +70,9 @@ function useKeywordScanner(text, redFlags, amberFlags, pharmacyFirst, highRiskGr
     const kw = (k) => { const kl = k.toLowerCase(); return lower.includes(kl) || kl.includes(lower); };
     const red = redFlags.filter(f => f.keywords.some(k => kw(k)));
     const amber = amberFlags.filter(f => f.keywords.some(k => kw(k)) || (f.searchTerms && f.searchTerms.some(t => kw(t))));
-    const pharmacy = pharmacyFirst.filter(c => kw(c.name));
+    const pharmacy = pharmacyFirst.filter(c => (c.condition && kw(c.condition)) || (c.name && kw(c.name)) || (c.keywords && c.keywords.some(k => kw(k))));
     const risk = highRiskGroups.filter(g => {
+      if (g.keywords) return g.keywords.some(k => kw(k));
       const terms = g.group.toLowerCase().split(/[\s/,]+/);
       return terms.some(t => t.length > 3 && (lower.includes(t) || t.includes(lower)));
     });
@@ -76,7 +81,28 @@ function useKeywordScanner(text, redFlags, amberFlags, pharmacyFirst, highRiskGr
     const matchedPathways = quickMatchPathways.filter(p => p.keywords.some(k => kw(k)));
     const CANCER_KEYWORDS = ['lump', 'unexplained weight loss', 'weight loss unexplained', 'unexplained bleeding', 'persistent bowel change', 'difficulty swallowing', 'hoarseness', 'postmenopausal bleeding', 'night sweats', 'blood in stool', 'blood in urine', 'mole changed', 'mole growing'];
     const cancer = CANCER_KEYWORDS.filter(k => lower.includes(k) || k.includes(lower));
-    return { red, amber, pharmacy, risk, changeWords, hasChange, pathways: matchedPathways, cancer, hasPathway: matchedPathways.length > 0, hasCancer: cancer.length > 0, hasAny: red.length + amber.length + pharmacy.length + risk.length + matchedPathways.length + (hasChange ? 1 : 0) > 0 };
+    // NEW: Purple flag scanning
+    const purple = purpleFlags.filter(f => f.keywords.some(k => kw(k)));
+    const hasPurple = purple.length > 0;
+    // NEW: Yellow flag scanning
+    const yellow = yellowFlags.filter(f => f.keywords.some(k => kw(k)));
+    const hasYellow = yellow.length > 0;
+    // NEW: Green flag scanning
+    const green = greenFlags.filter(f => f.keywords.some(k => kw(k)));
+    const hasGreen = green.length > 0;
+    // NEW: STOP pattern scanning (HIGHEST PRIORITY)
+    const stop = stopPatterns.filter(p => p.keywords.some(k => kw(k)));
+    const hasStop = stop.length > 0;
+    return {
+      // EXISTING:
+      red, hasRed: red.length > 0, amber, hasAmber: amber.length > 0, pharmacy,
+      risk, hasRisk: risk.length > 0, changeWords, hasChange,
+      pathways: matchedPathways, hasPathway: matchedPathways.length > 0,
+      cancer, hasCancer: cancer.length > 0,
+      hasAny: red.length + amber.length + pharmacy.length + risk.length + matchedPathways.length + purple.length + yellow.length + green.length + stop.length + (hasChange ? 1 : 0) > 0,
+      // NEW:
+      purple, hasPurple, yellow, hasYellow, green, hasGreen, stop, hasStop
+    };
   }, [text, redFlags, amberFlags, pharmacyFirst, highRiskGroups]);
 }
 
