@@ -16,7 +16,7 @@ export const viewport = {
   initialScale: 1,
   maximumScale: 1,
   userScalable: false,
-  themeColor: '#0A0A0F',
+  themeColor: '#F8F7F4',
 };
 
 export default function RootLayout({ children }) {
@@ -27,9 +27,7 @@ export default function RootLayout({ children }) {
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
       </head>
-      <body style={{ background: '#0A0A0F' }} className="min-h-screen">
-        <div className="noise-overlay" />
-        <div className="ambient-bg" />
+      <body style={{ background: '#F8F7F4' }} className="min-h-screen">
         {children}
       </body>
     </html>
