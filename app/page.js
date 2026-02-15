@@ -413,7 +413,7 @@ const LoginScreen = ({ onLogin, toast }) => {
           {error && <div className="bg-triage-red-light text-triage-red-text px-4 py-3 rounded-xl mb-4 text-sm flex items-center gap-2 border border-triage-red-dark/20"><AlertCircle size={18} />{error}</div>}
           <Button type="submit" color="solid" full size="lg" disabled={loading}>{loading ? <><RefreshCw size={20} className="animate-spin" />Signing in...</> : <><Lock size={20} />Sign In</>}</Button>
         </form>
-        <p className="text-center text-gray-400 text-sm mt-6">Partner Practice? Use your shared login.</p>
+        <p className="text-center text-gray-400 text-sm mt-6">GP Partner? Use your shared login.</p>
       </div>
     </div>
   );
