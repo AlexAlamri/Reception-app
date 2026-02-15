@@ -120,10 +120,10 @@ const C = {
 
 // ============ CORE UI COMPONENTS ============
 const EmergencyBanner = () => (
-  <div className="emergency-banner text-white py-2 px-4 text-center font-bold sticky top-0 z-50 text-sm">
+  <div className="emergency-banner text-white py-2.5 px-4 text-center font-semibold sticky top-0 z-50 text-sm">
     <span className="animate-pulse mr-1">🚨</span>
-    EMERGENCY → <a href="tel:999" className="underline ml-1 text-lg font-black">CALL 999</a>
-    <span className="text-white/60 ml-2 text-xs hidden sm:inline">Chest pain · Can't breathe · Collapse · Stroke</span>
+    EMERGENCY → <a href="tel:999" className="underline ml-1 text-lg font-semibold">CALL 999</a>
+    <span className="text-white/70 ml-2 text-sm hidden sm:inline">Chest pain · Can&apos;t breathe · Collapse · Stroke</span>
   </div>
 );
 
@@ -149,11 +149,11 @@ const GlassCard = ({ children, color = 'gray', onClick, className = '' }) => {
 
 const Button = ({ children, color = 'blue', onClick, full = false, size = 'md', disabled = false, type = 'button' }) => {
   const styles = {
-    blue: 'bg-triage-blue-light hover:bg-triage-blue/20 text-triage-blue-text border-triage-blue-dark/30',
-    green: 'bg-triage-green-light hover:bg-triage-green/20 text-triage-green-text border-triage-green-dark/30',
-    red: 'bg-triage-red-light hover:bg-triage-red/20 text-triage-red-text border-triage-red-dark/30',
-    amber: 'bg-triage-amber-light hover:bg-triage-amber/20 text-triage-amber-text border-triage-amber-dark/30',
-    teal: 'bg-triage-teal-light hover:bg-triage-teal/20 text-triage-teal-text border-triage-teal-dark/30',
+    blue: 'bg-triage-blue-light hover:bg-triage-blue-light text-triage-blue-text border-triage-blue-dark/30',
+    green: 'bg-triage-green-light hover:bg-triage-green-light text-triage-green-text border-triage-green-dark/30',
+    red: 'bg-triage-red-light hover:bg-triage-red-light text-triage-red-text border-triage-red-dark/30',
+    amber: 'bg-triage-amber-light hover:bg-triage-amber-light text-triage-amber-text border-triage-amber-dark/30',
+    teal: 'bg-triage-teal-light hover:bg-triage-teal-light text-triage-teal-text border-triage-teal-dark/30',
     gray: 'bg-gray-100 hover:bg-gray-200 text-gray-600 border-gray-200',
     solid: 'bg-triage-blue-dark hover:bg-triage-blue-dark/90 text-white border-transparent',
   };
@@ -202,7 +202,7 @@ const CopyBtn = ({ text, label = 'Copy', onCopy }) => {
   const [copied, setCopied] = useState(false);
   const copy = () => { navigator.clipboard.writeText(text); setCopied(true); onCopy?.(); setTimeout(() => setCopied(false), 2000); };
   return (
-    <button onClick={copy} className={`flex items-center gap-1.5 px-3 py-2 rounded-xl border text-xs font-semibold transition-all mt-2 ${copied ? 'bg-triage-green-light border-triage-green-dark/40 text-triage-green-text' : 'bg-gray-50 border-gray-200 text-gray-500 hover:bg-gray-100'}`}>
+    <button onClick={copy} className={`flex items-center gap-1.5 px-3 py-2 rounded-xl border text-sm font-semibold transition-all mt-2 ${copied ? 'bg-triage-green-light border-triage-green-dark/40 text-triage-green-text' : 'bg-gray-50 border-gray-200 text-gray-500 hover:bg-gray-100'}`}>
       {copied ? <><Check size={14} /> Copied!</> : <><Copy size={14} /> {label}</>}
     </button>
   );
@@ -219,7 +219,7 @@ const PhoneLink = ({ service, number, hours, priority = 'normal', icon, website,
           <div>
             <div className="font-semibold text-gray-800">{service}</div>
             <div className="text-sm text-gray-400">{hours}</div>
-            {address && <div className="text-xs text-gray-400 mt-1">{address}</div>}
+            {address && <div className="text-sm text-gray-400 mt-1">{address}</div>}
           </div>
         </div>
         <a href={`tel:${number.replace(/\s/g, '')}`} className={`flex items-center gap-2 font-bold text-lg ${c.text} hover:opacity-80`}>
@@ -245,13 +245,13 @@ const UserBadge = ({ session, onLogout }) => (
       <div className="w-6 h-6 rounded-lg bg-triage-blue-light flex items-center justify-center flex-shrink-0"><User size={12} className="text-triage-blue-text" /></div>
       <div className="min-w-0">
         <div className="flex items-center gap-1.5">
-          <span className="text-gray-500 font-medium text-xs truncate">{session.name}</span>
-          <span className="bg-triage-blue-light text-triage-blue-text text-[10px] px-1.5 py-0.5 rounded font-semibold flex-shrink-0">{ROLE_LABELS[session.role] || session.role}</span>
+          <span className="text-gray-500 font-medium text-sm truncate">{session.name}</span>
+          <span className="bg-triage-blue-light text-triage-blue-text text-sm px-1.5 py-0.5 rounded font-semibold flex-shrink-0">{ROLE_LABELS[session.role] || session.role}</span>
         </div>
-        {session.group && <div className="text-[9px] text-gray-400 truncate">{getGroupLabel(session.group)}</div>}
+        {session.group && <div className="text-sm text-gray-400 truncate">{getGroupLabel(session.group)}</div>}
       </div>
     </div>
-    <button onClick={onLogout} className="flex items-center gap-1 text-gray-400 hover:text-triage-red-text text-xs transition-colors flex-shrink-0"><LogOut size={12} />Logout</button>
+    <button onClick={onLogout} className="flex items-center gap-1 text-gray-400 hover:text-triage-red-text text-sm transition-colors flex-shrink-0"><LogOut size={12} />Logout</button>
   </div>
 );
 
@@ -317,8 +317,8 @@ const LoginScreen = ({ onLogin, toast }) => {
       <div className="bg-white rounded-3xl shadow-lg w-full max-w-md p-8 animate-fade-slide">
         <div className="text-center mb-8">
           <div className="w-20 h-20 rounded-2xl bg-triage-blue-light flex items-center justify-center mx-auto mb-4 border border-triage-blue-dark/20"><Shield className="text-triage-blue-text" size={40} /></div>
-          <h1 className="text-2xl font-black text-gray-800 tracking-tight">Care Navigator</h1>
-          <p className="text-gray-400 mt-1 font-medium">{settings.practiceName}</p>
+          <h1 className="text-2xl font-semibold text-gray-800 tracking-tight">Care Navigator</h1>
+          <p className="text-gray-500 mt-1.5 font-medium">{settings.practiceName}</p>
         </div>
         <form onSubmit={submit}>
           <Input label="Username" value={username} onChange={setUsername} placeholder="Enter username" required autoCapitalize="none" autoCorrect="off" spellCheck={false} autoComplete="username" />
@@ -334,7 +334,7 @@ const LoginScreen = ({ onLogin, toast }) => {
           {error && <div className="bg-triage-red-light text-triage-red-text px-4 py-3 rounded-xl mb-4 text-sm flex items-center gap-2 border border-triage-red-dark/20"><AlertCircle size={18} />{error}</div>}
           <Button type="submit" color="solid" full size="lg" disabled={loading}>{loading ? <><RefreshCw size={20} className="animate-spin" />Signing in...</> : <><Lock size={20} />Sign In</>}</Button>
         </form>
-        <p className="text-center text-gray-300 text-xs mt-4">Partner Practice? Use your shared login.</p>
+        <p className="text-center text-gray-400 text-sm mt-6">Partner Practice? Use your shared login.</p>
       </div>
     </div>
   );
@@ -345,23 +345,23 @@ const FlowStep = ({ num, color, title, subtitle, expanded, onToggle, badge, badg
   const c = C[color] || C.gray;
   const bc = C[badgeColor] || C[color] || C.gray;
   return (
-    <div id={`flow-step-${num}`} className={`mb-2 rounded-2xl border transition-all duration-200 ${completed ? 'opacity-50' : ''} ${locked ? 'opacity-50 pointer-events-none' : ''} ${expanded ? `${c.bg} ${c.border}` : 'bg-white border-gray-200 shadow-sm'}`}>
-      <button onClick={locked ? undefined : onToggle} className="w-full text-left p-3 sm:p-4 flex items-center gap-3">
-        <div className={`w-9 h-9 rounded-xl flex items-center justify-center font-black text-sm flex-shrink-0 ${completed ? 'bg-triage-green-light border border-triage-green-dark/30 text-triage-green-text' : locked ? 'bg-gray-100 border border-gray-200 text-gray-400' : `${c.bg} border ${c.border} ${c.text}`}`}>
+    <div id={`flow-step-${num}`} className={`mb-3 rounded-2xl border transition-all duration-200 ${completed ? 'opacity-50' : ''} ${locked ? 'opacity-50 pointer-events-none' : ''} ${expanded ? `${c.bg} ${c.border}` : 'bg-white border-gray-100 shadow-sm'}`}>
+      <button onClick={locked ? undefined : onToggle} className="w-full text-left p-4 sm:p-5 flex items-center gap-4">
+        <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm flex-shrink-0 ${completed ? 'bg-triage-green-light border border-triage-green-dark/30 text-triage-green-text' : locked ? 'bg-gray-100 border border-gray-200 text-gray-400' : `${c.bg} border ${c.border} ${c.text}`}`}>
           {completed ? <Check size={16} /> : locked ? <Lock size={14} /> : num}
         </div>
         <div className="flex-1 min-w-0">
-          <div className={`font-bold text-sm leading-tight ${expanded ? c.text : locked ? 'text-gray-400' : 'text-gray-700'}`}>{locked ? `🔒 ${title}` : title}</div>
-          {!expanded && <div className="text-gray-400 text-xs mt-0.5 truncate">{locked && lockedMsg ? lockedMsg : subtitle}</div>}
+          <div className={`font-semibold text-base leading-tight ${expanded ? c.text : locked ? 'text-gray-400' : 'text-gray-700'}`}>{locked ? `🔒 ${title}` : title}</div>
+          {!expanded && <div className="text-gray-400 text-sm mt-1 truncate">{locked && lockedMsg ? lockedMsg : subtitle}</div>}
         </div>
         {badge && !completed && !locked && (
-          <span className={`${bc.bg} border ${bc.border} ${bc.text} px-2 py-0.5 rounded-full text-[10px] font-bold whitespace-nowrap ${badgeColor === 'red' ? 'animate-pulse' : ''}`}>
+          <span className={`${bc.bg} border ${bc.border} ${bc.text} px-2.5 py-1 rounded-full text-sm font-semibold whitespace-nowrap ${badgeColor === 'red' ? 'animate-pulse' : ''}`}>
             {badge}
           </span>
         )}
-        {!locked && (expanded ? <ChevronUp size={16} className={c.text} /> : <ChevronDown size={16} className="text-gray-300" />)}
+        {!locked && (expanded ? <ChevronUp size={18} className={c.text} /> : <ChevronDown size={18} className="text-gray-300" />)}
       </button>
-      {expanded && !locked && <div className="px-3 sm:px-4 pb-4 pt-1 border-t border-gray-100 animate-fade-slide">{children}</div>}
+      {expanded && !locked && <div className="px-4 sm:px-5 pb-5 pt-2 border-t border-gray-100 animate-fade-slide">{children}</div>}
     </div>
   );
 };
@@ -371,32 +371,32 @@ const StopAlertOverlay = ({ stopMatches, patientWords, onAcknowledge }) => {
   if (!stopMatches || stopMatches.length === 0) return null;
   const match = stopMatches[0];
   return (
-    <div className="fixed inset-0 z-[60] bg-red-900/98 flex flex-col items-center justify-center p-6 text-center" onClick={e => e.stopPropagation()}>
-      <div className="text-6xl mb-4 animate-pulse">🚨</div>
-      <h1 className="text-3xl sm:text-4xl font-black text-white mb-2">STOP — CALL 999 NOW</h1>
-      <div className="text-xl font-bold text-red-200 mb-4 uppercase">{match.system}</div>
+    <div className="fixed inset-0 z-[60] bg-red-600 flex flex-col items-center justify-center p-6 text-center" onClick={e => e.stopPropagation()}>
+      <div className="text-6xl mb-6 animate-pulse">🚨</div>
+      <h1 className="text-3xl sm:text-4xl font-black text-white mb-3">STOP — CALL 999 NOW</h1>
+      <div className="text-xl font-bold text-red-100 mb-6 uppercase">{match.system}</div>
       {patientWords && (
-        <div className="bg-red-800/50 border border-red-500/30 rounded-xl p-4 mb-4 max-w-md w-full">
-          <div className="text-red-300 text-xs font-bold mb-1">PATIENT&apos;S EXACT WORDS:</div>
+        <div className="bg-red-700/60 border border-red-400/30 rounded-2xl p-4 mb-5 max-w-md w-full">
+          <div className="text-red-200 text-sm font-bold mb-1.5">Patient&apos;s exact words:</div>
           <div className="text-white text-sm italic">&ldquo;{patientWords}&rdquo;</div>
         </div>
       )}
-      <div className="bg-red-800/30 border border-red-500/20 rounded-xl p-3 mb-6 max-w-md w-full">
-        <div className="text-red-300 text-xs font-bold mb-1">MATCHED KEYWORDS:</div>
-        <div className="flex flex-wrap gap-1 justify-center">
+      <div className="bg-red-700/40 border border-red-400/20 rounded-2xl p-4 mb-8 max-w-md w-full">
+        <div className="text-red-200 text-sm font-bold mb-1.5">Matched keywords:</div>
+        <div className="flex flex-wrap gap-1.5 justify-center">
           {match.keywords.filter(k => patientWords?.toLowerCase().includes(k.toLowerCase())).map((k, i) => (
-            <span key={i} className="bg-red-700/50 text-white px-2 py-0.5 rounded text-xs">{k}</span>
+            <span key={i} className="bg-red-500/60 text-white px-2.5 py-1 rounded-full text-sm font-medium">{k}</span>
           ))}
         </div>
       </div>
-      <a href="tel:999" className="block w-full max-w-md bg-white text-red-900 font-black text-lg py-4 rounded-2xl mb-3 hover:bg-red-100 transition-all text-center">
+      <a href="tel:999" className="block w-full max-w-md bg-white text-red-700 font-black text-lg py-4 rounded-xl mb-4 hover:bg-red-50 transition-all text-center shadow-lg">
         📞 CALL 999 — On-site ambulance: 020 3162 7525
       </a>
       <button
         onClick={onAcknowledge}
-        className="w-full max-w-md bg-transparent border border-gray-300 text-gray-500 text-sm py-3 rounded-2xl hover:bg-gray-100 transition-all"
+        className="w-full max-w-md bg-transparent border-2 border-white/40 text-white/80 text-sm py-3 rounded-xl hover:bg-white/10 transition-all font-medium"
       >
-        ✓ CHECKED — PROCEED TO RED FLAGS
+        ✓ Checked — proceed to red flags
       </button>
     </div>
   );
@@ -406,7 +406,7 @@ const StopAlertOverlay = ({ stopMatches, patientWords, onAcknowledge }) => {
 const OutcomeBtn = ({ label, color = 'blue', icon, onClick }) => {
   const c = C[color] || C.blue;
   return (
-    <button onClick={onClick} className={`w-full ${c.bg} border ${c.border} ${c.text} rounded-xl py-2.5 px-3 text-center font-semibold text-xs flex items-center justify-center gap-2 hover:brightness-110 active:scale-[0.98] transition-all`}>
+    <button onClick={onClick} className={`w-full ${c.bg} border ${c.border} ${c.text} rounded-xl py-2.5 px-3 text-center font-semibold text-sm flex items-center justify-center gap-2 hover:brightness-110 active:scale-[0.98] transition-all`}>
       {icon}{label}
     </button>
   );
@@ -496,13 +496,13 @@ const DecisionFlow = ({ data, settings, onRecord, showToast }) => {
       {/* ---- HEADER ---- */}
       <div className="flex items-center justify-between mb-3">
         <div>
-          <h1 className="text-lg font-black text-gray-800 tracking-tight">Process ANIMA Request</h1>
-          <p className="text-[10px] text-gray-400 mt-0.5">
+          <h1 className="text-xl font-semibold text-gray-800">Process ANIMA Request</h1>
+          <p className="text-sm text-gray-400 mt-1">
             {settings.practiceName} · SOP v3.5 · Work through steps in order ↓
           </p>
         </div>
         {(outcome || completedSteps.size > 0) && (
-          <button onClick={resetFlow} className="flex items-center gap-1.5 px-3 py-2 bg-triage-blue/20 border border-triage-blue/30 rounded-xl text-triage-blue-texttext-xs font-bold hover:bg-triage-blue/30 transition-all">
+          <button onClick={resetFlow} className="flex items-center gap-1.5 px-3 py-2 bg-triage-blue-light border border-triage-blue-dark/25 rounded-xl text-triage-blue-text text-sm font-bold hover:bg-triage-blue-light transition-all">
             <RotateCcw size={14} />New
           </button>
         )}
@@ -514,34 +514,34 @@ const DecisionFlow = ({ data, settings, onRecord, showToast }) => {
           <Search className="absolute left-3 top-3 text-gray-300" size={16} />
           <textarea value={scanText} onChange={e => setScanText(e.target.value)} autoFocus={true}
             placeholder="Paste patient's words from ANIMA here to scan for flags..."
-            rows={2} className="w-full pl-9 pr-9 py-2.5 rounded-xl bg-gray-50 border border-gray-200 focus:border-triage-blue/40 focus:outline-none text-gray-800 text-sm resize-none leading-relaxed" />
+            rows={2} className="w-full pl-9 pr-9 py-2.5 rounded-xl bg-gray-50 border border-gray-200 focus:border-triage-blue-dark/30 focus:outline-none text-gray-800 text-sm resize-none leading-relaxed" />
           {scanText && <button onClick={() => setScanText('')} className="absolute right-3 top-3 text-gray-300 hover:text-gray-700"><X size={16} /></button>}
         </div>
         {scanResults && (
-          <div className="flex gap-1.5 mt-2 flex-wrap">
-            {scanResults.hasStop && <span className="bg-red-600/30 border border-red-500/50 text-red-300 px-2.5 py-1 rounded-full text-[11px] font-bold animate-pulse">🚨 STOP — 999</span>}
-            {scanResults.hasRed && <button onClick={() => toggle(1)} className="bg-triage-red/15 border border-triage-red/30 text-triage-red-textpx-2.5 py-1 rounded-full text-[11px] font-bold animate-pulse">🔴 RED</button>}
-            {scanResults.hasAmber && <button onClick={() => toggle(5)} className="bg-triage-amber/15 border border-triage-amber/30 text-triage-amber-textpx-2.5 py-1 rounded-full text-[11px] font-bold">🟠 AMBER</button>}
-            {scanResults.hasPurple && <span className="bg-triage-purple-light border border-triage-purple-dark/35 text-triage-purple-text px-2.5 py-1 rounded-full text-[11px] font-bold">🟣 PURPLE</span>}
-            {scanResults.hasYellow && <span className="bg-triage-yellow-light border border-triage-yellow-dark/35 text-triage-yellow-text px-2.5 py-1 rounded-full text-[11px] font-bold">🟡 YELLOW</span>}
-            {scanResults.hasGreen && <span className="bg-triage-green/15 border border-triage-green/30 text-triage-green-textpx-2.5 py-1 rounded-full text-[11px] font-bold">🟢 GREEN</span>}
-            {scanResults.hasRisk && <span className="bg-triage-teal/15 border border-triage-teal/30 text-triage-teal-textpx-2.5 py-1 rounded-full text-[11px] font-bold">⚠️ HIGH RISK</span>}
-            {scanResults.hasCancer && <span className="bg-triage-red/15 border border-triage-red/30 text-triage-red-textpx-2.5 py-1 rounded-full text-[11px] font-bold">🎗️ CANCER?</span>}
-            {scanResults.hasChange && <span className="bg-triage-teal/15 border border-triage-teal/30 text-triage-teal-textpx-2.5 py-1 rounded-full text-[11px] font-bold">📈 WORSENING</span>}
-            {scanResults.pharmacy.length > 0 && <button onClick={() => toggle(4)} className="bg-triage-green/15 border border-triage-green/30 text-triage-green-textpx-2.5 py-1 rounded-full text-[11px] font-bold">💊 Pharmacy</button>}
-            {scanResults.hasPathway && <button onClick={() => toggle(2)} className="bg-triage-blue/15 border border-triage-blue/30 text-triage-blue-textpx-2.5 py-1 rounded-full text-[11px] font-bold">🔍 PATHWAY</button>}
-            {!scanResults.hasAny && <span className="text-gray-300 text-xs py-1">No keyword matches — work through steps below</span>}
+          <div className="flex gap-2 mt-2.5 flex-wrap">
+            {scanResults.hasStop && <span className="bg-red-100 border border-red-300 text-red-700 px-3 py-1.5 rounded-full text-sm font-semibold animate-pulse">🚨 STOP — 999</span>}
+            {scanResults.hasRed && <button onClick={() => toggle(1)} className="bg-triage-red-light border border-triage-red-dark/25 text-triage-red-text px-3 py-1.5 rounded-full text-sm font-semibold animate-pulse">🔴 Red flags</button>}
+            {scanResults.hasAmber && <button onClick={() => toggle(5)} className="bg-triage-amber-light border border-triage-amber-dark/25 text-triage-amber-text px-3 py-1.5 rounded-full text-sm font-semibold">🟠 Amber</button>}
+            {scanResults.hasPurple && <span className="bg-triage-purple-light border border-triage-purple-dark/25 text-triage-purple-text px-3 py-1.5 rounded-full text-sm font-semibold">🟣 Purple</span>}
+            {scanResults.hasYellow && <span className="bg-triage-yellow-light border border-triage-yellow-dark/25 text-triage-yellow-text px-3 py-1.5 rounded-full text-sm font-semibold">🟡 Yellow</span>}
+            {scanResults.hasGreen && <span className="bg-triage-green-light border border-triage-green-dark/25 text-triage-green-text px-3 py-1.5 rounded-full text-sm font-semibold">🟢 Green</span>}
+            {scanResults.hasRisk && <span className="bg-triage-teal-light border border-triage-teal-dark/25 text-triage-teal-text px-3 py-1.5 rounded-full text-sm font-semibold">⚠️ High risk</span>}
+            {scanResults.hasCancer && <span className="bg-triage-red-light border border-triage-red-dark/25 text-triage-red-text px-3 py-1.5 rounded-full text-sm font-semibold">🎗️ Cancer?</span>}
+            {scanResults.hasChange && <span className="bg-triage-teal-light border border-triage-teal-dark/25 text-triage-teal-text px-3 py-1.5 rounded-full text-sm font-semibold">📈 Worsening</span>}
+            {scanResults.pharmacy.length > 0 && <button onClick={() => toggle(4)} className="bg-triage-green-light border border-triage-green-dark/25 text-triage-green-text px-3 py-1.5 rounded-full text-sm font-semibold">💊 Pharmacy</button>}
+            {scanResults.hasPathway && <button onClick={() => toggle(2)} className="bg-triage-blue-light border border-triage-blue-dark/25 text-triage-blue-text px-3 py-1.5 rounded-full text-sm font-semibold">🔍 Pathway</button>}
+            {!scanResults.hasAny && <span className="text-gray-400 text-sm py-1">No keyword matches — work through steps below</span>}
           </div>
         )}
       </div>
 
       {/* ---- GOLDEN RULE ---- */}
-      <div className="bg-gray-50 border border-gray-200 rounded-xl px-3 py-2 mb-4">
-        <div className="flex items-center gap-2 mb-1">
-          <Info size={14} className="text-triage-blue-textflex-shrink-0" />
-          <span className="text-[11px] text-gray-500 font-bold">GOLDEN RULES — TIER 1</span>
+      <div className="bg-white border border-gray-100 rounded-2xl shadow-sm px-4 py-3 mb-5">
+        <div className="flex items-center gap-2 mb-1.5">
+          <Info size={16} className="text-triage-blue-text flex-shrink-0" />
+          <span className="text-sm text-gray-600 font-semibold">Golden Rules — Tier 1</span>
         </div>
-        <div className="text-[11px] text-gray-400 leading-relaxed">
+        <div className="text-sm text-gray-400 leading-relaxed">
           Use patient&apos;s <strong className="text-gray-500">exact words</strong> ·
           Check <strong className="text-gray-500">EMIS first</strong> ·
           You do <strong className="text-triage-red-text">NOT diagnose</strong> or decide urgency ·
@@ -560,21 +560,21 @@ const DecisionFlow = ({ data, settings, onRecord, showToast }) => {
 
         {/* Scanner-first alert card */}
         {(scanResults?.hasStop || scanResults?.hasRed) && (
-          <div className="mb-3 bg-triage-red/10 border-l-4 border-l-triage-red border border-triage-red/25 rounded-xl p-3">
-            <div className="text-triage-red-textfont-bold text-sm mb-1.5">⚠️ {scanResults.hasStop ? scanResults.stop[0].system.toUpperCase() : scanResults.red[0].system.toUpperCase()}</div>
-            <div className="text-gray-800 font-bold text-xs mb-2">{scanResults.hasStop ? 'CALL 999 NOW' : scanResults.red[0].action}</div>
+          <div className="mb-3 bg-triage-red-light border-l-4 border-l-triage-red-dark border border-triage-red-dark/20 rounded-xl p-3">
+            <div className="text-triage-red-text font-bold text-sm mb-1.5">⚠️ {scanResults.hasStop ? scanResults.stop[0].system.toUpperCase() : scanResults.red[0].system.toUpperCase()}</div>
+            <div className="text-gray-800 font-bold text-sm mb-2">{scanResults.hasStop ? 'CALL 999 NOW' : scanResults.red[0].action}</div>
             <div className="flex flex-wrap gap-1 mb-2">
               {(scanResults.hasStop ? scanResults.stop[0].keywords : scanResults.red[0].keywords).filter(k => scanText.toLowerCase().includes(k.toLowerCase())).map((k, i) => (
-                <span key={i} className="bg-triage-red/20 text-triage-red-textpx-2 py-0.5 rounded text-[10px]">{k}</span>
+                <span key={i} className="bg-triage-red-light text-triage-red-text px-2 py-0.5 rounded text-sm">{k}</span>
               ))}
             </div>
-            <div className="text-gray-400 text-[10px]">On-site ambulance: 020 3162 7525 | Crisis: 0800 028 8000 | CAMHS: 0203 228 5980</div>
+            <div className="text-gray-400 text-sm">On-site ambulance: 020 3162 7525 | Crisis: 0800 028 8000 | CAMHS: 0203 228 5980</div>
           </div>
         )}
 
         {/* Collapsed accordion by body system */}
-        <div className="text-gray-400 text-xs mb-2 font-semibold">Body systems — click to expand:</div>
-        <div className="space-y-1 mb-4 max-h-64 overflow-y-auto pr-1">
+        <div className="text-gray-500 text-sm mb-3 font-semibold">Body systems — click to expand:</div>
+        <div className="space-y-2 mb-4 max-h-72 overflow-y-auto pr-1">
           {(() => {
             const grouped = {};
             data.redFlags.forEach(f => { if (!grouped[f.system]) grouped[f.system] = []; grouped[f.system].push(f); });
@@ -585,20 +585,20 @@ const DecisionFlow = ({ data, settings, onRecord, showToast }) => {
               const isMatched = matchedSystems.has(system);
               const isOpen = expandedSystems[system] ?? isMatched;
               return (
-                <div key={system} className={`rounded-lg border ${isMatched ? 'border-l-4 border-l-triage-red border-triage-red/30 bg-triage-red/5' : 'border-gray-200 bg-gray-50'}`}>
+                <div key={system} className={`rounded-xl border ${isMatched ? 'border-l-4 border-l-triage-red-dark border-triage-red-dark/30 bg-triage-red-light' : 'border-gray-100 bg-white shadow-sm'}`}>
                   <button onClick={() => setExpandedSystems(prev => ({ ...prev, [system]: !isOpen }))}
-                    className="w-full flex items-center justify-between px-2.5 py-1.5 text-left">
-                    <span className={`text-[11px] font-bold tracking-wide ${isMatched ? 'text-triage-red' : 'text-gray-500'}`}>
-                      {isMatched && '🚨 '}{system.toUpperCase()} ({flags.length} flag{flags.length > 1 ? 's' : ''})
+                    className="w-full flex items-center justify-between px-3.5 py-2.5 text-left hover:bg-gray-50/50 transition-colors rounded-xl">
+                    <span className={`text-sm font-semibold ${isMatched ? 'text-triage-red-text' : 'text-gray-600'}`}>
+                      {isMatched && '🚨 '}{system} ({flags.length} flag{flags.length > 1 ? 's' : ''})
                     </span>
-                    {isOpen ? <ChevronUp size={12} className="text-gray-400" /> : <ChevronDown size={12} className="text-gray-400" />}
+                    {isOpen ? <ChevronUp size={14} className="text-gray-400" /> : <ChevronDown size={14} className="text-gray-400" />}
                   </button>
                   {isOpen && (
-                    <div className="px-2.5 pb-2 space-y-1">
+                    <div className="px-3.5 pb-3 space-y-1.5">
                       {flags.map((f, i) => (
-                        <div key={i} className="flex items-start gap-2">
-                          <div className="w-1.5 h-1.5 rounded-full bg-triage-red-dark mt-1.5 flex-shrink-0" />
-                          <span className="text-gray-500 text-[11px] leading-relaxed">Patient says: {f.keywords.slice(0, 5).join(', ')} — <strong className="text-triage-red-text">{f.action}</strong></span>
+                        <div key={i} className="flex items-start gap-2.5 pl-1">
+                          <div className="w-1.5 h-1.5 rounded-full bg-triage-red-dark mt-2 flex-shrink-0" />
+                          <span className="text-gray-500 text-sm leading-relaxed">Patient says: {f.keywords.slice(0, 5).join(', ')} — <strong className="text-triage-red-text">{f.action}</strong></span>
                         </div>
                       ))}
                     </div>
@@ -608,16 +608,16 @@ const DecisionFlow = ({ data, settings, onRecord, showToast }) => {
             });
           })()}
         </div>
-        <div className="flex gap-2 mb-2">
-          <a href="tel:999" className="flex-1 bg-triage-red/20 border border-triage-red/30 text-triage-red-textrounded-xl py-3 text-center font-bold text-sm active:scale-95 transition-transform flex items-center justify-center gap-2">
+        <div className="flex gap-3 mb-3">
+          <a href="tel:999" className="flex-1 bg-triage-red-light border border-triage-red-dark/30 text-triage-red-text rounded-xl py-3.5 text-center font-bold text-sm active:scale-95 transition-transform flex items-center justify-center gap-2">
             <Phone size={16} />CALL 999
           </a>
-          <button onClick={() => { selectOutcome('→ Patient declined 999 — duty GP booked, noted "declined 999"', 'red'); }} className="flex-1 bg-triage-red/10 border border-triage-red/20 text-triage-red-textrounded-xl py-3 text-center font-semibold text-xs">
+          <button onClick={() => { selectOutcome('→ Patient declined 999 — duty GP booked, noted "declined 999"', 'red'); }} className="flex-1 bg-white border border-triage-red-dark/20 text-triage-red-text rounded-xl py-3.5 text-center font-semibold text-sm hover:bg-triage-red-light/50 transition-colors">
             Patient declined 999
           </button>
         </div>
-        <div className="text-gray-400 text-[10px] text-center mb-3">On-site ambulance: 020 3162 7525 | Crisis: 0800 028 8000 | CAMHS: 0203 228 5980</div>
-        <button onClick={() => advanceToNext(1)} className="w-full text-center text-xs text-gray-400 hover:text-triage-green-textpy-2 border-t border-gray-100">
+        <div className="text-gray-400 text-sm text-center mb-3">On-site ambulance: 020 3162 7525 | Crisis: 0800 028 8000 | CAMHS: 0203 228 5980</div>
+        <button onClick={() => advanceToNext(1)} className="w-full text-center text-sm text-gray-400 hover:text-triage-green-text py-3 border-t border-gray-100 transition-colors">
           ✓ No red flags identified — continue ↓
         </button>
       </FlowStep>
@@ -625,58 +625,63 @@ const DecisionFlow = ({ data, settings, onRecord, showToast }) => {
       {/* ═══════════════════════════════════════════════════
           STEP 2: SIGNPOST TO EXTERNAL SERVICE (v3.5)
           ═══════════════════════════════════════════════════ */}
-      <FlowStep num={2} color="blue" title="🔀 SIGNPOST TO EXTERNAL SERVICE" subtitle="Does this belong to a specific external pathway?"
+      <FlowStep num={2} color="blue" title="🔀 Signpost to External Service" subtitle="Does this belong to a specific external pathway?"
         expanded={expandedStep === 2} onToggle={() => toggle(2)} completed={completedSteps.has(2)}
         locked={!completedSteps.has(1)} lockedMsg="Complete Step 1 first"
         badge={scanResults?.hasPathway ? 'MATCH' : null} badgeColor="blue">
 
         {/* Signposting pathway grid */}
         {scanResults?.pathways?.length > 0 && (
-          <div className="bg-triage-blue/8 border border-triage-blue/20 rounded-xl p-2.5 mb-3">
-            <div className="text-triage-blue-textfont-bold text-xs mb-1">🔍 SCANNER MATCHED:</div>
+          <div className="bg-triage-blue-light border border-triage-blue-dark/20 rounded-xl p-2.5 mb-3">
+            <div className="text-triage-blue-text font-bold text-sm mb-1">🔍 Scanner matched:</div>
             <div className="flex flex-wrap gap-1">
-              {scanResults.pathways.map(p => <span key={p.id} className="bg-triage-blue/20 px-2 py-0.5 rounded text-[11px] text-triage-blue-textfont-medium">{p.pathway}</span>)}
+              {scanResults.pathways.map(p => <span key={p.id} className="bg-triage-blue-light px-2 py-0.5 rounded text-sm text-triage-blue-text font-medium">{p.pathway}</span>)}
             </div>
           </div>
         )}
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mb-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
           {[
             { icon: '👁️', name: 'Eye Emergency', contact: '020 8934 6799', hours: 'Mon–Fri 8:30–4:30', detail: 'CUES / Royal Eye Unit' },
             { icon: '🦴', name: 'Injury / Acute Trauma', contact: 'via NHS 111', hours: '8am–8pm daily', detail: 'Richmond UTC' },
             { icon: '🤰', name: 'Pregnancy >18wks', contact: '0208 934 2802', hours: '24/7', detail: 'Maternity Helpline' },
             { icon: '🩺', name: 'Sexual Health', contact: '0208 974 9331', hours: 'Self-refer', detail: 'Wolverton Centre' },
-            { icon: '🧠', name: 'Mental Health (NON-crisis)', contact: 'swlstg.nhs.uk', hours: 'Self-refer', detail: 'Kingston Talking Therapies', warn: '⚠️ MUST send Talking Therapies info AND book GP 1–3 days. Do NOT signpost alone.' },
+            { icon: '🧠', name: 'Mental Health (non-crisis)', contact: 'swlstg.nhs.uk', hours: 'Self-refer', detail: 'Kingston Talking Therapies', warn: '⚠️ Must send Talking Therapies info and book GP 1–3 days. Do not signpost alone.' },
             { icon: '👶', name: 'Health Visiting (0–5)', contact: '020 8339 8000', hours: 'Mon–Fri 9–5', detail: 'HV Service. Well Baby Clinics Tue/Wed/Thu.' },
             { icon: '🚫', name: 'Abortion Services', contact: 'NUPAS: 0333 004 6666', hours: 'See provider', detail: 'BPAS: 0345 730 4030 / MSI: 0345 300 8090' },
             { icon: '📞', name: 'NHS 111', contact: '111', hours: '24/7', detail: 'If unsure, out of hours, or need non-999 urgent advice' },
             { icon: '💊', name: 'NHS 111 Emergency Rx', contact: '111.nhs.uk/emergency-prescription', hours: '24/7', detail: 'Ran out of essential medication outside GP hours' },
-            { icon: '🧠', name: 'Mental Health CRISIS', contact: '0800 028 8000', hours: '24/7', detail: 'CAMHS <18: 0203 228 5980' },
+            { icon: '🧠', name: 'Mental Health Crisis', contact: '0800 028 8000', hours: '24/7', detail: 'CAMHS <18: 0203 228 5980' },
             { icon: '🚑', name: '999 / A&E', contact: '999', hours: '24/7', detail: 'If in doubt — 999' },
             { icon: '🏥', name: 'Pharmacy First', contact: '', hours: '', detail: '→ See Step 4', isLink: true, linkStep: 4 },
             { icon: '📋', name: 'Planned / EMIS', contact: '', hours: '', detail: '→ See Step 3', isLink: true, linkStep: 3 },
           ].map((p, i) => {
             const is999 = p.contact === '999';
             return (
-              <div key={i} className={`rounded-xl border p-2.5 ${is999 ? 'border-triage-red/30 bg-triage-red/5' : 'border-gray-200 bg-gray-50'}`}>
-                <div className={`font-bold text-xs ${is999 ? 'text-triage-red' : 'text-gray-700'}`}>{p.icon} {p.name}</div>
-                <div className="text-gray-400 text-[10px] mt-0.5">{p.detail}</div>
-                {p.hours && <div className="text-gray-400 text-[10px]">{p.hours}</div>}
-                {p.warn && <div className="text-triage-amber-texttext-[10px] font-bold mt-1">{p.warn}</div>}
+              <div key={i} className={`rounded-2xl border p-3.5 ${is999 ? 'border-triage-red-dark/20 bg-triage-red-light' : 'border-gray-100 bg-white shadow-sm'} hover:shadow-md transition-shadow`}>
+                <div className="flex items-start gap-3">
+                  <div className={`w-10 h-10 rounded-full flex items-center justify-center text-lg flex-shrink-0 ${is999 ? 'bg-triage-red-light border border-triage-red-dark/20' : 'bg-triage-blue-light border border-triage-blue-dark/15'}`}>{p.icon}</div>
+                  <div className="flex-1 min-w-0">
+                    <div className={`font-semibold text-sm ${is999 ? 'text-triage-red-text' : 'text-gray-700'}`}>{p.name}</div>
+                    <div className="text-gray-400 text-sm mt-0.5">{p.detail}</div>
+                    {p.hours && <div className="text-gray-400 text-sm">{p.hours}</div>}
+                  </div>
+                </div>
+                {p.warn && <div className="text-triage-amber-text text-sm font-semibold mt-2 bg-triage-amber-light rounded-lg p-2">{p.warn}</div>}
                 {p.contact && !p.isLink && (
-                  <div className="flex items-center gap-1 mt-1">
-                    <span className="text-triage-blue-texttext-[10px]">{p.contact}</span>
+                  <div className="flex items-center gap-1.5 mt-2">
+                    <span className="text-triage-blue-text text-sm font-medium">{p.contact}</span>
                     <button onClick={(e) => { e.stopPropagation(); navigator.clipboard.writeText(p.contact); showToast('Copied: ' + p.contact); }}
-                      className="text-gray-400 hover:text-triage-blue-text"><Copy size={10} /></button>
+                      className="text-gray-400 hover:text-triage-blue-text"><Copy size={12} /></button>
                   </div>
                 )}
-                {p.isLink && <button onClick={() => toggle(p.linkStep)} className="text-triage-blue-texttext-[10px] mt-1 underline">{p.detail}</button>}
+                {p.isLink && <button onClick={() => toggle(p.linkStep)} className="text-triage-blue-text text-sm mt-2 underline font-medium">{p.detail}</button>}
               </div>
             );
           })}
         </div>
 
-        <button onClick={() => advanceToNext(2)} className="w-full text-center text-xs text-gray-400 hover:text-triage-green-textpy-2 border-t border-gray-100">
+        <button onClick={() => advanceToNext(2)} className="w-full text-center text-sm text-gray-400 hover:text-triage-green-text py-3 border-t border-gray-100 transition-colors">
           ✓ No external pathway — continue ↓
         </button>
       </FlowStep>
@@ -684,14 +689,14 @@ const DecisionFlow = ({ data, settings, onRecord, showToast }) => {
       {/* ═══════════════════════════════════════════════════
           STEP 3: PLANNED ITEMS — CHECK EMIS (v3.5)
           ═══════════════════════════════════════════════════ */}
-      <FlowStep num={3} color="teal" title="📋 PLANNED ITEMS — CHECK EMIS" subtitle="Is there an existing plan, recall, or clinical admin item in EMIS?"
+      <FlowStep num={3} color="teal" title="📋 Planned Items — Check EMIS" subtitle="Is there an existing plan, recall, or clinical admin item in EMIS?"
         expanded={expandedStep === 3} onToggle={() => toggle(3)} completed={completedSteps.has(3)}
         locked={!completedSteps.has(2)} lockedMsg="Complete Step 2 first"
         badge={scanResults?.hasChange ? 'CHANGE?' : null} badgeColor="amber">
 
         {/* Direct booking checklist */}
-        <div className="bg-triage-blue/6 border border-triage-blue/15 rounded-xl p-3 mb-3">
-          <div className="text-triage-blue-textfont-bold text-xs mb-2">DIRECT BOOKING CHECKLIST:</div>
+        <div className="bg-triage-blue-light border border-triage-blue-dark/15 rounded-xl p-3 mb-3">
+          <div className="text-triage-blue-text font-bold text-sm mb-2">Direct booking checklist:</div>
           {[
             'Follow-up appointment (GP said "come back in X weeks")',
             'Blood tests due (chronic disease / medication monitoring)',
@@ -704,14 +709,14 @@ const DecisionFlow = ({ data, settings, onRecord, showToast }) => {
           ].map((item, i) => (
             <label key={i} className="flex items-center gap-2.5 py-1 cursor-pointer group">
               <div onClick={() => { const n = [...emisChecks]; n[i] = !n[i]; setEmisChecks(n); }}
-                className={`w-5 h-5 rounded-md border flex items-center justify-center flex-shrink-0 transition-all ${emisChecks[i] ? 'bg-triage-blue/30 border-triage-blue/50' : 'border-gray-200 group-hover:border-gray-300'}`}>
+                className={`w-5 h-5 rounded-md border flex items-center justify-center flex-shrink-0 transition-all ${emisChecks[i] ? 'bg-triage-blue-light border-triage-blue-dark/40' : 'border-gray-200 group-hover:border-gray-300'}`}>
                 {emisChecks[i] && <Check size={12} className="text-triage-blue-text" />}
               </div>
-              <span className={`text-xs ${emisChecks[i] ? 'text-gray-600' : 'text-gray-400'}`}>{item}</span>
+              <span className={`text-sm ${emisChecks[i] ? 'text-gray-600' : 'text-gray-400'}`}>{item}</span>
             </label>
           ))}
           {emisChecks.some(Boolean) && (
-            <div className="mt-2 bg-triage-green/10 border border-triage-green/25 rounded-lg p-2 text-triage-green-texttext-xs font-semibold">
+            <div className="mt-2 bg-triage-green-light border border-triage-green-dark/20 rounded-lg p-2 text-triage-green-text text-sm font-semibold">
               ✅ Direct-book per EMIS plan. No triage needed.
             </div>
           )}
@@ -719,8 +724,8 @@ const DecisionFlow = ({ data, settings, onRecord, showToast }) => {
 
         {/* Fit Note Quick Reference */}
         <div className="bg-gray-50 border border-gray-200 rounded-xl p-3 mb-3">
-          <div className="text-gray-500 font-bold text-xs mb-1">📝 FIT NOTE QUICK REFERENCE:</div>
-          <div className="text-gray-400 text-[11px] space-y-1">
+          <div className="text-gray-500 font-bold text-sm mb-1">📝 Fit note quick reference:</div>
+          <div className="text-gray-400 text-sm space-y-1">
             <div>• Straightforward renewal (recent review + within 7 days + documented) → Process admin → session GP</div>
             <div>• NEW / worsening / not previously seen → Tier 3 GP Triager</div>
           </div>
@@ -728,89 +733,89 @@ const DecisionFlow = ({ data, settings, onRecord, showToast }) => {
 
         {/* Repeat Medication Quick Reference */}
         <div className="bg-gray-50 border border-gray-200 rounded-xl p-3 mb-3">
-          <div className="text-gray-500 font-bold text-xs mb-1">💊 REPEAT MEDICATION:</div>
-          <div className="text-gray-400 text-[11px] space-y-1">
+          <div className="text-gray-500 font-bold text-sm mb-1">💊 Repeat medication:</div>
+          <div className="text-gray-400 text-sm space-y-1">
             <div>• Routine repeat (no change) → Admin team</div>
             <div>• Dose change / new med / side effect / interaction → <span className="text-triage-purple-text font-semibold">Tier 3 GP Triager (PURPLE)</span></div>
-            <div>• Ran out of essential med (insulin, anticoag, AED) → <span className="text-triage-red-textfont-semibold">URGENT Tier 3 or NHS 111 emergency supply</span></div>
+            <div>• Ran out of essential med (insulin, anticoag, AED) → <span className="text-triage-red-text font-semibold">URGENT Tier 3 or NHS 111 emergency supply</span></div>
           </div>
         </div>
 
         {/* EMIS findings text area */}
         <div className="mb-3">
-          <div className="text-gray-500 text-xs font-bold mb-1.5">📝 EMIS FINDINGS (travels with the request):</div>
+          <div className="text-gray-500 text-sm font-bold mb-1.5">📝 EMIS findings (travels with the request):</div>
           <textarea value={emisFindings} onChange={e => setEmisFindings(e.target.value)}
             placeholder="e.g. 'Diabetes recall due. Last seen GP 3 weeks ago re: back pain. No alerts.'"
-            rows={2} className="w-full px-3 py-2 rounded-xl bg-gray-50 border border-gray-200 focus:border-triage-teal/40 focus:outline-none text-gray-800 text-xs resize-none" />
+            rows={2} className="w-full px-3 py-2 rounded-xl bg-gray-50 border border-gray-200 focus:border-triage-teal-dark/30 focus:outline-none text-gray-800 text-sm resize-none" />
         </div>
 
         {/* NEW/ONGOING decision */}
         <div className="flex gap-3 mb-3">
           <button onClick={() => { setNewOngoing('plan-exists'); selectOutcome('→ Direct booked per EMIS plan' + (emisFindings ? '. EMIS: ' + emisFindings : ''), 'green'); }}
-            className="flex-1 p-3 rounded-xl border border-triage-green/30 bg-triage-green/6 hover:bg-triage-green/10 text-left transition-all">
-            <div className="text-triage-green-textfont-bold text-sm">✅ PLAN EXISTS</div>
-            <div className="text-gray-400 text-[10px] mt-1">Direct book per plan</div>
+            className="flex-1 p-3 rounded-xl border border-triage-green-dark/25 bg-triage-green-light hover:bg-triage-green-light text-left transition-all">
+            <div className="text-triage-green-text font-bold text-sm">✅ Plan exists</div>
+            <div className="text-gray-400 text-sm mt-1">Direct book per plan</div>
           </button>
           <button onClick={() => { setNewOngoing('no-plan'); advanceToNext(3); }}
-            className={`flex-1 p-3 rounded-xl border border-triage-blue/30 bg-triage-blue/6 hover:bg-triage-blue/10 text-left transition-all ${scanResults?.hasChange ? 'ring-2 ring-triage-blue/40' : ''}`}>
-            <div className="text-triage-blue-textfont-bold text-sm">➡️ NO PLAN / NEW / WORSENED</div>
-            <div className="text-gray-400 text-[10px] mt-1">Continue to next step</div>
+            className={`flex-1 p-3 rounded-xl border border-triage-blue-dark/25 bg-triage-blue-light hover:bg-triage-blue-light text-left transition-all ${scanResults?.hasChange ? 'ring-2 ring-triage-blue/40' : ''}`}>
+            <div className="text-triage-blue-text font-bold text-sm">➡️ No plan / New / Worsened</div>
+            <div className="text-gray-400 text-sm mt-1">Continue to next step</div>
           </button>
         </div>
-        <div className="text-triage-amber-texttext-[11px] font-medium">⚠️ If patient says &apos;worse&apos;, &apos;not improving&apos;, or &apos;different&apos; → treat as NEW</div>
+        <div className="text-triage-amber-text text-sm font-medium">⚠️ If patient says &apos;worse&apos;, &apos;not improving&apos;, or &apos;different&apos; → treat as NEW</div>
       </FlowStep>
 
       {/* ═══════════════════════════════════════════════════
           STEP 4: PHARMACY FIRST / SELF-CARE (v3.5)
           ═══════════════════════════════════════════════════ */}
-      <FlowStep num={4} color="green" title="💊 PHARMACY FIRST / SELF-CARE" subtitle="Can this be managed by the pharmacy or at home?"
+      <FlowStep num={4} color="green" title="💊 Pharmacy First / Self-care" subtitle="Can this be managed by the pharmacy or at home?"
         expanded={expandedStep === 4} onToggle={() => toggle(4)} completed={completedSteps.has(4)}
         badge={scanResults?.pharmacy.length > 0 ? 'MATCH' : null} badgeColor="green">
 
         {/* Critical exclusion warnings */}
-        <div className="bg-triage-red/5 border border-triage-red/15 rounded-xl p-2.5 mb-3 space-y-1">
-          <div className="text-triage-red-texttext-[11px] font-bold">⚠️ UTI: WOMEN 16–64 ONLY. Male → GP. Pregnant → GP.</div>
-          <div className="text-triage-red-texttext-[11px] font-bold">⚠️ NEVER Pharmacy First for: Under 1s, immunosuppressed, or any high-risk group with doubt</div>
+        <div className="bg-triage-red-light border border-triage-red-dark/15 rounded-xl p-2.5 mb-3 space-y-1">
+          <div className="text-triage-red-text text-sm font-bold">⚠️ UTI: WOMEN 16–64 ONLY. Male → GP. Pregnant → GP.</div>
+          <div className="text-triage-red-text text-sm font-bold">⚠️ NEVER Pharmacy First for: Under 1s, immunosuppressed, or any high-risk group with doubt</div>
         </div>
 
         {/* Pharmacy First conditions table */}
-        <div className="text-gray-500 font-bold text-xs mb-2">PHARMACY FIRST — 7 CONDITIONS:</div>
+        <div className="text-gray-500 font-bold text-sm mb-2">Pharmacy First — 7 conditions:</div>
         <div className="space-y-1.5 mb-3 max-h-56 overflow-y-auto pr-1">
           {data.pharmacyFirst.map(c => (
-            <div key={c.id} className={`rounded-xl border p-2.5 ${scanResults?.pharmacy.some(p => p.id === c.id) ? 'border-l-4 border-l-triage-green border-triage-green/25 bg-triage-green/5' : 'border-gray-200 bg-gray-50'}`}>
+            <div key={c.id} className={`rounded-xl border p-2.5 ${scanResults?.pharmacy.some(p => p.id === c.id) ? 'border-l-4 border-l-triage-green-dark border-triage-green-dark/20 bg-triage-green-light' : 'border-gray-200 bg-gray-50'}`}>
               <div className="flex items-center justify-between">
-                <div className="text-gray-700 font-bold text-xs">{c.icon} {c.condition || c.name}</div>
-                <span className="text-triage-blue-texttext-[10px] font-semibold">{c.ageRange}</span>
+                <div className="text-gray-700 font-bold text-sm">{c.icon} {c.condition || c.name}</div>
+                <span className="text-triage-blue-text text-sm font-semibold">{c.ageRange}</span>
               </div>
-              <div className="text-triage-red-texttext-[10px] mt-1">Exclusions: {c.exclusions.join(' | ')}</div>
+              <div className="text-triage-red-text text-sm mt-1">Exclusions: {c.exclusions.join(' | ')}</div>
             </div>
           ))}
         </div>
 
         {/* Self-Care criteria */}
         <div className="bg-gray-50 border border-gray-200 rounded-xl p-3 mb-3">
-          <div className="text-gray-500 font-bold text-xs mb-1">SELF-CARE CRITERIA:</div>
-          <div className="text-gray-400 text-[11px]">Mild symptoms, &lt;48 hours, no red/amber flags, not high-risk</div>
+          <div className="text-gray-500 font-bold text-sm mb-1">Self-care criteria:</div>
+          <div className="text-gray-400 text-sm">Mild symptoms, &lt;48 hours, no red/amber flags, not high-risk</div>
         </div>
 
         {/* Safety Net */}
-        <div className="bg-triage-amber/5 border border-triage-amber/12 rounded-xl p-2.5 mb-3">
-          <div className="text-triage-amber-textfont-bold text-[11px] mb-0.5">🛟 SAFETY-NET SCRIPT:</div>
-          <div className="text-gray-400 text-[11px]">&ldquo;{data.scripts.safetyNet.script}&rdquo;</div>
+        <div className="bg-triage-amber-light border border-triage-amber/12 rounded-xl p-2.5 mb-3">
+          <div className="text-triage-amber-text font-bold text-sm mb-0.5">🛟 Safety-net script:</div>
+          <div className="text-gray-400 text-sm">&ldquo;{data.scripts.safetyNet.script}&rdquo;</div>
           <CopyBtn text={data.scripts.safetyNet.script} label="Copy Safety Net" onCopy={() => onRecord('Copied safety net')} />
         </div>
 
         <div className="flex gap-2 mb-2">
           <button onClick={() => { setSelfCareOffered('pharmacy'); selectOutcome('→ Pharmacy First referral', 'green'); }}
-            className="flex-1 bg-triage-green/15 border border-triage-green/25 text-triage-green-textrounded-xl py-2.5 text-center font-semibold text-xs">
+            className="flex-1 bg-triage-green-light border border-triage-green-dark/20 text-triage-green-text rounded-xl py-3 text-center font-semibold text-sm hover:brightness-95 transition-all">
             ✓ Offered Pharmacy First
           </button>
           <button onClick={() => { setSelfCareOffered('selfcare'); selectOutcome('→ Self-Care offered', 'green'); }}
-            className="flex-1 bg-triage-green/15 border border-triage-green/25 text-triage-green-textrounded-xl py-2.5 text-center font-semibold text-xs">
-            ✓ Self-Care Offered
+            className="flex-1 bg-triage-green-light border border-triage-green-dark/20 text-triage-green-text rounded-xl py-3 text-center font-semibold text-sm hover:brightness-95 transition-all">
+            ✓ Self-care offered
           </button>
         </div>
-        <button onClick={() => { setSelfCareOffered('declined'); advanceToNext(4); }} className="w-full text-center text-xs text-gray-400 hover:text-triage-blue-textpy-2 border-t border-gray-100">
+        <button onClick={() => { setSelfCareOffered('declined'); advanceToNext(4); }} className="w-full text-center text-sm text-gray-400 hover:text-triage-blue-text py-3 border-t border-gray-100 transition-colors">
           Patient declined — continue to Step 5 ↓
         </button>
       </FlowStep>
@@ -818,12 +823,12 @@ const DecisionFlow = ({ data, settings, onRecord, showToast }) => {
       {/* ═══════════════════════════════════════════════════
           STEP 5: FORWARD TO TIER 2 (v3.5)
           ═══════════════════════════════════════════════════ */}
-      <FlowStep num={5} color="violet" title="➡️ FORWARD TO TIER 2" subtitle="Forward ALL remaining requests to the Patient Services Team"
+      <FlowStep num={5} color="violet" title="➡️ Forward to Tier 2" subtitle="Forward ALL remaining requests to the Patient Services Team"
         expanded={expandedStep === 5} onToggle={() => toggle(5)} completed={completedSteps.has(5)}>
 
-        <div className="text-gray-500 text-[11px] mb-3 font-semibold">Forward to Tier 2 if ANY apply:</div>
+        <div className="text-gray-500 text-sm mb-3 font-semibold">Forward to Tier 2 if ANY apply:</div>
         <div className="bg-gray-50 border border-gray-200 rounded-xl p-3 mb-3">
-          <div className="text-gray-400 text-[11px] space-y-0.5">
+          <div className="text-gray-400 text-sm space-y-0.5">
             {['Multiple overlapping problems', 'Severe or worsening symptoms', 'Symptoms >2 weeks not improving',
               'New lump / night sweats / unexplained bleeding / weight loss (cancer flags)',
               'Patient anxious, unhappy, or requesting GP', 'Patient declined Pharmacy First / self-care',
@@ -833,31 +838,31 @@ const DecisionFlow = ({ data, settings, onRecord, showToast }) => {
         </div>
 
         {/* TIER 1 → TIER 2 HANDOVER FORM */}
-        <div className="bg-triage-purple-light border border-triage-purple-dark/20 rounded-xl p-3 mb-3">
-          <div className="text-triage-purple-textfont-bold text-xs mb-2">📋 TIER 1 → TIER 2 HANDOVER</div>
-          <div className="space-y-2 text-[11px]">
+        <div className="bg-white border border-gray-100 rounded-2xl shadow-sm p-4 mb-4">
+          <div className="text-triage-purple-text font-semibold text-base mb-3">📋 Tier 1 → Tier 2 Handover</div>
+          <div className="space-y-3 text-sm">
             <div>
-              <span className="text-gray-500 font-bold">Patient&apos;s exact words:</span>
+              <span className="text-gray-500 font-semibold">Patient&apos;s exact words:</span>
               <div className="text-gray-800 mt-0.5">{scanText || '(not entered)'}</div>
             </div>
-            <div className="grid grid-cols-2 gap-2">
-              <div><span className="text-gray-500 font-bold">EMIS checked:</span> <span className="text-gray-800">{emisChecks.some(Boolean) ? 'Yes' : 'No'}</span></div>
-              <div><span className="text-gray-500 font-bold">NEW/ONGOING:</span> <span className="text-gray-800">{newOngoing === 'plan-exists' ? 'ONGOING' : newOngoing === 'no-plan' ? 'NEW' : '—'}</span></div>
+            <div className="grid grid-cols-2 gap-3">
+              <div><span className="text-gray-500 font-semibold">EMIS checked:</span> <span className="text-gray-800">{emisChecks.some(Boolean) ? 'Yes' : 'No'}</span></div>
+              <div><span className="text-gray-500 font-semibold">New/Ongoing:</span> <span className="text-gray-800">{newOngoing === 'plan-exists' ? 'Ongoing' : newOngoing === 'no-plan' ? 'New' : '—'}</span></div>
             </div>
-            {emisFindings && <div><span className="text-gray-500 font-bold">EMIS findings:</span> <span className="text-gray-800">{emisFindings}</span></div>}
-            <div><span className="text-gray-500 font-bold">High risk:</span> <span className="text-gray-800">{scanResults?.hasRisk ? 'Yes — ' + scanResults.risk.map(r => r.group).join(', ') : 'No'}</span></div>
-            <div><span className="text-gray-500 font-bold">Red flags checked:</span> <span className="text-gray-800">{completedSteps.has(1) ? 'Yes' : 'No'}</span></div>
-            <div><span className="text-gray-500 font-bold">Pharmacy First offered:</span> <span className="text-gray-800">{selfCareOffered === 'pharmacy' ? 'Yes' : selfCareOffered === 'selfcare' ? 'Self-care' : selfCareOffered === 'declined' ? 'Declined' : 'No'}</span></div>
+            {emisFindings && <div><span className="text-gray-500 font-semibold">EMIS findings:</span> <span className="text-gray-800">{emisFindings}</span></div>}
+            <div><span className="text-gray-500 font-semibold">High risk:</span> <span className="text-gray-800">{scanResults?.hasRisk ? 'Yes — ' + scanResults.risk.map(r => r.group).join(', ') : 'No'}</span></div>
+            <div><span className="text-gray-500 font-semibold">Red flags checked:</span> <span className="text-gray-800">{completedSteps.has(1) ? 'Yes' : 'No'}</span></div>
+            <div><span className="text-gray-500 font-semibold">Pharmacy First offered:</span> <span className="text-gray-800">{selfCareOffered === 'pharmacy' ? 'Yes' : selfCareOffered === 'selfcare' ? 'Self-care' : selfCareOffered === 'declined' ? 'Declined' : 'No'}</span></div>
             <div>
-              <span className="text-gray-500 font-bold">Flags identified:</span>
-              <div className="flex flex-wrap gap-1 mt-1">
-                {scanResults?.hasRed && <span className="bg-triage-red/20 text-triage-red-textpx-1.5 py-0.5 rounded text-[10px]">RED</span>}
-                {scanResults?.hasAmber && <span className="bg-triage-amber/20 text-triage-amber-textpx-1.5 py-0.5 rounded text-[10px]">AMBER</span>}
-                {scanResults?.hasPurple && <span className="bg-triage-purple-light text-triage-purple-text px-1.5 py-0.5 rounded text-[10px]">PURPLE</span>}
-                {scanResults?.hasYellow && <span className="bg-triage-yellow-light text-triage-yellow-text px-1.5 py-0.5 rounded text-[10px]">YELLOW</span>}
-                {scanResults?.hasGreen && <span className="bg-triage-green/20 text-triage-green-textpx-1.5 py-0.5 rounded text-[10px]">GREEN</span>}
-                {scanResults?.hasCancer && <span className="bg-triage-red/20 text-triage-red-textpx-1.5 py-0.5 rounded text-[10px]">CANCER?</span>}
-                {scanResults?.hasRisk && <span className="bg-triage-teal/20 text-triage-teal-textpx-1.5 py-0.5 rounded text-[10px]">HIGH RISK</span>}
+              <span className="text-gray-500 font-semibold">Flags identified:</span>
+              <div className="flex flex-wrap gap-1.5 mt-1.5">
+                {scanResults?.hasRed && <span className="bg-triage-red-light text-triage-red-text px-2 py-0.5 rounded-full text-sm font-medium">Red</span>}
+                {scanResults?.hasAmber && <span className="bg-triage-amber-light text-triage-amber-text px-2 py-0.5 rounded-full text-sm font-medium">Amber</span>}
+                {scanResults?.hasPurple && <span className="bg-triage-purple-light text-triage-purple-text px-2 py-0.5 rounded-full text-sm font-medium">Purple</span>}
+                {scanResults?.hasYellow && <span className="bg-triage-yellow-light text-triage-yellow-text px-2 py-0.5 rounded-full text-sm font-medium">Yellow</span>}
+                {scanResults?.hasGreen && <span className="bg-triage-green-light text-triage-green-text px-2 py-0.5 rounded-full text-sm font-medium">Green</span>}
+                {scanResults?.hasCancer && <span className="bg-triage-red-light text-triage-red-text px-2 py-0.5 rounded-full text-sm font-medium">Cancer?</span>}
+                {scanResults?.hasRisk && <span className="bg-triage-teal-light text-triage-teal-text px-2 py-0.5 rounded-full text-sm font-medium">High risk</span>}
                 {!scanResults?.hasAny && <span className="text-gray-400">None detected</span>}
               </div>
             </div>
@@ -890,40 +895,40 @@ const DecisionFlow = ({ data, settings, onRecord, showToast }) => {
           navigator.clipboard.writeText(msg);
           showToast('Handover copied to clipboard');
         }}
-          className="w-full bg-gray-50 border border-gray-200 text-gray-600 rounded-xl py-3 text-center font-semibold text-sm flex items-center justify-center gap-2 hover:bg-gray-100 mb-3">
-          <Copy size={16} />📋 Copy Handover to Clipboard
+          className="w-full bg-triage-purple-light border border-triage-purple-dark/20 text-triage-purple-text rounded-xl py-3.5 text-center font-semibold text-sm flex items-center justify-center gap-2 hover:brightness-95 transition-all mb-4">
+          <Copy size={16} />📋 Copy handover to clipboard
         </button>
 
         <button onClick={resetFlow}
-          className="w-full bg-triage-blue/10 border border-triage-blue/25 text-triage-blue-textrounded-xl py-2.5 text-center font-semibold text-xs hover:bg-triage-blue/20">
-          🔄 Start New Triage
+          className="w-full bg-triage-blue-light border border-triage-blue-dark/20 text-triage-blue-text rounded-xl py-3 text-center font-semibold text-sm hover:brightness-95 transition-all">
+          🔄 Start new triage
         </button>
       </FlowStep>
 
       {/* ---- IF IN DOUBT BANNER ---- */}
-      <div className="bg-triage-blue-light border border-triage-blue-dark/20 rounded-2xl p-4 text-center mt-2 mb-2">
-        <div className="text-triage-blue-textfont-black text-sm">⚠️ IF IN DOUBT → ASK A CLINICIAN</div>
-        <div className="text-gray-400 text-xs mt-1">GP Triager from 8am · Duty clinician on site</div>
+      <div className="bg-white border border-gray-100 rounded-2xl shadow-sm p-5 text-center mt-3 mb-3">
+        <div className="text-triage-blue-text font-semibold text-base">⚠️ If in doubt → ask a clinician</div>
+        <div className="text-gray-400 text-sm mt-1">GP Triager from 8am · Duty clinician on site</div>
       </div>
 
       {/* ---- VERSION TEXT ---- */}
-      <div className="text-center text-gray-300 text-[10px] py-2 mb-2">
+      <div className="text-center text-gray-300 text-sm py-2 mb-2">
         SOP v3.5 | Tier 1 Flowchart v4.0 | Feb 2026 | Dr Sahar Jahanian
       </div>
 
       {/* ---- QUICK ACTION BAR (fixed bottom) ---- */}
-      <div className="fixed bottom-0 left-0 right-0 z-30 bg-white/95 border-t border-gray-200 p-2">
-        <div className="flex gap-2 max-w-lg mx-auto">
+      <div className="fixed bottom-0 left-0 right-0 z-30 bg-white shadow-md border-t border-gray-100 p-2.5">
+        <div className="flex gap-2.5 max-w-lg mx-auto">
           <button onClick={() => setQuickAction(quickAction === '999' ? null : '999')}
-            className="flex-1 bg-triage-red/20 border border-triage-red/30 text-triage-red-textrounded-xl py-2 text-[11px] font-bold text-center">
+            className="flex-1 bg-triage-red-light border border-triage-red-dark/20 text-triage-red-text rounded-xl py-2.5 text-sm font-semibold text-center hover:brightness-95 transition-all">
             🚨 999
           </button>
           <button onClick={() => setQuickAction(quickAction === 'crisis' ? null : 'crisis')}
-            className="flex-1 bg-triage-amber/20 border border-triage-amber/30 text-triage-amber-textrounded-xl py-2 text-[11px] font-bold text-center">
+            className="flex-1 bg-triage-amber-light border border-triage-amber-dark/20 text-triage-amber-text rounded-xl py-2.5 text-sm font-semibold text-center hover:brightness-95 transition-all">
             📞 Crisis
           </button>
           <button onClick={() => { setExpandedStep(5); setTimeout(() => document.getElementById('flow-step-5')?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100); }}
-            className="flex-1 bg-triage-blue/20 border border-triage-blue/30 text-triage-blue-textrounded-xl py-2 text-[11px] font-bold text-center">
+            className="flex-1 bg-triage-blue-light border border-triage-blue-dark/20 text-triage-blue-text rounded-xl py-2.5 text-sm font-semibold text-center hover:brightness-95 transition-all">
             ➡️ Tier 2
           </button>
           <button onClick={() => {
@@ -941,20 +946,20 @@ const DecisionFlow = ({ data, settings, onRecord, showToast }) => {
             if (parts.length) { navigator.clipboard.writeText(parts.join('\n')); showToast('Copied to clipboard'); }
             else showToast('Nothing to copy yet');
           }}
-            className="flex-1 bg-gray-100 border border-gray-200 text-gray-500 rounded-xl py-2 text-[11px] font-bold text-center">
+            className="flex-1 bg-gray-50 border border-gray-200 text-gray-500 rounded-xl py-2.5 text-sm font-semibold text-center hover:bg-gray-100 transition-all">
             📋 Copy
           </button>
         </div>
         {quickAction === '999' && (
-          <div className="max-w-lg mx-auto mt-2 bg-triage-red/10 border border-triage-red/25 rounded-xl p-2.5 animate-fade-slide">
-            <div className="text-triage-red-textfont-bold text-xs">Call 999. Inform duty clinician.</div>
-            <div className="text-gray-500 text-[11px] mt-0.5">On-site ambulance: <strong className="text-gray-800">020 3162 7525</strong></div>
+          <div className="max-w-lg mx-auto mt-2.5 bg-triage-red-light border border-triage-red-dark/20 rounded-xl p-3 animate-fade-slide">
+            <div className="text-triage-red-text font-semibold text-sm">Call 999. Inform duty clinician.</div>
+            <div className="text-gray-500 text-sm mt-0.5">On-site ambulance: <strong className="text-gray-800">020 3162 7525</strong></div>
           </div>
         )}
         {quickAction === 'crisis' && (
-          <div className="max-w-lg mx-auto mt-2 bg-triage-amber/10 border border-triage-amber/25 rounded-xl p-2.5 animate-fade-slide">
-            <div className="text-triage-amber-textfont-bold text-xs">Crisis Lines</div>
-            <div className="text-gray-500 text-[11px] mt-0.5">Adults: <strong className="text-gray-800">0800 028 8000</strong> | CAMHS &lt;18: <strong className="text-gray-800">0203 228 5980</strong></div>
+          <div className="max-w-lg mx-auto mt-2.5 bg-triage-amber-light border border-triage-amber-dark/20 rounded-xl p-3 animate-fade-slide">
+            <div className="text-triage-amber-text font-semibold text-sm">Crisis lines</div>
+            <div className="text-gray-500 text-sm mt-0.5">Adults: <strong className="text-gray-800">0800 028 8000</strong> | CAMHS &lt;18: <strong className="text-gray-800">0203 228 5980</strong></div>
           </div>
         )}
       </div>
@@ -965,15 +970,15 @@ const DecisionFlow = ({ data, settings, onRecord, showToast }) => {
           <div className={`max-w-lg mx-auto ${C[outcome.color]?.bg || C.blue.bg} border ${C[outcome.color]?.border || C.blue.border} rounded-2xl p-3 backdrop-blur-xl shadow-2xl`}>
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2 flex-1 min-w-0">
-                <CheckCircle size={18} className={C[outcome.color]?.text || 'text-triage-blue'} />
+                <CheckCircle size={18} className={C[outcome.color]?.text || 'text-triage-blue-text'} />
                 <div className="min-w-0">
-                  <div className={`font-bold text-sm ${C[outcome.color]?.text || 'text-triage-blue'} truncate`}>{outcome.text}</div>
-                  <div className="text-gray-400 text-[10px]">{outcome.time} · Document in EMIS</div>
+                  <div className={`font-bold text-sm ${C[outcome.color]?.text || 'text-triage-blue-text'} truncate`}>{outcome.text}</div>
+                  <div className="text-gray-400 text-sm">{outcome.time} · Document in EMIS</div>
                 </div>
               </div>
               <div className="flex gap-1.5 flex-shrink-0 ml-2">
                 <CopyBtn text={`${outcome.time} - ${outcome.text}`} label="Copy" onCopy={() => showToast('Copied for EMIS')} />
-                <button onClick={resetFlow} className="px-2.5 py-2 rounded-xl bg-gray-100 border border-gray-200 text-gray-500 text-xs font-semibold hover:bg-gray-100">
+                <button onClick={resetFlow} className="px-2.5 py-2 rounded-xl bg-gray-100 border border-gray-200 text-gray-500 text-sm font-semibold hover:bg-gray-100">
                   <RotateCcw size={14} />
                 </button>
               </div>
@@ -991,27 +996,27 @@ const SearchScreen = ({ data }) => {
   const results = useKeywordScanner(search, data.redFlags, data.amberFlags, data.pharmacyFirst, data.highRiskGroups);
   return (
     <div className="p-4 pb-24 max-w-lg mx-auto">
-      <h1 className="text-lg font-black mb-3 flex items-center gap-2 text-gray-800"><Search size={20} className="text-triage-blue-text" />Quick Lookup</h1>
+      <h1 className="text-lg font-semibold mb-3 flex items-center gap-2 text-gray-800"><Search size={20} className="text-triage-blue-text" />Quick Lookup</h1>
       <SearchBar value={search} onChange={setSearch} placeholder="Type symptom or keyword..." />
       {search.length >= 2 && !results?.hasAny && <p className="text-center text-gray-400 mt-8 text-sm">No matches. If unsure → GP Triager.</p>}
       {results?.red.length > 0 && (
-        <div className="mb-4"><h2 className="font-bold text-triage-red-textmb-2 text-sm flex items-center gap-2"><AlertTriangle size={16} />RED FLAGS — Call 999</h2>
-          {results.red.map((f, i) => <GlassCard key={`${f.system}-${i}`} color="red" className="!p-3 !mb-2"><div className="text-gray-700 text-sm">{f.symptom}</div><div className="text-triage-red-textfont-bold text-xs mt-1">→ {f.action}</div></GlassCard>)}
+        <div className="mb-4"><h2 className="font-bold text-triage-red-text mb-2 text-sm flex items-center gap-2"><AlertTriangle size={16} />RED FLAGS — Call 999</h2>
+          {results.red.map((f, i) => <GlassCard key={`${f.system}-${i}`} color="red" className="!p-3 !mb-2"><div className="text-gray-700 text-sm">{f.symptom}</div><div className="text-triage-red-text font-bold text-sm mt-1">→ {f.action}</div></GlassCard>)}
         </div>
       )}
       {results?.amber.length > 0 && (
-        <div className="mb-4"><h2 className="font-bold text-triage-amber-textmb-2 text-sm flex items-center gap-2"><AlertCircle size={16} />AMBER — Same-Day</h2>
-          {results.amber.map(f => <GlassCard key={f.id} color="amber" className="!p-3 !mb-2"><div className="text-triage-amber-textfont-bold text-xs">{f.category}</div><div className="flex flex-wrap gap-1 mt-1">{f.keywords.slice(0, 6).map((k, i) => <span key={i} className="bg-gray-50 px-1.5 py-0.5 rounded text-[10px] text-gray-400">{k}</span>)}</div><div className="text-triage-amber-texttext-xs font-medium mt-1.5">→ {f.action}</div></GlassCard>)}
+        <div className="mb-4"><h2 className="font-bold text-triage-amber-text mb-2 text-sm flex items-center gap-2"><AlertCircle size={16} />AMBER — Same-Day</h2>
+          {results.amber.map(f => <GlassCard key={f.id} color="amber" className="!p-3 !mb-2"><div className="text-triage-amber-text font-bold text-sm">{f.category}</div><div className="flex flex-wrap gap-1 mt-1">{f.keywords.slice(0, 6).map((k, i) => <span key={i} className="bg-gray-50 px-1.5 py-0.5 rounded text-sm text-gray-400">{k}</span>)}</div><div className="text-triage-amber-text text-sm font-medium mt-1.5">→ {f.action}</div></GlassCard>)}
         </div>
       )}
       {results?.pharmacy.length > 0 && (
-        <div className="mb-4"><h2 className="font-bold text-triage-green-textmb-2 text-sm flex items-center gap-2"><Pill size={16} />Pharmacy First</h2>
-          {results.pharmacy.map(c => <GlassCard key={c.id} color="green" className="!p-3 !mb-2"><span className="text-lg mr-2">{c.icon}</span><span className="font-bold text-gray-800 text-sm">{c.name}</span><span className="text-gray-400 text-xs ml-2">({c.ageRange})</span></GlassCard>)}
+        <div className="mb-4"><h2 className="font-bold text-triage-green-text mb-2 text-sm flex items-center gap-2"><Pill size={16} />Pharmacy First</h2>
+          {results.pharmacy.map(c => <GlassCard key={c.id} color="green" className="!p-3 !mb-2"><span className="text-lg mr-2">{c.icon}</span><span className="font-bold text-gray-800 text-sm">{c.name}</span><span className="text-gray-400 text-sm ml-2">({c.ageRange})</span></GlassCard>)}
         </div>
       )}
       {results?.risk.length > 0 && (
-        <div className="mb-4"><h2 className="font-bold text-triage-amber-textmb-2 text-sm flex items-center gap-2"><Shield size={16} />High-Risk</h2>
-          {results.risk.map(g => <GlassCard key={g.id} color="amber" className="!p-3 !mb-2"><div className="flex items-center gap-2"><span className="text-lg">{g.icon}</span><span className="text-gray-800 font-semibold text-sm">{g.group}</span></div><div className="text-gray-400 text-xs mt-1">{g.action}</div></GlassCard>)}
+        <div className="mb-4"><h2 className="font-bold text-triage-amber-text mb-2 text-sm flex items-center gap-2"><Shield size={16} />High-Risk</h2>
+          {results.risk.map(g => <GlassCard key={g.id} color="amber" className="!p-3 !mb-2"><div className="flex items-center gap-2"><span className="text-lg">{g.icon}</span><span className="text-gray-800 font-semibold text-sm">{g.group}</span></div><div className="text-gray-400 text-sm mt-1">{g.action}</div></GlassCard>)}
         </div>
       )}
     </div>
@@ -1024,7 +1029,7 @@ const ContactsScreen = ({ contacts }) => {
   const filtered = contacts.filter(c => c.service.toLowerCase().includes(search.toLowerCase()));
   return (
     <div className="p-4 pb-24 max-w-lg mx-auto">
-      <h1 className="text-lg font-black mb-3 flex items-center gap-2 text-gray-800"><Phone size={20} className="text-triage-blue-text" />Key Contacts</h1>
+      <h1 className="text-lg font-semibold mb-3 flex items-center gap-2 text-gray-800"><Phone size={20} className="text-triage-blue-text" />Key Contacts</h1>
       <SearchBar value={search} onChange={setSearch} placeholder="Search contacts..." />
       {filtered.map(c => <div key={c.id}><PhoneLink {...c} /></div>)}
     </div>
@@ -1121,16 +1126,16 @@ const TrainingScreen = ({ onBack, scenarios }) => {
   return (
     <div className="p-4 pb-24 max-w-lg mx-auto">
       <BackButton onClick={onBack} />
-      <h1 className="text-lg font-black mb-2 flex items-center gap-2 text-gray-800"><GraduationCap size={20} className="text-triage-purple-text" />Training</h1>
+      <h1 className="text-lg font-semibold mb-2 flex items-center gap-2 text-gray-800"><GraduationCap size={20} className="text-triage-purple-text" />Training</h1>
 
       {/* Progress bar */}
       <div className="bg-white shadow-sm rounded-xl p-3 border border-gray-200 mb-3">
         <div className="flex items-center justify-between mb-1.5">
-          <span className="text-gray-500 text-xs font-semibold">{completedCount}/{totalCount} completed ({pct}%)</span>
-          <button onClick={resetProgress} className="text-gray-400 text-[10px] hover:text-triage-red-text">Reset Progress</button>
+          <span className="text-gray-500 text-sm font-semibold">{completedCount}/{totalCount} completed ({pct}%)</span>
+          <button onClick={resetProgress} className="text-gray-400 text-sm hover:text-triage-red-text">Reset Progress</button>
         </div>
         <div className="w-full h-1.5 bg-gray-100 rounded-full overflow-hidden">
-          <div className="h-full bg-triage-green/60 rounded-full transition-all" style={{ width: `${pct}%` }} />
+          <div className="h-full bg-triage-green-light0 rounded-full transition-all" style={{ width: `${pct}%` }} />
         </div>
       </div>
 
@@ -1141,7 +1146,7 @@ const TrainingScreen = ({ onBack, scenarios }) => {
           const isActive = selectedTopic === t.key;
           return (
             <button key={t.label} onClick={() => { setSelectedTopic(t.key); setIdx(0); setAnswer(null); setShowResult(false); setFollowUpPart(1); }}
-              className={`px-2.5 py-1.5 rounded-lg border text-[10px] font-semibold transition-all ${isActive ? 'bg-triage-purple-light border-triage-purple-dark/30 text-triage-violet' : 'border-gray-200 text-gray-400 hover:border-gray-200'}`}>
+              className={`px-2.5 py-1.5 rounded-lg border text-sm font-semibold transition-all ${isActive ? 'bg-triage-purple-light border-triage-purple-dark/30 text-triage-purple-text' : 'border-gray-200 text-gray-400 hover:border-gray-200'}`}>
               {t.label} <span className="text-gray-300 ml-0.5">{count}</span>
             </button>
           );
@@ -1150,17 +1155,17 @@ const TrainingScreen = ({ onBack, scenarios }) => {
 
       {/* Scenario counter + score */}
       <div className="flex items-center justify-between mb-3">
-        <span className="text-gray-500 text-sm">{idx + 1}/{filtered.length}{hasFollowUp && <span className="text-triage-teal-textml-1.5 text-[10px] font-bold">Part {followUpPart}/{totalParts}</span>}</span>
+        <span className="text-gray-500 text-sm">{idx + 1}/{filtered.length}{hasFollowUp && <span className="text-triage-teal-text ml-1.5 text-sm font-bold">Part {followUpPart}/{totalParts}</span>}</span>
         <div className="flex items-center gap-2">
-          {progress.includes(sc.id) && <span className="text-triage-green-texttext-[10px] font-bold">✅ Done</span>}
+          {progress.includes(sc.id) && <span className="text-triage-green-text text-sm font-bold">✅ Done</span>}
           <span className="font-bold text-gray-800 text-sm">Score: {score.correct}/{score.total}</span>
         </div>
       </div>
 
       {/* Scenario card */}
       <GlassCard color="blue">
-        <div className="text-triage-blue-textfont-bold mb-2 text-xs">
-          📋 ANIMA REQUEST:{hasFollowUp && <span className="text-triage-teal-textml-2">{followUpPart === 1 ? 'Initial call' : 'Follow-up'}</span>}
+        <div className="text-triage-blue-text font-bold mb-2 text-sm">
+          📋 ANIMA REQUEST:{hasFollowUp && <span className="text-triage-teal-text ml-2">{followUpPart === 1 ? 'Initial call' : 'Follow-up'}</span>}
         </div>
         <p className="text-gray-600 text-sm leading-relaxed">{currentPart.scenario}</p>
       </GlassCard>
@@ -1168,7 +1173,7 @@ const TrainingScreen = ({ onBack, scenarios }) => {
       {/* Options */}
       <div className="mt-3 space-y-2">
         {currentPart.options.map(o => {
-          let style = 'bg-gray-50 border-gray-200 hover:border-triage-blue/30';
+          let style = 'bg-gray-50 border-gray-200 hover:border-triage-blue-dark/25';
           if (showResult) {
             if (o.id === currentPart.correctAnswer) style = 'bg-triage-green-light border-triage-green-dark/40';
             else if (o.id === answer) style = 'bg-triage-red-light border-triage-red-dark/40';
@@ -1190,14 +1195,14 @@ const TrainingScreen = ({ onBack, scenarios }) => {
             {hasFollowUp && followUpPart === 1 && answer === currentPart.correctAnswer ? (
               <Button color="teal" full onClick={next}>Continue to Part 2 →</Button>
             ) : hasFollowUp && followUpPart === 1 && answer !== currentPart.correctAnswer ? (
-              <div className="text-center text-gray-400 text-xs mb-2">Get Part 1 correct to unlock the follow-up scenario.
+              <div className="text-center text-gray-400 text-sm mb-2">Get Part 1 correct to unlock the follow-up scenario.
                 {idx < filtered.length - 1 && <div className="mt-2"><Button color="blue" full onClick={() => { setIdx(idx + 1); setAnswer(null); setShowResult(false); setFollowUpPart(1); }}>Skip to Next →</Button></div>}
               </div>
             ) : idx < filtered.length - 1 ? (
               <Button color="blue" full onClick={next}>Next →</Button>
             ) : (
               <div className="text-center">
-                <div className="text-xl font-black mb-3 text-gray-800">{score.correct}/{score.total}</div>
+                <div className="text-xl font-semibold mb-3 text-gray-800">{score.correct}/{score.total}</div>
                 <Button color="green" onClick={restart}>Restart Topic</Button>
               </div>
             )}
@@ -1254,100 +1259,100 @@ const Tier2Workflow = ({ data, showToast }) => {
   return (
     <div className="p-3 sm:p-4 pb-36 max-w-lg mx-auto">
       {/* TIER 2 HEADER */}
-      <div className="mb-4">
-        <h1 className="text-lg font-black text-gray-800 tracking-tight">TIER 2 — Patient Services Team</h1>
-        <p className="text-[11px] text-triage-amber-textfont-bold mt-1">YOU PROCESS AND BOOK — YOU DO NOT DECIDE CLINICAL URGENCY</p>
-        <p className="text-[10px] text-gray-400 mt-1">Match the pattern → take the action. If &gt;60 seconds → escalate to Tier 3.</p>
+      <div className="mb-5">
+        <h1 className="text-xl font-semibold text-gray-800">Tier 2 — Patient Services Team</h1>
+        <p className="text-sm text-triage-amber-text font-semibold mt-1.5">You process and book — you do not decide clinical urgency</p>
+        <p className="text-sm text-gray-400 mt-1">Match the pattern → take the action. If &gt;60 seconds → escalate to Tier 3.</p>
         {(t2CompletedSteps.size > 0) && (
-          <button onClick={resetT2} className="mt-2 flex items-center gap-1.5 px-3 py-2 bg-triage-blue/20 border border-triage-blue/30 rounded-xl text-triage-blue-texttext-xs font-bold">
-            <RotateCcw size={14} />New Triage
+          <button onClick={resetT2} className="mt-3 flex items-center gap-1.5 px-4 py-2.5 bg-triage-blue-light border border-triage-blue-dark/20 rounded-xl text-triage-blue-text text-sm font-semibold hover:brightness-95 transition-all">
+            <RotateCcw size={14} />New triage
           </button>
         )}
       </div>
 
       {/* TIME LIMITS BAR */}
-      <div className="grid grid-cols-3 gap-2 mb-4">
-        <div className="bg-triage-amber/10 border border-triage-amber/25 rounded-xl p-2 text-center">
-          <div className="text-triage-amber-textfont-bold text-[11px]">AMBER</div>
-          <div className="text-[10px] text-gray-500">within 1 hour</div>
+      <div className="grid grid-cols-3 gap-3 mb-5">
+        <div className="bg-triage-amber-light border border-triage-amber-dark/20 rounded-2xl p-3 text-center shadow-sm">
+          <div className="text-triage-amber-text font-semibold text-sm">Amber</div>
+          <div className="text-sm text-gray-500">within 1 hour</div>
         </div>
-        <div className="bg-triage-yellow-light border border-triage-yellow-dark/30 rounded-xl p-2 text-center">
-          <div className="text-triage-yellow-text font-bold text-[11px]">YELLOW + GREEN</div>
-          <div className="text-[10px] text-gray-500">within 2 hours</div>
+        <div className="bg-triage-yellow-light border border-triage-yellow-dark/20 rounded-2xl p-3 text-center shadow-sm">
+          <div className="text-triage-yellow-text font-semibold text-sm">Yellow + Green</div>
+          <div className="text-sm text-gray-500">within 2 hours</div>
         </div>
-        <div className="bg-triage-red/10 border border-triage-red/25 rounded-xl p-2 text-center">
-          <div className="text-triage-red-textfont-bold text-[11px]">END OF DAY</div>
-          <div className="text-[10px] text-gray-500">auto-escalate</div>
+        <div className="bg-triage-red-light border border-triage-red-dark/20 rounded-2xl p-3 text-center shadow-sm">
+          <div className="text-triage-red-text font-semibold text-sm">End of day</div>
+          <div className="text-sm text-gray-500">auto-escalate</div>
         </div>
       </div>
 
       {/* ═══ T2 STEP 1: RECEIVE & REVIEW ═══ */}
-      <FlowStep num={1} color="blue" title="📋 RECEIVE & REVIEW" subtitle="Read the Tier 1 handover and enter patient words"
+      <FlowStep num={1} color="blue" title="📋 Receive & Review" subtitle="Read the Tier 1 handover and enter patient words"
         expanded={t2Step === 1} onToggle={() => t2Toggle(1)} completed={t2CompletedSteps.has(1)}>
         <div className="space-y-3">
           <TextArea label="Paste Tier 1 Handover" value={handoverPaste} onChange={setHandoverPaste} placeholder="Paste the Tier 1 handover from clipboard..." rows={4} />
           {handoverPaste && (
             <div className="bg-gray-50 border border-gray-200 rounded-xl p-3">
-              <div className="text-[11px] text-triage-blue-textfont-bold mb-1">HANDOVER RECEIVED</div>
-              <pre className="text-[11px] text-gray-500 whitespace-pre-wrap font-sans">{handoverPaste}</pre>
+              <div className="text-sm text-triage-blue-text font-bold mb-1">Handover received</div>
+              <pre className="text-sm text-gray-500 whitespace-pre-wrap font-sans">{handoverPaste}</pre>
             </div>
           )}
           <TextArea label="Patient's Words (for scanner)" value={t2PatientWords} onChange={setT2PatientWords} placeholder="Enter patient's words for keyword scanning..." rows={2} />
           {scan && (
-            <div className="flex gap-1.5 flex-wrap">
-              {scan.hasStop && <span className="bg-red-600/30 border border-red-500/50 text-red-300 px-2.5 py-1 rounded-full text-[11px] font-bold animate-pulse">🚨 STOP</span>}
-              {scan.hasRed && <span className="bg-triage-red/15 border border-triage-red/30 text-triage-red-textpx-2.5 py-1 rounded-full text-[11px] font-bold">🔴 RED</span>}
-              {scan.hasAmber && <span className="bg-triage-amber/15 border border-triage-amber/30 text-triage-amber-textpx-2.5 py-1 rounded-full text-[11px] font-bold">🟠 AMBER</span>}
-              {scan.hasPurple && <span className="bg-triage-purple-light border border-triage-purple-dark/35 text-triage-purple-text px-2.5 py-1 rounded-full text-[11px] font-bold">🟣 PURPLE</span>}
-              {scan.hasYellow && <span className="bg-triage-yellow-light border border-triage-yellow-dark/35 text-triage-yellow-text px-2.5 py-1 rounded-full text-[11px] font-bold">🟡 YELLOW</span>}
-              {scan.hasGreen && <span className="bg-triage-green/15 border border-triage-green/30 text-triage-green-textpx-2.5 py-1 rounded-full text-[11px] font-bold">🟢 GREEN</span>}
-              {scan.hasRisk && <span className="bg-triage-teal/15 border border-triage-teal/30 text-triage-teal-textpx-2.5 py-1 rounded-full text-[11px] font-bold">⚠️ HIGH RISK</span>}
+            <div className="flex gap-2 flex-wrap">
+              {scan.hasStop && <span className="bg-red-100 border border-red-300 text-red-700 px-3 py-1.5 rounded-full text-sm font-semibold animate-pulse">🚨 STOP</span>}
+              {scan.hasRed && <span className="bg-triage-red-light border border-triage-red-dark/25 text-triage-red-text px-3 py-1.5 rounded-full text-sm font-semibold">🔴 Red</span>}
+              {scan.hasAmber && <span className="bg-triage-amber-light border border-triage-amber-dark/25 text-triage-amber-text px-3 py-1.5 rounded-full text-sm font-semibold">🟠 Amber</span>}
+              {scan.hasPurple && <span className="bg-triage-purple-light border border-triage-purple-dark/25 text-triage-purple-text px-3 py-1.5 rounded-full text-sm font-semibold">🟣 Purple</span>}
+              {scan.hasYellow && <span className="bg-triage-yellow-light border border-triage-yellow-dark/25 text-triage-yellow-text px-3 py-1.5 rounded-full text-sm font-semibold">🟡 Yellow</span>}
+              {scan.hasGreen && <span className="bg-triage-green-light border border-triage-green-dark/25 text-triage-green-text px-3 py-1.5 rounded-full text-sm font-semibold">🟢 Green</span>}
+              {scan.hasRisk && <span className="bg-triage-teal-light border border-triage-teal-dark/25 text-triage-teal-text px-3 py-1.5 rounded-full text-sm font-semibold">⚠️ High risk</span>}
             </div>
           )}
-          <div className="bg-triage-amber/10 border border-triage-amber/20 rounded-xl p-2.5">
-            <div className="text-[11px] text-triage-amber-textfont-bold">AMBER = within 1 hour | All others = within 2 hours</div>
-            <div className="text-[10px] text-gray-400 mt-1">PROCESS and BOOK protocol-clear. Do NOT decide clinical urgency.</div>
+          <div className="bg-triage-amber-light border border-triage-amber-dark/20 rounded-xl p-2.5">
+            <div className="text-sm text-triage-amber-text font-bold">AMBER = within 1 hour | All others = within 2 hours</div>
+            <div className="text-sm text-gray-400 mt-1">PROCESS and BOOK protocol-clear. Do NOT decide clinical urgency.</div>
           </div>
-          <button onClick={() => t2Advance(1)} className="w-full py-3 bg-triage-blue/20 border border-triage-blue/30 text-triage-blue-textrounded-xl font-bold text-sm">
+          <button onClick={() => t2Advance(1)} className="w-full py-3 bg-triage-blue-light border border-triage-blue-dark/20 text-triage-blue-text rounded-xl font-semibold text-sm hover:brightness-95 transition-all">
             Continue to Purple Check →
           </button>
         </div>
       </FlowStep>
 
       {/* ═══ T2 STEP 2: PURPLE GATE ═══ */}
-      <FlowStep num={2} color="violet" title="🟣 IS THIS PURPLE? — MUST ESCALATE TO TIER 3" subtitle="Check this list FIRST before matching amber/yellow/green"
+      <FlowStep num={2} color="violet" title="🟣 Purple Check — Must Escalate to Tier 3" subtitle="Check this list FIRST before matching amber/yellow/green"
         expanded={t2Step === 2} onToggle={() => t2Toggle(2)} completed={t2CompletedSteps.has(2)}
         locked={!t2CompletedSteps.has(1)} lockedMsg="Complete Step 1 first">
         <div className="space-y-3">
           <div className="bg-triage-purple-light border border-triage-purple-dark/35 rounded-xl p-2.5">
-            <div className="text-triage-purple-text text-[11px] font-bold">If ANY purple trigger applies → Tier 3 REGARDLESS — even if it also matches yellow or green.</div>
+            <div className="text-triage-purple-text text-sm font-bold">If ANY purple trigger applies → Tier 3 REGARDLESS — even if it also matches yellow or green.</div>
           </div>
           <div className="space-y-2">
             {purpleFlags.map((pf, i) => {
               const matched = scan?.purple?.some(p => p.category === pf.category);
               return (
                 <div key={i} className={`border-l-4 ${matched ? 'border-triage-purple-dark bg-triage-purple-light' : 'border-gray-200 bg-gray-50'} rounded-r-xl p-2.5`}>
-                  <div className={`font-bold text-xs ${matched ? 'text-triage-purple-text' : 'text-gray-600'}`}>{pf.category}</div>
-                  <div className="text-[10px] text-gray-400 mt-0.5">{pf.triggers.join(' · ')}</div>
-                  <div className="text-[10px] text-triage-purple-text/70 mt-0.5">{pf.action}</div>
+                  <div className={`font-bold text-sm ${matched ? 'text-triage-purple-text' : 'text-gray-600'}`}>{pf.category}</div>
+                  <div className="text-sm text-gray-400 mt-0.5">{pf.triggers.join(' · ')}</div>
+                  <div className="text-sm text-triage-purple-text/70 mt-0.5">{pf.action}</div>
                 </div>
               );
             })}
           </div>
           {purpleGate === null && (
-            <div className="grid grid-cols-2 gap-2 mt-3">
+            <div className="grid grid-cols-2 gap-3 mt-4">
               <button onClick={() => { setPurpleGate('clear'); t2Advance(2); }}
-                className="py-3 bg-triage-green/20 border border-triage-green/30 text-triage-green-textrounded-xl font-bold text-xs">
+                className="py-3.5 bg-triage-green-light border border-triage-green-dark/20 text-triage-green-text rounded-xl font-semibold text-sm hover:brightness-95 transition-all">
                 No purple triggers — continue
               </button>
               <button onClick={() => { setPurpleGate('purple'); t2MarkDone(2); setT2Step(6); }}
-                className="py-3 bg-triage-purple-light border border-triage-purple-dark/35 text-triage-purple-text rounded-xl font-bold text-xs animate-pulse">
-                PURPLE IDENTIFIED — ESCALATE
+                className="py-3.5 bg-triage-purple-light border border-triage-purple-dark/25 text-triage-purple-text rounded-xl font-semibold text-sm animate-pulse">
+                Purple identified — escalate
               </button>
             </div>
           )}
           {purpleGate && (
-            <div className={`text-center py-2 rounded-xl text-xs font-bold ${purpleGate === 'clear' ? 'bg-triage-green/10 text-triage-green' : 'bg-triage-purple-light text-triage-purple-text'}`}>
+            <div className={`text-center py-3 rounded-xl text-sm font-semibold ${purpleGate === 'clear' ? 'bg-triage-green-light text-triage-green-text' : 'bg-triage-purple-light text-triage-purple-text'}`}>
               {purpleGate === 'clear' ? '✓ No purple — proceeding to amber check' : '🟣 Purple identified — escalating to Tier 3'}
             </div>
           )}
@@ -1355,24 +1360,24 @@ const Tier2Workflow = ({ data, showToast }) => {
       </FlowStep>
 
       {/* ═══ T2 STEP 3: AMBER CHECK ═══ */}
-      <FlowStep num={3} color="amber" title="🟠 IS THIS AMBER? — BOOK SAME-DAY" subtitle="Same-day duty GP (action within 1 hour)"
+      <FlowStep num={3} color="amber" title="🟠 Amber Check — Book Same-day" subtitle="Same-day duty GP (action within 1 hour)"
         expanded={t2Step === 3} onToggle={() => t2Toggle(3)} completed={t2CompletedSteps.has(3)}
         locked={!t2CompletedSteps.has(2) || purpleGate === 'purple'} lockedMsg={purpleGate === 'purple' ? 'Purple identified — skip to escalation' : 'Complete Step 2 first'}>
         <div className="space-y-3">
           <div className="relative">
             <Search className="absolute left-3 top-2.5 text-gray-300" size={14} />
             <input type="text" value={amberSearch} onChange={e => setAmberSearch(e.target.value)}
-              placeholder="Filter amber categories..." className="w-full pl-9 pr-3 py-2 rounded-xl bg-gray-50 border border-gray-200 focus:border-triage-amber/40 focus:outline-none text-gray-800 text-xs" />
+              placeholder="Filter amber categories..." className="w-full pl-9 pr-3 py-2 rounded-xl bg-gray-50 border border-gray-200 focus:border-triage-amber/40 focus:outline-none text-gray-800 text-sm" />
           </div>
           <div className="space-y-2 max-h-80 overflow-y-auto">
             {filteredAmber.map((af, i) => {
               const matched = scan?.amber?.some(a => a.category === af.category);
               return (
-                <div key={i} className={`border-l-4 ${matched ? 'border-triage-amber bg-triage-amber/10' : 'border-gray-200 bg-gray-50'} rounded-r-xl p-2.5`}>
-                  <div className={`font-bold text-xs ${matched ? 'text-triage-amber' : 'text-gray-600'}`}>{af.category}</div>
-                  <div className="text-[10px] text-gray-400 mt-0.5">{af.buzzwords ? af.buzzwords.join(', ') : af.keywords.join(', ')}</div>
-                  <div className="text-[10px] text-triage-amber-dark/70 mt-0.5">{af.action}</div>
-                  {af.notes && <div className="text-[10px] text-gray-400 mt-0.5 italic">{af.notes}</div>}
+                <div key={i} className={`border-l-4 ${matched ? 'border-triage-amber bg-triage-amber-light' : 'border-gray-200 bg-gray-50'} rounded-r-xl p-2.5`}>
+                  <div className={`font-bold text-sm ${matched ? 'text-triage-amber-text' : 'text-gray-600'}`}>{af.category}</div>
+                  <div className="text-sm text-gray-400 mt-0.5">{af.buzzwords ? af.buzzwords.join(', ') : af.keywords.join(', ')}</div>
+                  <div className="text-sm text-triage-amber-dark/70 mt-0.5">{af.action}</div>
+                  {af.notes && <div className="text-sm text-gray-400 mt-0.5 italic">{af.notes}</div>}
                 </div>
               );
             })}
@@ -1380,17 +1385,17 @@ const Tier2Workflow = ({ data, showToast }) => {
           {amberGate === null && (
             <div className="grid grid-cols-2 gap-2 mt-3">
               <button onClick={() => { setAmberGate('clear'); t2Advance(3); }}
-                className="py-3 bg-triage-blue/20 border border-triage-blue/30 text-triage-blue-textrounded-xl font-bold text-xs">
+                className="py-3 bg-triage-blue-light border border-triage-blue-dark/20 text-triage-blue-text rounded-xl font-semibold text-sm hover:brightness-95 transition-all">
                 No amber match — continue
               </button>
               <button onClick={() => { setAmberGate('amber'); t2MarkDone(3); showToast('Amber matched — book same-day duty GP'); }}
-                className="py-3 bg-triage-amber/20 border border-triage-amber/30 text-triage-amber-textrounded-xl font-bold text-xs">
+                className="py-3 bg-triage-amber-light border border-triage-amber-dark/20 text-triage-amber-text rounded-xl font-semibold text-sm hover:brightness-95 transition-all">
                 Amber matched — booking same-day
               </button>
             </div>
           )}
           {amberGate && (
-            <div className={`text-center py-2 rounded-xl text-xs font-bold ${amberGate === 'clear' ? 'bg-triage-blue/10 text-triage-blue' : 'bg-triage-amber/10 text-triage-amber'}`}>
+            <div className={`text-center py-2 rounded-xl text-sm font-bold ${amberGate === 'clear' ? 'bg-triage-blue-light text-triage-blue-text' : 'bg-triage-amber-light text-triage-amber-text'}`}>
               {amberGate === 'clear' ? '✓ No amber — proceeding to yellow check' : '🟠 Amber matched — book same-day duty GP within 1 hour'}
             </div>
           )}
@@ -1398,7 +1403,7 @@ const Tier2Workflow = ({ data, showToast }) => {
       </FlowStep>
 
       {/* ═══ T2 STEP 4: YELLOW CHECK ═══ */}
-      <FlowStep num={4} color="amber" title="🟡 IS THIS YELLOW? — BOOK 1-3 DAYS" subtitle="Book within 1-3 days (action within 2 hours)"
+      <FlowStep num={4} color="amber" title="🟡 Yellow Check — Book 1–3 Days" subtitle="Book within 1-3 days (action within 2 hours)"
         expanded={t2Step === 4} onToggle={() => t2Toggle(4)} completed={t2CompletedSteps.has(4)}
         locked={!t2CompletedSteps.has(3) || purpleGate === 'purple'} lockedMsg="Complete Step 3 first">
         <div className="space-y-3">
@@ -1407,55 +1412,55 @@ const Tier2Workflow = ({ data, showToast }) => {
               const matched = scan?.yellow?.some(y => y.category === yf.category);
               return (
                 <div key={i} className={`border-l-4 ${matched ? 'border-triage-yellow-dark bg-triage-yellow-light' : 'border-gray-200 bg-gray-50'} rounded-r-xl p-2.5`}>
-                  <div className={`font-bold text-xs ${matched ? 'text-triage-yellow-text' : 'text-gray-600'}`}>
+                  <div className={`font-bold text-sm ${matched ? 'text-triage-yellow-text' : 'text-gray-600'}`}>
                     {yf.category}
-                    {yf.econsult && <span className="ml-2 text-[9px] bg-triage-blue/20 text-triage-blue-textpx-1.5 py-0.5 rounded">eConsult?</span>}
+                    {yf.econsult && <span className="ml-2 text-sm bg-triage-blue-light text-triage-blue-text px-1.5 py-0.5 rounded">eConsult?</span>}
                   </div>
-                  <div className="text-[10px] text-gray-400 mt-0.5">{yf.presentation || yf.triggers?.join(' · ')}</div>
-                  {yf.escalateIf && <div className="text-[10px] text-triage-red-dark/70 mt-0.5">Escalate if: {yf.escalateIf}</div>}
+                  <div className="text-sm text-gray-400 mt-0.5">{yf.presentation || yf.triggers?.join(' · ')}</div>
+                  {yf.escalateIf && <div className="text-sm text-triage-red-dark/70 mt-0.5">Escalate if: {yf.escalateIf}</div>}
                 </div>
               );
             })}
           </div>
           {/* Mental Health reminder */}
           <div className="bg-triage-purple-light border border-triage-purple-dark/30 rounded-xl p-2.5">
-            <div className="text-triage-purple-text text-[11px] font-bold">MENTAL HEALTH (non-crisis)</div>
-            <div className="text-[10px] text-gray-500 mt-1">Send Kingston Talking Therapies self-referral info (swlstg.nhs.uk) AND book GP review within 1-3 days. Do NOT just signpost.</div>
+            <div className="text-triage-purple-text text-sm font-bold">Mental health (non-crisis)</div>
+            <div className="text-sm text-gray-500 mt-1">Send Kingston Talking Therapies self-referral info (swlstg.nhs.uk) AND book GP review within 1-3 days. Do NOT just signpost.</div>
           </div>
           {/* eConsult check */}
           {yellowEconsult === null && (
-            <div className="bg-triage-blue/10 border border-triage-blue/25 rounded-xl p-2.5">
-              <div className="text-triage-blue-texttext-[11px] font-bold mb-2">eCONSULT CHECK</div>
-              <div className="text-[10px] text-gray-400 mb-2">Has this condition already been managed via eConsult?</div>
+            <div className="bg-triage-blue-light border border-triage-blue-dark/20 rounded-xl p-2.5">
+              <div className="text-triage-blue-text text-sm font-bold mb-2">eConsult check</div>
+              <div className="text-sm text-gray-400 mb-2">Has this condition already been managed via eConsult?</div>
               <div className="grid grid-cols-2 gap-2">
-                <button onClick={() => setYellowEconsult('tried')} className="py-2 bg-triage-amber/15 border border-triage-amber/25 text-triage-amber-textrounded-xl text-xs font-bold">Yes — tried before → face-to-face</button>
-                <button onClick={() => setYellowEconsult('no')} className="py-2 bg-triage-blue/15 border border-triage-blue/25 text-triage-blue-textrounded-xl text-xs font-bold">No — may suggest eConsult</button>
+                <button onClick={() => setYellowEconsult('tried')} className="py-2 bg-triage-amber-light border border-triage-amber-dark/20 text-triage-amber-text rounded-xl text-sm font-semibold hover:brightness-95 transition-all">Yes — tried before → face-to-face</button>
+                <button onClick={() => setYellowEconsult('no')} className="py-2 bg-triage-blue-light border border-triage-blue-dark/20 text-triage-blue-text rounded-xl text-sm font-semibold hover:brightness-95 transition-all">No — may suggest eConsult</button>
               </div>
             </div>
           )}
           {yellowEconsult && (
-            <div className={`text-center py-2 rounded-xl text-xs font-bold ${yellowEconsult === 'tried' ? 'bg-triage-amber/10 text-triage-amber' : 'bg-triage-blue/10 text-triage-blue'}`}>
+            <div className={`text-center py-2 rounded-xl text-sm font-bold ${yellowEconsult === 'tried' ? 'bg-triage-amber-light text-triage-amber-text' : 'bg-triage-blue-light text-triage-blue-text'}`}>
               {yellowEconsult === 'tried' ? '→ Book face-to-face (eConsult already tried)' : '→ eConsult may be appropriate'}
             </div>
           )}
           {/* Purple safety net */}
           <div className="bg-triage-purple-light border border-triage-purple-dark/25 rounded-xl p-2">
-            <div className="text-triage-purple-text text-[10px] font-bold">PURPLE SAFETY NET: If ANY purple trigger applies → ESCALATE regardless of yellow match</div>
+            <div className="text-triage-purple-text text-sm font-bold">PURPLE SAFETY NET: If ANY purple trigger applies → ESCALATE regardless of yellow match</div>
           </div>
           {yellowGate === null && (
             <div className="grid grid-cols-2 gap-2 mt-2">
               <button onClick={() => { setYellowGate('clear'); t2Advance(4); }}
-                className="py-3 bg-triage-blue/20 border border-triage-blue/30 text-triage-blue-textrounded-xl font-bold text-xs">
+                className="py-3 bg-triage-blue-light border border-triage-blue-dark/20 text-triage-blue-text rounded-xl font-semibold text-sm hover:brightness-95 transition-all">
                 No yellow match — continue
               </button>
               <button onClick={() => { setYellowGate('yellow'); t2MarkDone(4); showToast('Yellow matched — book 1-3 days'); }}
-                className="py-3 bg-triage-yellow-light border border-triage-yellow-dark/35 text-triage-yellow-text rounded-xl font-bold text-xs">
+                className="py-3 bg-triage-yellow-light border border-triage-yellow-dark/35 text-triage-yellow-text rounded-xl font-bold text-sm">
                 Yellow matched — booking 1-3 days
               </button>
             </div>
           )}
           {yellowGate && (
-            <div className={`text-center py-2 rounded-xl text-xs font-bold ${yellowGate === 'clear' ? 'bg-triage-blue/10 text-triage-blue' : 'bg-triage-yellow-light text-triage-yellow-text'}`}>
+            <div className={`text-center py-2 rounded-xl text-sm font-bold ${yellowGate === 'clear' ? 'bg-triage-blue-light text-triage-blue-text' : 'bg-triage-yellow-light text-triage-yellow-text'}`}>
               {yellowGate === 'clear' ? '✓ No yellow — proceeding to green check' : '🟡 Yellow matched — book within 1-3 days'}
             </div>
           )}
@@ -1463,69 +1468,69 @@ const Tier2Workflow = ({ data, showToast }) => {
       </FlowStep>
 
       {/* ═══ T2 STEP 5: GREEN CHECK ═══ */}
-      <FlowStep num={5} color="green" title="🟢 IS THIS GREEN? — BOOK 1 WEEK" subtitle="Book within 1 week (action within 2 hours)"
+      <FlowStep num={5} color="green" title="🟢 Green Check — Book 1 Week" subtitle="Book within 1 week (action within 2 hours)"
         expanded={t2Step === 5} onToggle={() => t2Toggle(5)} completed={t2CompletedSteps.has(5)}
         locked={!t2CompletedSteps.has(4) || purpleGate === 'purple'} lockedMsg="Complete Step 4 first">
         <div className="space-y-3">
           {/* Tried and failed rule */}
-          <div className="bg-triage-amber/10 border border-triage-amber/25 rounded-xl p-2.5">
-            <div className="text-triage-amber-texttext-[11px] font-bold">THE &quot;TRIED AND FAILED&quot; RULE</div>
-            <div className="text-[10px] text-gray-500 mt-1">If patient already managed via eConsult for THIS condition and it did not work → book face-to-face, NOT another eConsult.</div>
+          <div className="bg-triage-amber-light border border-triage-amber-dark/20 rounded-xl p-2.5">
+            <div className="text-triage-amber-text text-sm font-bold">The "tried and failed" rule</div>
+            <div className="text-sm text-gray-500 mt-1">If patient already managed via eConsult for THIS condition and it did not work → book face-to-face, NOT another eConsult.</div>
             <div className="mt-2 space-y-1">
-              <div className="text-[10px] text-gray-400">• Mild eczema: eConsult Rx tried + rash persists → face-to-face</div>
-              <div className="text-[10px] text-gray-400">• Acne: topical Rx via eConsult + no improvement → face-to-face</div>
-              <div className="text-[10px] text-gray-400">• Non-crisis MH: Talking Therapies + eConsult tried, still struggling → face-to-face</div>
+              <div className="text-sm text-gray-400">• Mild eczema: eConsult Rx tried + rash persists → face-to-face</div>
+              <div className="text-sm text-gray-400">• Acne: topical Rx via eConsult + no improvement → face-to-face</div>
+              <div className="text-sm text-gray-400">• Non-crisis MH: Talking Therapies + eConsult tried, still struggling → face-to-face</div>
             </div>
           </div>
           <div className="space-y-2 max-h-80 overflow-y-auto">
             {greenFlags.map((gf, i) => {
               const matched = scan?.green?.some(g => g.category === gf.category);
               return (
-                <div key={i} className={`border-l-4 ${matched ? 'border-triage-green bg-triage-green/10' : 'border-gray-200 bg-gray-50'} rounded-r-xl p-2.5`}>
-                  <div className={`font-bold text-xs ${matched ? 'text-triage-green' : 'text-gray-600'}`}>
+                <div key={i} className={`border-l-4 ${matched ? 'border-triage-green bg-triage-green-light' : 'border-gray-200 bg-gray-50'} rounded-r-xl p-2.5`}>
+                  <div className={`font-bold text-sm ${matched ? 'text-triage-green-text' : 'text-gray-600'}`}>
                     {gf.category}
-                    {gf.econsult && <span className="ml-2 text-[9px] bg-triage-blue/20 text-triage-blue-textpx-1.5 py-0.5 rounded">eConsult?</span>}
+                    {gf.econsult && <span className="ml-2 text-sm bg-triage-blue-light text-triage-blue-text px-1.5 py-0.5 rounded">eConsult?</span>}
                   </div>
-                  <div className="text-[10px] text-gray-400 mt-0.5">{gf.presentation || gf.triggers?.join(' · ')}</div>
-                  {gf.escalateIf && <div className="text-[10px] text-triage-red-dark/70 mt-0.5">Escalate if: {gf.escalateIf}</div>}
+                  <div className="text-sm text-gray-400 mt-0.5">{gf.presentation || gf.triggers?.join(' · ')}</div>
+                  {gf.escalateIf && <div className="text-sm text-triage-red-dark/70 mt-0.5">Escalate if: {gf.escalateIf}</div>}
                 </div>
               );
             })}
           </div>
           {/* eConsult check */}
           {greenEconsult === null && (
-            <div className="bg-triage-blue/10 border border-triage-blue/25 rounded-xl p-2.5">
-              <div className="text-triage-blue-texttext-[11px] font-bold mb-2">eCONSULT CHECK</div>
-              <div className="text-[10px] text-gray-400 mb-2">Has this condition already been managed via eConsult?</div>
+            <div className="bg-triage-blue-light border border-triage-blue-dark/20 rounded-xl p-2.5">
+              <div className="text-triage-blue-text text-sm font-bold mb-2">eConsult check</div>
+              <div className="text-sm text-gray-400 mb-2">Has this condition already been managed via eConsult?</div>
               <div className="grid grid-cols-2 gap-2">
-                <button onClick={() => { setGreenEconsult('tried'); setEconsultTriedFailed(true); }} className="py-2 bg-triage-amber/15 border border-triage-amber/25 text-triage-amber-textrounded-xl text-xs font-bold">Yes — tried before → face-to-face</button>
-                <button onClick={() => setGreenEconsult('no')} className="py-2 bg-triage-blue/15 border border-triage-blue/25 text-triage-blue-textrounded-xl text-xs font-bold">No — may suggest eConsult</button>
+                <button onClick={() => { setGreenEconsult('tried'); setEconsultTriedFailed(true); }} className="py-2 bg-triage-amber-light border border-triage-amber-dark/20 text-triage-amber-text rounded-xl text-sm font-semibold hover:brightness-95 transition-all">Yes — tried before → face-to-face</button>
+                <button onClick={() => setGreenEconsult('no')} className="py-2 bg-triage-blue-light border border-triage-blue-dark/20 text-triage-blue-text rounded-xl text-sm font-semibold hover:brightness-95 transition-all">No — may suggest eConsult</button>
               </div>
             </div>
           )}
           {greenEconsult && (
-            <div className={`text-center py-2 rounded-xl text-xs font-bold ${greenEconsult === 'tried' ? 'bg-triage-amber/10 text-triage-amber' : 'bg-triage-blue/10 text-triage-blue'}`}>
+            <div className={`text-center py-2 rounded-xl text-sm font-bold ${greenEconsult === 'tried' ? 'bg-triage-amber-light text-triage-amber-text' : 'bg-triage-blue-light text-triage-blue-text'}`}>
               {greenEconsult === 'tried' ? '→ Book face-to-face (eConsult tried & failed)' : '→ eConsult may be appropriate'}
             </div>
           )}
           {/* Purple safety net */}
           <div className="bg-triage-purple-light border border-triage-purple-dark/25 rounded-xl p-2">
-            <div className="text-triage-purple-text text-[10px] font-bold">PURPLE SAFETY NET: If ANY purple trigger applies → ESCALATE regardless of green match</div>
+            <div className="text-triage-purple-text text-sm font-bold">PURPLE SAFETY NET: If ANY purple trigger applies → ESCALATE regardless of green match</div>
           </div>
           {greenGate === null && (
             <div className="grid grid-cols-2 gap-2 mt-2">
               <button onClick={() => { setGreenGate('clear'); t2Advance(5); }}
-                className="py-3 bg-triage-blue/20 border border-triage-blue/30 text-triage-blue-textrounded-xl font-bold text-xs">
+                className="py-3 bg-triage-blue-light border border-triage-blue-dark/20 text-triage-blue-text rounded-xl font-semibold text-sm hover:brightness-95 transition-all">
                 No green match — continue
               </button>
               <button onClick={() => { setGreenGate('green'); t2MarkDone(5); showToast('Green matched — book within 1 week'); }}
-                className="py-3 bg-triage-green/20 border border-triage-green/30 text-triage-green-textrounded-xl font-bold text-xs">
+                className="py-3 bg-triage-green-light border border-triage-green-dark/20 text-triage-green-text rounded-xl font-semibold text-sm hover:brightness-95 transition-all">
                 Green matched — booking 1 week
               </button>
             </div>
           )}
           {greenGate && (
-            <div className={`text-center py-2 rounded-xl text-xs font-bold ${greenGate === 'clear' ? 'bg-triage-blue/10 text-triage-blue' : 'bg-triage-green/10 text-triage-green'}`}>
+            <div className={`text-center py-2 rounded-xl text-sm font-bold ${greenGate === 'clear' ? 'bg-triage-blue-light text-triage-blue-text' : 'bg-triage-green-light text-triage-green-text'}`}>
               {greenGate === 'clear' ? '✓ No green — proceeding to decision point' : '🟢 Green matched — book within 1 week'}
             </div>
           )}
@@ -1533,30 +1538,30 @@ const Tier2Workflow = ({ data, showToast }) => {
       </FlowStep>
 
       {/* ═══ T2 STEP 6: DECISION POINT + eCONSULT DISTRIBUTION ═══ */}
-      <FlowStep num={6} color="blue" title="⚖️ DECISION POINT + eCONSULT DISTRIBUTION" subtitle="Final decision — can you process, or must you escalate?"
+      <FlowStep num={6} color="blue" title="⚖️ Decision Point + eConsult Distribution" subtitle="Final decision — can you process, or must you escalate?"
         expanded={t2Step === 6} onToggle={() => t2Toggle(6)} completed={t2CompletedSteps.has(6)}
         locked={!t2CompletedSteps.has(5) && !t2CompletedSteps.has(2)} lockedMsg="Complete previous steps first">
         <div className="space-y-3">
           {/* Two-panel layout */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {/* CAN DO panel */}
-            <div className="border-l-4 border-triage-green bg-triage-green/5 rounded-r-xl p-3">
-              <div className="text-triage-green-textfont-bold text-xs mb-2">TIER 2 CAN PROCESS</div>
+            <div className="border-l-4 border-triage-green bg-triage-green-light rounded-r-xl p-3">
+              <div className="text-triage-green-text font-bold text-sm mb-2">Tier 2 can process</div>
               <ul className="space-y-1">
                 {tier2Actions.canDo.map((item, i) => (
-                  <li key={i} className="text-[10px] text-gray-500 flex items-start gap-1.5">
-                    <CheckCircle size={10} className="text-triage-green-textflex-shrink-0 mt-0.5" />{item}
+                  <li key={i} className="text-sm text-gray-500 flex items-start gap-1.5">
+                    <CheckCircle size={10} className="text-triage-green-text flex-shrink-0 mt-0.5" />{item}
                   </li>
                 ))}
               </ul>
             </div>
             {/* MUST ESCALATE panel */}
-            <div className="border-l-4 border-triage-red bg-triage-red/5 rounded-r-xl p-3">
-              <div className="text-triage-red-textfont-bold text-xs mb-2">MUST ESCALATE TO TIER 3</div>
+            <div className="border-l-4 border-triage-red bg-triage-red-light rounded-r-xl p-3">
+              <div className="text-triage-red-text font-bold text-sm mb-2">Must escalate to Tier 3</div>
               <ul className="space-y-1">
                 {tier2Actions.mustEscalate.map((item, i) => (
-                  <li key={i} className="text-[10px] text-gray-500 flex items-start gap-1.5">
-                    <AlertTriangle size={10} className="text-triage-red-textflex-shrink-0 mt-0.5" />{item}
+                  <li key={i} className="text-sm text-gray-500 flex items-start gap-1.5">
+                    <AlertTriangle size={10} className="text-triage-red-text flex-shrink-0 mt-0.5" />{item}
                   </li>
                 ))}
               </ul>
@@ -1564,18 +1569,18 @@ const Tier2Workflow = ({ data, showToast }) => {
           </div>
 
           {/* 60-SECOND RULE */}
-          <div className="bg-triage-red/15 border-2 border-triage-red/40 rounded-xl p-4 text-center">
-            <div className="text-triage-red-textfont-black text-lg">60-SECOND RULE</div>
-            <div className="text-gray-500 text-xs mt-1">If you&apos;ve been thinking about this for &gt;60 seconds → ESCALATE TO TIER 3</div>
+          <div className="bg-triage-red-light border-2 border-triage-red-dark/30 rounded-2xl p-5 text-center">
+            <div className="text-triage-red-text font-bold text-lg">60-SECOND RULE</div>
+            <div className="text-gray-500 text-sm mt-1.5">If you&apos;ve been thinking about this for &gt;60 seconds → escalate to Tier 3</div>
           </div>
 
           {/* eCONSULT DISTRIBUTION */}
-          <div className="bg-gray-50 border border-gray-200 rounded-xl p-3">
-            <div className="text-triage-blue-textfont-bold text-xs mb-2">eCONSULT DISTRIBUTION (daily task)</div>
+          <div className="bg-white border border-gray-100 rounded-2xl shadow-sm p-4">
+            <div className="text-triage-blue-text font-semibold text-sm mb-3">eConsult distribution (daily task)</div>
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <div className="text-triage-green-texttext-[10px] font-bold mb-1">ADMIN → SESSION GP</div>
-                <div className="text-[10px] text-gray-400 space-y-0.5">
+                <div className="text-triage-green-text text-sm font-bold mb-1">Admin → Session GP</div>
+                <div className="text-sm text-gray-400 space-y-0.5">
                   <div>• Fit note renewal</div>
                   <div>• Results with GP comment</div>
                   <div>• ADHD/ASD referrals</div>
@@ -1585,8 +1590,8 @@ const Tier2Workflow = ({ data, showToast }) => {
                 </div>
               </div>
               <div>
-                <div className="text-triage-red-texttext-[10px] font-bold mb-1">CLINICAL → GP TRIAGER</div>
-                <div className="text-[10px] text-gray-400 space-y-0.5">
+                <div className="text-triage-red-text text-sm font-bold mb-1">Clinical → GP Triager</div>
+                <div className="text-sm text-gray-400 space-y-0.5">
                   <div>• Clinical queries</div>
                   <div>• Medication decisions</div>
                   <div>• Abnormal results (no plan)</div>
@@ -1599,47 +1604,47 @@ const Tier2Workflow = ({ data, showToast }) => {
           </div>
 
           {/* TIER 2→3 HANDOVER FORM */}
-          <div className="bg-purple-500/5 border border-triage-purple-dark/25 rounded-xl p-3">
-            <div className="text-triage-purple-text font-bold text-sm mb-3">TIER 2 → TIER 3 HANDOVER FORM</div>
+          <div className="bg-white border border-gray-100 rounded-2xl shadow-sm p-4">
+            <div className="text-triage-purple-text font-semibold text-base mb-3">Tier 2 → Tier 3 Handover Form</div>
             <div className="space-y-3">
-              <div className="grid grid-cols-2 gap-2 text-[10px]">
-                <div className="bg-gray-50 rounded-lg p-2">
+              <div className="grid grid-cols-2 gap-3 text-sm">
+                <div className="bg-gray-50 rounded-xl p-2.5">
                   <span className="text-gray-400">Purple: </span>
-                  <span className={purpleGate === 'purple' ? 'text-triage-purple-text font-bold' : 'text-gray-500'}>{purpleGate === 'purple' ? 'YES' : purpleGate === 'clear' ? 'Clear' : '—'}</span>
+                  <span className={purpleGate === 'purple' ? 'text-triage-purple-text font-semibold' : 'text-gray-500'}>{purpleGate === 'purple' ? 'Yes' : purpleGate === 'clear' ? 'Clear' : '—'}</span>
                 </div>
-                <div className="bg-gray-50 rounded-lg p-2">
+                <div className="bg-gray-50 rounded-xl p-2.5">
                   <span className="text-gray-400">Amber: </span>
-                  <span className={amberGate === 'amber' ? 'text-triage-amber-textfont-bold' : 'text-gray-500'}>{amberGate === 'amber' ? 'YES' : amberGate === 'clear' ? 'Clear' : '—'}</span>
+                  <span className={amberGate === 'amber' ? 'text-triage-amber-text font-semibold' : 'text-gray-500'}>{amberGate === 'amber' ? 'Yes' : amberGate === 'clear' ? 'Clear' : '—'}</span>
                 </div>
-                <div className="bg-gray-50 rounded-lg p-2">
+                <div className="bg-gray-50 rounded-xl p-2.5">
                   <span className="text-gray-400">Yellow: </span>
-                  <span className={yellowGate === 'yellow' ? 'text-triage-yellow-text font-bold' : 'text-gray-500'}>{yellowGate === 'yellow' ? 'YES' : yellowGate === 'clear' ? 'Clear' : '—'}</span>
+                  <span className={yellowGate === 'yellow' ? 'text-triage-yellow-text font-semibold' : 'text-gray-500'}>{yellowGate === 'yellow' ? 'Yes' : yellowGate === 'clear' ? 'Clear' : '—'}</span>
                 </div>
-                <div className="bg-gray-50 rounded-lg p-2">
+                <div className="bg-gray-50 rounded-xl p-2.5">
                   <span className="text-gray-400">Green: </span>
-                  <span className={greenGate === 'green' ? 'text-triage-green-textfont-bold' : 'text-gray-500'}>{greenGate === 'green' ? 'YES' : greenGate === 'clear' ? 'Clear' : '—'}</span>
+                  <span className={greenGate === 'green' ? 'text-triage-green-text font-semibold' : 'text-gray-500'}>{greenGate === 'green' ? 'Yes' : greenGate === 'clear' ? 'Clear' : '—'}</span>
                 </div>
               </div>
               <div className="flex items-center gap-2">
                 <input type="checkbox" checked={econsultTriedFailed} onChange={e => setEconsultTriedFailed(e.target.checked)} className="rounded" />
-                <label className="text-[11px] text-gray-500">eConsult tried and failed</label>
+                <label className="text-sm text-gray-500">eConsult tried and failed</label>
               </div>
               <TextArea label="Tier 2 Review Notes" value={t2Notes} onChange={setT2Notes} placeholder="Your review notes..." rows={2} />
               <TextArea label="Specific Question for GP (REQUIRED)" value={gpQuestion} onChange={setGpQuestion} placeholder="What specific question do you need the GP to answer?" rows={2} />
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-[10px] text-gray-400 mb-1">Time Sensitivity</label>
+                  <label className="block text-sm text-gray-400 mb-1">Time Sensitivity</label>
                   <select value={timeSensitivity} onChange={e => setTimeSensitivity(e.target.value)}
-                    className="w-full px-3 py-2 rounded-xl bg-gray-50 border border-gray-200 text-gray-800 text-xs">
+                    className="w-full px-3 py-2 rounded-xl bg-gray-50 border border-gray-200 text-gray-800 text-sm">
                     <option value="URGENT">URGENT</option>
                     <option value="SAME-DAY">SAME-DAY</option>
                     <option value="ROUTINE">ROUTINE</option>
                   </select>
                 </div>
                 <div>
-                  <label className="block text-[10px] text-gray-400 mb-1">Confidence Level</label>
+                  <label className="block text-sm text-gray-400 mb-1">Confidence Level</label>
                   <select value={confidence} onChange={e => setConfidence(e.target.value)}
-                    className="w-full px-3 py-2 rounded-xl bg-gray-50 border border-gray-200 text-gray-800 text-xs">
+                    className="w-full px-3 py-2 rounded-xl bg-gray-50 border border-gray-200 text-gray-800 text-sm">
                     <option value="HIGH">HIGH</option>
                     <option value="MEDIUM">MEDIUM</option>
                     <option value="LOW">LOW</option>
@@ -1650,14 +1655,14 @@ const Tier2Workflow = ({ data, showToast }) => {
             </div>
           </div>
 
-          <button onClick={resetT2} className="w-full py-3 bg-triage-blue/20 border border-triage-blue/30 text-triage-blue-textrounded-xl font-bold text-sm mt-3">
+          <button onClick={resetT2} className="w-full py-3 bg-triage-blue-light border border-triage-blue-dark/20 text-triage-blue-text rounded-xl font-semibold text-sm hover:brightness-95 transition-all mt-3">
             <RotateCcw size={14} className="inline mr-2" />Start New Triage
           </button>
         </div>
       </FlowStep>
 
       {/* VERSION TEXT */}
-      <div className="text-center text-[10px] text-gray-300 mt-4 mb-20">
+      <div className="text-center text-sm text-gray-300 mt-4 mb-20">
         SOP v3.5 | Tier 2 Flowchart v4.0 | Feb 2026 | Dr Sahar Jahanian
       </div>
     </div>
@@ -1676,36 +1681,36 @@ const SOPScreen = () => {
       case 'text': return <p key={idx} className="text-gray-600 text-sm leading-relaxed mb-3">{block.text}</p>;
       case 'highlight': return <div key={idx} className={`${c.bg} border ${c.border} rounded-xl p-3 mb-3 flex items-start gap-2`}><div className={`w-2 h-2 rounded-full ${c.dot} mt-1.5 flex-shrink-0`} /><span className={`${c.text} font-semibold text-sm`}>{block.text}</span></div>;
       case 'list': return <div key={idx} className="mb-3">{block.title && <div className={`${c.text} font-bold text-sm mb-2`}>{block.title}</div>}<div className="space-y-1.5">{block.items.map((item, i) => <div key={i} className="flex items-start gap-2.5 pl-1"><div className={`w-1.5 h-1.5 rounded-full ${c.dot} mt-2 flex-shrink-0 opacity-60`} /><span className="text-gray-500 text-sm">{item}</span></div>)}</div></div>;
-      case 'steps': return <div key={idx} className="space-y-2 mb-3">{block.items.map((item, i) => { const ic = C[item.color] || C.gray; return <div key={i} className={`${ic.bg} border ${ic.border} rounded-xl p-3`}><div className="flex items-start gap-3">{item.step && <div className={`w-7 h-7 rounded-lg ${ic.bg} border ${ic.border} flex items-center justify-center flex-shrink-0 font-bold text-xs ${ic.text}`}>{item.step}</div>}<div className="flex-1"><div className={`${ic.text} font-bold text-sm`}>{item.label}</div>{item.detail && <div className="text-gray-400 text-xs mt-0.5">{item.detail}</div>}<div className="text-gray-500 text-xs mt-1">→ {item.action}</div></div></div></div>; })}</div>;
-      case 'table': return <div key={idx} className="overflow-x-auto mb-3"><table className="w-full text-sm"><thead><tr>{block.headers.map((h, i) => <th key={i} className="text-left text-gray-500 font-semibold pb-2 pr-3 text-xs border-b border-gray-200">{h}</th>)}</tr></thead><tbody>{block.rows.map((row, i) => <tr key={i} className="border-b border-gray-100">{row.map((cell, j) => <td key={j} className="py-2.5 pr-3 text-xs text-gray-500">{cell}</td>)}</tr>)}</tbody></table></div>;
-      case 'script': return <div key={idx} className="bg-triage-green-light border border-triage-green-dark/25 rounded-xl p-3.5 mb-3"><div className="text-triage-green-textfont-bold text-xs mb-1.5">📢 {block.title}</div><p className="text-gray-500 text-sm italic">"{block.text}"</p></div>;
-      case 'checklist': return <div key={idx} className="mb-3">{block.title && <div className={`${c.text} font-bold text-sm mb-2`}>{block.title}</div>}<div className="space-y-1.5">{block.items.map((item, i) => <div key={i} className="flex items-center gap-2 text-sm text-gray-500"><div className="w-4 h-4 rounded border border-triage-green/40 bg-triage-green/10 flex items-center justify-center flex-shrink-0"><Check size={10} className="text-triage-green-text" /></div>{item}</div>)}</div></div>;
-      case 'do-dont': return <div key={idx} className="space-y-2 mb-3">{block.donts.map((d, i) => <div key={i} className="grid grid-cols-2 gap-2 text-xs"><div className="bg-triage-red-light border border-triage-red-dark/25 rounded-lg p-2.5"><span className="text-triage-red-textfont-semibold">✗ </span><span className="text-gray-500">{d.bad}</span></div>{d.good && <div className="bg-triage-green-light border border-triage-green-dark/25 rounded-lg p-2.5"><span className="text-triage-green-textfont-semibold">✓ </span><span className="text-gray-500">{d.good}</span></div>}</div>)}</div>;
-      case 'two-column': return <div key={idx} className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">{[block.left, block.right].filter(Boolean).map((col, ci) => <div key={ci} className="bg-triage-blue-light border border-triage-blue-dark/20 rounded-xl p-3.5"><div className="text-triage-blue-textfont-bold text-sm mb-2">{col.title}</div>{col.link && <a href={col.link} target="_blank" rel="noopener noreferrer" className="text-triage-blue-texttext-xs underline mb-2 block">{col.link}</a>}<div className="space-y-1">{col.items.map((item, i) => <div key={i} className="flex items-start gap-2 text-xs text-gray-500"><span className="text-triage-blue-textmt-0.5">•</span>{item}</div>)}</div></div>)}</div>;
-      case 'conditions': return <div key={idx} className="mb-3">{block.title && <div className="text-triage-green-textfont-bold text-sm mb-2">{block.title}</div>}<div className="flex flex-wrap gap-2">{block.items.map((item, i) => <div key={i} className="bg-triage-green-light border border-triage-green-dark/25 rounded-lg px-3 py-1.5 text-xs"><span className="text-gray-600 font-medium">{item.name}</span><span className="text-gray-400 ml-1.5">{item.age}</span></div>)}</div></div>;
-      case 'red-flags-table': return <div key={idx} className="space-y-2 mb-3">{block.items.map((item, i) => <div key={i} className="bg-triage-red-light border border-triage-red-dark/20 rounded-xl p-3 flex items-start gap-3"><div className="w-2 h-2 rounded-full bg-triage-red-dark mt-1.5 flex-shrink-0" /><div>{item.system && <div className="text-triage-red-dark/70 font-bold text-[10px] uppercase tracking-wider mb-0.5">{item.system}</div>}<div className="text-gray-600 text-sm">{item.symptom}</div><div className="text-triage-red-textfont-bold text-xs mt-1">→ {item.action}</div></div></div>)}</div>;
-      case 'amber-table': return <div key={idx} className="space-y-2 mb-3">{block.items.map((item, i) => <div key={i} className="bg-triage-amber-light border border-triage-amber-dark/20 rounded-xl p-3"><div className="flex items-center gap-2 mb-1"><span className="text-triage-amber-textfont-bold text-xs">{item.category}</span>{item.notes && <span className="text-triage-amber-dark/60 text-[10px] font-medium">{item.notes}</span>}</div><div className="text-gray-500 text-xs mb-1.5">{item.buzzwords}</div><div className="text-triage-amber-texttext-xs font-medium">→ {item.action}</div></div>)}</div>;
-      case 'risk-groups': return <div key={idx} className="space-y-2 mb-3">{block.items.map((item, i) => <div key={i} className="bg-triage-amber-light border border-triage-amber-dark/20 rounded-xl p-3"><div className="text-gray-700 font-semibold text-sm mb-1">{item.group}</div><div className="text-gray-500 text-xs">{item.action}</div></div>)}</div>;
-      case 'subsection': return <div key={idx} className="mb-4"><h4 className="text-triage-blue-textfont-bold text-sm mb-2">{block.title}</h4>{block.content.map((sub, si) => renderBlock(sub, `${idx}-${si}`))}</div>;
-      case 'contact': return <div key={idx} className="flex items-center justify-between bg-triage-blue-light border border-triage-blue-dark/20 rounded-lg p-2.5 mb-2"><div><div className="text-gray-600 text-sm font-medium">{block.service}</div>{block.hours && <div className="text-gray-400 text-xs">{block.hours}</div>}</div><a href={`tel:${block.number.replace(/\s/g, '')}`} className="text-triage-blue-textfont-bold text-sm">{block.number}</a></div>;
-      case 'link': return <a key={idx} href={block.url} target="_blank" rel="noopener noreferrer" className="text-triage-blue-texttext-sm underline mb-2 block flex items-center gap-1">{block.text} <ExternalLink size={12} /></a>;
-      case 'decision-tree': return <div key={idx} className="mb-3">{block.title && <div className="text-gray-600 font-bold text-sm mb-2">{block.title}</div>}{block.items.map((item, i) => <div key={i} className="mb-3"><div className="text-triage-blue-textfont-semibold text-sm mb-2">{item.question}</div><div className="space-y-2 pl-3 border-l-2 border-triage-blue-dark/30">{item.branches.map((branch, bi) => <div key={bi}><div className="text-triage-amber-textfont-bold text-xs mb-1">{branch.label}</div><div className="space-y-1">{branch.steps.map((step, si) => <div key={si} className="text-gray-500 text-xs flex items-start gap-2"><span className="text-gray-300">→</span>{step}</div>)}</div></div>)}</div></div>)}</div>;
-      case 'econsult-table': return <div key={idx} className="space-y-2 mb-3">{block.items.map((item, i) => <div key={i} className="bg-triage-teal-light border border-triage-teal-dark/20 rounded-xl p-3"><div className="text-triage-teal-textfont-bold text-xs mb-1">{item.category}</div><div className="text-gray-500 text-xs mb-1.5"><span className="text-gray-400">OK:</span> {item.examples}</div><div className="text-triage-red-dark/80 text-xs"><span className="text-gray-400">Exclude:</span> {item.exclude}</div></div>)}</div>;
-      case 'services': return <div key={idx} className="space-y-2 mb-3">{block.items.map((item, i) => <div key={i} className="bg-gray-50 border border-gray-200 rounded-xl p-3"><div className="text-gray-700 font-semibold text-sm">{item.service}</div><div className="text-gray-400 text-xs mt-0.5">{item.bestFor}</div><div className="text-triage-blue-texttext-xs mt-1">{item.access}</div></div>)}</div>;
-      case 'providers': return <div key={idx} className="space-y-2 mb-3">{block.items.map((item, i) => <div key={i} className="flex items-center justify-between bg-gray-50 border border-gray-200 rounded-xl p-3"><div><div className="text-gray-700 font-semibold text-sm">{item.name}</div><div className="text-gray-400 text-xs">{item.locations}</div></div><a href={`tel:${item.number.replace(/\s/g, '')}`} className="text-triage-blue-textfont-bold text-sm">{item.number}</a></div>)}</div>;
-      case 'model-overview': return <div key={idx} className="overflow-x-auto mb-3"><table className="w-full text-sm"><thead><tr>{['Tier','Who','Scope','Escalates To'].map((h, i) => <th key={i} className="text-left text-gray-500 font-semibold pb-2 pr-3 text-xs border-b border-gray-200">{h}</th>)}</tr></thead><tbody>{block.tiers.map((t, i) => <tr key={i} className="border-b border-gray-100"><td className="py-2.5 pr-3 text-xs font-bold text-triage-blue-text">{t.tier}</td><td className="py-2.5 pr-3 text-xs text-gray-500">{t.who}</td><td className="py-2.5 pr-3 text-xs text-gray-500">{t.scope}</td><td className="py-2.5 pr-3 text-xs text-gray-500">{t.escalatesTo}</td></tr>)}</tbody></table></div>;
-      case 'pathway-grid': return <div key={idx} className="space-y-2 mb-3">{block.items.map((item, i) => <div key={i} className="bg-triage-blue-light border border-triage-blue-dark/20 rounded-xl p-3"><div className="flex items-center gap-2 mb-1"><span>{item.icon}</span><span className="text-gray-700 font-semibold text-sm">{item.pathway}</span></div><div className="text-gray-500 text-xs mb-1.5">{item.symptoms}</div><div className="text-triage-blue-texttext-xs font-medium">→ {item.action}</div>{item.contact && <div className="text-gray-400 text-xs mt-0.5">{item.contact}</div>}</div>)}</div>;
-      case 'contacts-table': return <div key={idx} className="space-y-1.5 mb-3">{block.items.map((item, i) => <div key={i} className="flex items-center justify-between bg-triage-blue-light border border-triage-blue-dark/20 rounded-lg p-2.5"><div><div className="text-gray-600 text-sm font-medium">{item.service}</div>{item.hours && <div className="text-gray-400 text-xs">{item.hours}</div>}</div><div className="text-triage-blue-textfont-bold text-sm">{item.contact}</div></div>)}</div>;
-      case 'training-table': return <div key={idx} className="space-y-2 mb-3">{block.items.map((item, i) => <div key={i} className="bg-triage-blue-light border border-triage-blue-dark/20 rounded-xl p-3"><div className="text-triage-blue-textfont-bold text-sm mb-1">{item.tier}</div><div className="text-gray-500 text-xs">{item.requirements}</div></div>)}</div>;
-      case 'version-history': return <div key={idx} className="space-y-2 mb-3">{block.items.map((item, i) => <div key={i} className="bg-triage-purple-light border border-triage-purple-dark/20 rounded-xl p-3"><div className="flex items-center gap-2 mb-1"><span className="text-triage-purple-textfont-bold text-sm">{item.version}</span><span className="text-gray-400 text-xs">{item.date}</span><span className="text-gray-300 text-xs">{item.author}</span></div><div className="text-gray-500 text-xs">{item.changes}</div></div>)}</div>;
+      case 'steps': return <div key={idx} className="space-y-2 mb-3">{block.items.map((item, i) => { const ic = C[item.color] || C.gray; return <div key={i} className={`${ic.bg} border ${ic.border} rounded-xl p-3`}><div className="flex items-start gap-3">{item.step && <div className={`w-7 h-7 rounded-lg ${ic.bg} border ${ic.border} flex items-center justify-center flex-shrink-0 font-bold text-sm ${ic.text}`}>{item.step}</div>}<div className="flex-1"><div className={`${ic.text} font-bold text-sm`}>{item.label}</div>{item.detail && <div className="text-gray-400 text-sm mt-0.5">{item.detail}</div>}<div className="text-gray-500 text-sm mt-1">→ {item.action}</div></div></div></div>; })}</div>;
+      case 'table': return <div key={idx} className="overflow-x-auto mb-3"><table className="w-full text-sm"><thead><tr>{block.headers.map((h, i) => <th key={i} className="text-left text-gray-500 font-semibold pb-2 pr-3 text-sm border-b border-gray-200">{h}</th>)}</tr></thead><tbody>{block.rows.map((row, i) => <tr key={i} className="border-b border-gray-100">{row.map((cell, j) => <td key={j} className="py-2.5 pr-3 text-sm text-gray-500">{cell}</td>)}</tr>)}</tbody></table></div>;
+      case 'script': return <div key={idx} className="bg-triage-green-light border border-triage-green-dark/25 rounded-xl p-3.5 mb-3"><div className="text-triage-green-text font-bold text-sm mb-1.5">📢 {block.title}</div><p className="text-gray-500 text-sm italic">"{block.text}"</p></div>;
+      case 'checklist': return <div key={idx} className="mb-3">{block.title && <div className={`${c.text} font-bold text-sm mb-2`}>{block.title}</div>}<div className="space-y-1.5">{block.items.map((item, i) => <div key={i} className="flex items-center gap-2 text-sm text-gray-500"><div className="w-4 h-4 rounded border border-triage-green/40 bg-triage-green-light flex items-center justify-center flex-shrink-0"><Check size={10} className="text-triage-green-text" /></div>{item}</div>)}</div></div>;
+      case 'do-dont': return <div key={idx} className="space-y-2 mb-3">{block.donts.map((d, i) => <div key={i} className="grid grid-cols-2 gap-2 text-sm"><div className="bg-triage-red-light border border-triage-red-dark/25 rounded-lg p-2.5"><span className="text-triage-red-text font-semibold">✗ </span><span className="text-gray-500">{d.bad}</span></div>{d.good && <div className="bg-triage-green-light border border-triage-green-dark/25 rounded-lg p-2.5"><span className="text-triage-green-text font-semibold">✓ </span><span className="text-gray-500">{d.good}</span></div>}</div>)}</div>;
+      case 'two-column': return <div key={idx} className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">{[block.left, block.right].filter(Boolean).map((col, ci) => <div key={ci} className="bg-triage-blue-light border border-triage-blue-dark/20 rounded-xl p-3.5"><div className="text-triage-blue-text font-bold text-sm mb-2">{col.title}</div>{col.link && <a href={col.link} target="_blank" rel="noopener noreferrer" className="text-triage-blue-text text-sm underline mb-2 block">{col.link}</a>}<div className="space-y-1">{col.items.map((item, i) => <div key={i} className="flex items-start gap-2 text-sm text-gray-500"><span className="text-triage-blue-text mt-0.5">•</span>{item}</div>)}</div></div>)}</div>;
+      case 'conditions': return <div key={idx} className="mb-3">{block.title && <div className="text-triage-green-text font-bold text-sm mb-2">{block.title}</div>}<div className="flex flex-wrap gap-2">{block.items.map((item, i) => <div key={i} className="bg-triage-green-light border border-triage-green-dark/25 rounded-lg px-3 py-1.5 text-sm"><span className="text-gray-600 font-medium">{item.name}</span><span className="text-gray-400 ml-1.5">{item.age}</span></div>)}</div></div>;
+      case 'red-flags-table': return <div key={idx} className="space-y-2 mb-3">{block.items.map((item, i) => <div key={i} className="bg-triage-red-light border border-triage-red-dark/20 rounded-xl p-3 flex items-start gap-3"><div className="w-2 h-2 rounded-full bg-triage-red-dark mt-1.5 flex-shrink-0" /><div>{item.system && <div className="text-triage-red-dark/70 font-bold text-sm uppercase tracking-wider mb-0.5">{item.system}</div>}<div className="text-gray-600 text-sm">{item.symptom}</div><div className="text-triage-red-text font-bold text-sm mt-1">→ {item.action}</div></div></div>)}</div>;
+      case 'amber-table': return <div key={idx} className="space-y-2 mb-3">{block.items.map((item, i) => <div key={i} className="bg-triage-amber-light border border-triage-amber-dark/20 rounded-xl p-3"><div className="flex items-center gap-2 mb-1"><span className="text-triage-amber-text font-bold text-sm">{item.category}</span>{item.notes && <span className="text-triage-amber-dark/60 text-sm font-medium">{item.notes}</span>}</div><div className="text-gray-500 text-sm mb-1.5">{item.buzzwords}</div><div className="text-triage-amber-text text-sm font-medium">→ {item.action}</div></div>)}</div>;
+      case 'risk-groups': return <div key={idx} className="space-y-2 mb-3">{block.items.map((item, i) => <div key={i} className="bg-triage-amber-light border border-triage-amber-dark/20 rounded-xl p-3"><div className="text-gray-700 font-semibold text-sm mb-1">{item.group}</div><div className="text-gray-500 text-sm">{item.action}</div></div>)}</div>;
+      case 'subsection': return <div key={idx} className="mb-4"><h4 className="text-triage-blue-text font-bold text-sm mb-2">{block.title}</h4>{block.content.map((sub, si) => renderBlock(sub, `${idx}-${si}`))}</div>;
+      case 'contact': return <div key={idx} className="flex items-center justify-between bg-triage-blue-light border border-triage-blue-dark/20 rounded-lg p-2.5 mb-2"><div><div className="text-gray-600 text-sm font-medium">{block.service}</div>{block.hours && <div className="text-gray-400 text-sm">{block.hours}</div>}</div><a href={`tel:${block.number.replace(/\s/g, '')}`} className="text-triage-blue-text font-bold text-sm">{block.number}</a></div>;
+      case 'link': return <a key={idx} href={block.url} target="_blank" rel="noopener noreferrer" className="text-triage-blue-text text-sm underline mb-2 block flex items-center gap-1">{block.text} <ExternalLink size={12} /></a>;
+      case 'decision-tree': return <div key={idx} className="mb-3">{block.title && <div className="text-gray-600 font-bold text-sm mb-2">{block.title}</div>}{block.items.map((item, i) => <div key={i} className="mb-3"><div className="text-triage-blue-text font-semibold text-sm mb-2">{item.question}</div><div className="space-y-2 pl-3 border-l-2 border-triage-blue-dark/30">{item.branches.map((branch, bi) => <div key={bi}><div className="text-triage-amber-text font-bold text-sm mb-1">{branch.label}</div><div className="space-y-1">{branch.steps.map((step, si) => <div key={si} className="text-gray-500 text-sm flex items-start gap-2"><span className="text-gray-300">→</span>{step}</div>)}</div></div>)}</div></div>)}</div>;
+      case 'econsult-table': return <div key={idx} className="space-y-2 mb-3">{block.items.map((item, i) => <div key={i} className="bg-triage-teal-light border border-triage-teal-dark/20 rounded-xl p-3"><div className="text-triage-teal-text font-bold text-sm mb-1">{item.category}</div><div className="text-gray-500 text-sm mb-1.5"><span className="text-gray-400">OK:</span> {item.examples}</div><div className="text-triage-red-dark/80 text-sm"><span className="text-gray-400">Exclude:</span> {item.exclude}</div></div>)}</div>;
+      case 'services': return <div key={idx} className="space-y-2 mb-3">{block.items.map((item, i) => <div key={i} className="bg-gray-50 border border-gray-200 rounded-xl p-3"><div className="text-gray-700 font-semibold text-sm">{item.service}</div><div className="text-gray-400 text-sm mt-0.5">{item.bestFor}</div><div className="text-triage-blue-text text-sm mt-1">{item.access}</div></div>)}</div>;
+      case 'providers': return <div key={idx} className="space-y-2 mb-3">{block.items.map((item, i) => <div key={i} className="flex items-center justify-between bg-gray-50 border border-gray-200 rounded-xl p-3"><div><div className="text-gray-700 font-semibold text-sm">{item.name}</div><div className="text-gray-400 text-sm">{item.locations}</div></div><a href={`tel:${item.number.replace(/\s/g, '')}`} className="text-triage-blue-text font-bold text-sm">{item.number}</a></div>)}</div>;
+      case 'model-overview': return <div key={idx} className="overflow-x-auto mb-3"><table className="w-full text-sm"><thead><tr>{['Tier','Who','Scope','Escalates To'].map((h, i) => <th key={i} className="text-left text-gray-500 font-semibold pb-2 pr-3 text-sm border-b border-gray-200">{h}</th>)}</tr></thead><tbody>{block.tiers.map((t, i) => <tr key={i} className="border-b border-gray-100"><td className="py-2.5 pr-3 text-sm font-bold text-triage-blue-text">{t.tier}</td><td className="py-2.5 pr-3 text-sm text-gray-500">{t.who}</td><td className="py-2.5 pr-3 text-sm text-gray-500">{t.scope}</td><td className="py-2.5 pr-3 text-sm text-gray-500">{t.escalatesTo}</td></tr>)}</tbody></table></div>;
+      case 'pathway-grid': return <div key={idx} className="space-y-2 mb-3">{block.items.map((item, i) => <div key={i} className="bg-triage-blue-light border border-triage-blue-dark/20 rounded-xl p-3"><div className="flex items-center gap-2 mb-1"><span>{item.icon}</span><span className="text-gray-700 font-semibold text-sm">{item.pathway}</span></div><div className="text-gray-500 text-sm mb-1.5">{item.symptoms}</div><div className="text-triage-blue-text text-sm font-medium">→ {item.action}</div>{item.contact && <div className="text-gray-400 text-sm mt-0.5">{item.contact}</div>}</div>)}</div>;
+      case 'contacts-table': return <div key={idx} className="space-y-1.5 mb-3">{block.items.map((item, i) => <div key={i} className="flex items-center justify-between bg-triage-blue-light border border-triage-blue-dark/20 rounded-lg p-2.5"><div><div className="text-gray-600 text-sm font-medium">{item.service}</div>{item.hours && <div className="text-gray-400 text-sm">{item.hours}</div>}</div><div className="text-triage-blue-text font-bold text-sm">{item.contact}</div></div>)}</div>;
+      case 'training-table': return <div key={idx} className="space-y-2 mb-3">{block.items.map((item, i) => <div key={i} className="bg-triage-blue-light border border-triage-blue-dark/20 rounded-xl p-3"><div className="text-triage-blue-text font-bold text-sm mb-1">{item.tier}</div><div className="text-gray-500 text-sm">{item.requirements}</div></div>)}</div>;
+      case 'version-history': return <div key={idx} className="space-y-2 mb-3">{block.items.map((item, i) => <div key={i} className="bg-triage-purple-light border border-triage-purple-dark/20 rounded-xl p-3"><div className="flex items-center gap-2 mb-1"><span className="text-triage-purple-text font-bold text-sm">{item.version}</span><span className="text-gray-400 text-sm">{item.date}</span><span className="text-gray-300 text-sm">{item.author}</span></div><div className="text-gray-500 text-sm">{item.changes}</div></div>)}</div>;
       default: return null;
     }
   };
 
   return (
     <div className="p-4 pb-24 max-w-lg mx-auto">
-      <h1 className="text-lg font-black mb-1 flex items-center gap-2 text-gray-800"><BookOpen size={20} className="text-triage-purple-text" />Triage SOP</h1>
-      <p className="text-gray-400 text-xs mb-3">{sopMeta.practices} · v{sopMeta.version} · {sopMeta.owner}</p>
+      <h1 className="text-lg font-semibold mb-1 flex items-center gap-2 text-gray-800"><BookOpen size={20} className="text-triage-purple-text" />Triage SOP</h1>
+      <p className="text-gray-400 text-sm mb-3">{sopMeta.practices} · v{sopMeta.version} · {sopMeta.owner}</p>
       <SearchBar value={search} onChange={setSearch} placeholder="Search SOP..." />
       <div className="space-y-2">
         {filtered.map(s => (
@@ -1714,7 +1719,7 @@ const SOPScreen = () => {
               className={`w-full text-left p-3.5 rounded-2xl transition-all border ${expanded === s.id ? 'bg-triage-purple-light border-triage-purple-dark/30' : 'bg-gray-50 border-gray-200'}`}>
               <div className="flex items-center gap-3">
                 <span className="text-lg">{s.icon}</span>
-                <div className="flex-1"><span className="text-gray-400 text-xs font-mono mr-2">§{s.number}</span><span className="text-gray-800 font-bold text-sm">{s.title}</span></div>
+                <div className="flex-1"><span className="text-gray-400 text-sm font-mono mr-2">§{s.number}</span><span className="text-gray-800 font-bold text-sm">{s.title}</span></div>
                 {expanded === s.id ? <ChevronUp size={16} className="text-triage-purple-text" /> : <ChevronDown size={16} className="text-gray-300" />}
               </div>
             </button>
@@ -1738,9 +1743,9 @@ const FlowchartScreen = () => {
   });
 
   const tierColors = {
-    1: { bg: 'bg-triage-green/10', border: 'border-triage-green/30', text: 'text-triage-green', label: 'Tier 1' },
-    2: { bg: 'bg-triage-amber/10', border: 'border-triage-amber/30', text: 'text-triage-amber', label: 'Tier 2' },
-    3: { bg: 'bg-triage-purple-light', border: 'border-triage-purple-dark/30', text: 'text-triage-violet', label: 'Tier 3' },
+    1: { bg: 'bg-triage-green-light', border: 'border-triage-green-dark/25', text: 'text-triage-green-text', label: 'Tier 1' },
+    2: { bg: 'bg-triage-amber-light', border: 'border-triage-amber-dark/25', text: 'text-triage-amber-text', label: 'Tier 2' },
+    3: { bg: 'bg-triage-purple-light', border: 'border-triage-purple-dark/30', text: 'text-triage-purple-text', label: 'Tier 3' },
   };
 
   const renderBlock = (block, idx) => {
@@ -1749,29 +1754,29 @@ const FlowchartScreen = () => {
       case 'text': return <p key={idx} className="text-gray-600 text-sm leading-relaxed mb-3">{block.text}</p>;
       case 'highlight': return <div key={idx} className={`${c.bg} border ${c.border} rounded-xl p-3 mb-3 flex items-start gap-2`}><div className={`w-2 h-2 rounded-full ${c.dot} mt-1.5 flex-shrink-0`} /><span className={`${c.text} font-semibold text-sm`}>{block.text}</span></div>;
       case 'list': return <div key={idx} className="mb-3">{block.title && <div className={`${c.text} font-bold text-sm mb-2`}>{block.title}</div>}<div className="space-y-1.5">{block.items.map((item, i) => <div key={i} className="flex items-start gap-2.5 pl-1"><div className={`w-1.5 h-1.5 rounded-full ${c.dot} mt-2 flex-shrink-0 opacity-60`} /><span className="text-gray-500 text-sm">{item}</span></div>)}</div></div>;
-      case 'checklist': return <div key={idx} className="mb-3">{block.title && <div className={`${c.text} font-bold text-sm mb-2`}>{block.title}</div>}<div className="space-y-1.5">{block.items.map((item, i) => <div key={i} className="flex items-center gap-2 text-sm text-gray-500"><div className="w-4 h-4 rounded border border-triage-green/40 bg-triage-green/10 flex items-center justify-center flex-shrink-0"><Check size={10} className="text-triage-green-text" /></div>{item}</div>)}</div></div>;
-      case 'subsection': return <div key={idx} className="mb-4"><h4 className="text-triage-blue-textfont-bold text-sm mb-2">{block.title}</h4>{block.content.map((sub, si) => renderBlock(sub, `${idx}-${si}`))}</div>;
-      case 'red-flags-table': return <div key={idx} className="space-y-2 mb-3">{block.items.map((item, i) => <div key={i} className="bg-triage-red-light border border-triage-red-dark/20 rounded-xl p-3 flex items-start gap-3"><div className="w-2 h-2 rounded-full bg-triage-red-dark mt-1.5 flex-shrink-0" /><div>{item.system && <div className="text-triage-red-dark/70 font-bold text-[10px] uppercase tracking-wider mb-0.5">{item.system}</div>}<div className="text-gray-600 text-sm">{item.symptom}</div><div className="text-triage-red-textfont-bold text-xs mt-1">{'\u2192'} {item.action}</div></div></div>)}</div>;
-      case 'amber-table': return <div key={idx} className="space-y-2 mb-3">{block.items.map((item, i) => <div key={i} className="bg-triage-amber-light border border-triage-amber-dark/20 rounded-xl p-3"><div className="flex items-center gap-2 mb-1"><span className="text-triage-amber-textfont-bold text-xs">{item.category}</span>{item.notes && <span className="text-triage-amber-dark/60 text-[10px] font-medium">{item.notes}</span>}</div><div className="text-gray-500 text-xs mb-1.5">{item.buzzwords}</div><div className="text-triage-amber-texttext-xs font-medium">{'\u2192'} {item.action}</div></div>)}</div>;
-      case 'risk-groups': return <div key={idx} className="space-y-2 mb-3">{block.items.map((item, i) => <div key={i} className="bg-triage-amber-light border border-triage-amber-dark/20 rounded-xl p-3"><div className="text-gray-700 font-semibold text-sm mb-1">{item.group}</div><div className="text-gray-500 text-xs">{item.action}</div></div>)}</div>;
-      case 'model-overview': return <div key={idx} className="overflow-x-auto mb-3"><table className="w-full text-sm"><thead><tr>{['Tier','Who','Scope','Escalates To'].map((h, i) => <th key={i} className="text-left text-gray-500 font-semibold pb-2 pr-3 text-xs border-b border-gray-200">{h}</th>)}</tr></thead><tbody>{block.tiers.map((t, i) => <tr key={i} className="border-b border-gray-100"><td className="py-2.5 pr-3 text-xs font-bold text-triage-blue-text">{t.tier}</td><td className="py-2.5 pr-3 text-xs text-gray-500">{t.who}</td><td className="py-2.5 pr-3 text-xs text-gray-500">{t.scope}</td><td className="py-2.5 pr-3 text-xs text-gray-500">{t.escalatesTo}</td></tr>)}</tbody></table></div>;
-      case 'pathway-grid': return <div key={idx} className="space-y-2 mb-3">{block.items.map((item, i) => <div key={i} className="bg-triage-blue-light border border-triage-blue-dark/20 rounded-xl p-3"><div className="flex items-center gap-2 mb-1"><span>{item.icon}</span><span className="text-gray-700 font-semibold text-sm">{item.pathway}</span></div><div className="text-gray-500 text-xs mb-1.5">{item.symptoms}</div><div className="text-triage-blue-texttext-xs font-medium">{'\u2192'} {item.action}</div>{item.contact && <div className="text-gray-400 text-xs mt-0.5">{item.contact}</div>}</div>)}</div>;
-      case 'contacts-table': return <div key={idx} className="space-y-1.5 mb-3">{block.items.map((item, i) => <div key={i} className="flex items-center justify-between bg-triage-blue-light border border-triage-blue-dark/20 rounded-lg p-2.5"><div><div className="text-gray-600 text-sm font-medium">{item.service}</div>{item.hours && <div className="text-gray-400 text-xs">{item.hours}</div>}</div><div className="text-triage-blue-textfont-bold text-sm">{item.contact}</div></div>)}</div>;
-      case 'training-table': return <div key={idx} className="space-y-2 mb-3">{block.items.map((item, i) => <div key={i} className="bg-triage-blue-light border border-triage-blue-dark/20 rounded-xl p-3"><div className="text-triage-blue-textfont-bold text-sm mb-1">{item.tier}</div><div className="text-gray-500 text-xs">{item.requirements}</div></div>)}</div>;
-      case 'conditions': return <div key={idx} className="mb-3">{block.title && <div className="text-triage-green-textfont-bold text-sm mb-2">{block.title}</div>}<div className="flex flex-wrap gap-2">{block.items.map((item, i) => <div key={i} className="bg-triage-green-light border border-triage-green-dark/25 rounded-lg px-3 py-1.5 text-xs"><span className="text-gray-600 font-medium">{item.name}</span><span className="text-gray-400 ml-1.5">{item.age}</span></div>)}</div></div>;
-      case 'flow-arrow': return <div key={idx} className="flex items-center justify-center gap-2 py-3 mb-3"><div className="h-px flex-1 bg-gradient-to-r from-transparent via-triage-blue-dark/30 to-transparent" /><div className="flex items-center gap-1.5 bg-triage-blue-light border border-triage-blue-dark/30 rounded-full px-4 py-1.5"><ArrowRight size={14} className="text-triage-blue-text" /><span className="text-triage-blue-texttext-xs font-semibold">{block.text}</span></div><div className="h-px flex-1 bg-gradient-to-r from-transparent via-triage-blue-dark/30 to-transparent" /></div>;
+      case 'checklist': return <div key={idx} className="mb-3">{block.title && <div className={`${c.text} font-bold text-sm mb-2`}>{block.title}</div>}<div className="space-y-1.5">{block.items.map((item, i) => <div key={i} className="flex items-center gap-2 text-sm text-gray-500"><div className="w-4 h-4 rounded border border-triage-green/40 bg-triage-green-light flex items-center justify-center flex-shrink-0"><Check size={10} className="text-triage-green-text" /></div>{item}</div>)}</div></div>;
+      case 'subsection': return <div key={idx} className="mb-4"><h4 className="text-triage-blue-text font-bold text-sm mb-2">{block.title}</h4>{block.content.map((sub, si) => renderBlock(sub, `${idx}-${si}`))}</div>;
+      case 'red-flags-table': return <div key={idx} className="space-y-2 mb-3">{block.items.map((item, i) => <div key={i} className="bg-triage-red-light border border-triage-red-dark/20 rounded-xl p-3 flex items-start gap-3"><div className="w-2 h-2 rounded-full bg-triage-red-dark mt-1.5 flex-shrink-0" /><div>{item.system && <div className="text-triage-red-dark/70 font-bold text-sm uppercase tracking-wider mb-0.5">{item.system}</div>}<div className="text-gray-600 text-sm">{item.symptom}</div><div className="text-triage-red-text font-bold text-sm mt-1">{'\u2192'} {item.action}</div></div></div>)}</div>;
+      case 'amber-table': return <div key={idx} className="space-y-2 mb-3">{block.items.map((item, i) => <div key={i} className="bg-triage-amber-light border border-triage-amber-dark/20 rounded-xl p-3"><div className="flex items-center gap-2 mb-1"><span className="text-triage-amber-text font-bold text-sm">{item.category}</span>{item.notes && <span className="text-triage-amber-dark/60 text-sm font-medium">{item.notes}</span>}</div><div className="text-gray-500 text-sm mb-1.5">{item.buzzwords}</div><div className="text-triage-amber-text text-sm font-medium">{'\u2192'} {item.action}</div></div>)}</div>;
+      case 'risk-groups': return <div key={idx} className="space-y-2 mb-3">{block.items.map((item, i) => <div key={i} className="bg-triage-amber-light border border-triage-amber-dark/20 rounded-xl p-3"><div className="text-gray-700 font-semibold text-sm mb-1">{item.group}</div><div className="text-gray-500 text-sm">{item.action}</div></div>)}</div>;
+      case 'model-overview': return <div key={idx} className="overflow-x-auto mb-3"><table className="w-full text-sm"><thead><tr>{['Tier','Who','Scope','Escalates To'].map((h, i) => <th key={i} className="text-left text-gray-500 font-semibold pb-2 pr-3 text-sm border-b border-gray-200">{h}</th>)}</tr></thead><tbody>{block.tiers.map((t, i) => <tr key={i} className="border-b border-gray-100"><td className="py-2.5 pr-3 text-sm font-bold text-triage-blue-text">{t.tier}</td><td className="py-2.5 pr-3 text-sm text-gray-500">{t.who}</td><td className="py-2.5 pr-3 text-sm text-gray-500">{t.scope}</td><td className="py-2.5 pr-3 text-sm text-gray-500">{t.escalatesTo}</td></tr>)}</tbody></table></div>;
+      case 'pathway-grid': return <div key={idx} className="space-y-2 mb-3">{block.items.map((item, i) => <div key={i} className="bg-triage-blue-light border border-triage-blue-dark/20 rounded-xl p-3"><div className="flex items-center gap-2 mb-1"><span>{item.icon}</span><span className="text-gray-700 font-semibold text-sm">{item.pathway}</span></div><div className="text-gray-500 text-sm mb-1.5">{item.symptoms}</div><div className="text-triage-blue-text text-sm font-medium">{'\u2192'} {item.action}</div>{item.contact && <div className="text-gray-400 text-sm mt-0.5">{item.contact}</div>}</div>)}</div>;
+      case 'contacts-table': return <div key={idx} className="space-y-1.5 mb-3">{block.items.map((item, i) => <div key={i} className="flex items-center justify-between bg-triage-blue-light border border-triage-blue-dark/20 rounded-lg p-2.5"><div><div className="text-gray-600 text-sm font-medium">{item.service}</div>{item.hours && <div className="text-gray-400 text-sm">{item.hours}</div>}</div><div className="text-triage-blue-text font-bold text-sm">{item.contact}</div></div>)}</div>;
+      case 'training-table': return <div key={idx} className="space-y-2 mb-3">{block.items.map((item, i) => <div key={i} className="bg-triage-blue-light border border-triage-blue-dark/20 rounded-xl p-3"><div className="text-triage-blue-text font-bold text-sm mb-1">{item.tier}</div><div className="text-gray-500 text-sm">{item.requirements}</div></div>)}</div>;
+      case 'conditions': return <div key={idx} className="mb-3">{block.title && <div className="text-triage-green-text font-bold text-sm mb-2">{block.title}</div>}<div className="flex flex-wrap gap-2">{block.items.map((item, i) => <div key={i} className="bg-triage-green-light border border-triage-green-dark/25 rounded-lg px-3 py-1.5 text-sm"><span className="text-gray-600 font-medium">{item.name}</span><span className="text-gray-400 ml-1.5">{item.age}</span></div>)}</div></div>;
+      case 'flow-arrow': return <div key={idx} className="flex items-center justify-center gap-2 py-3 mb-3"><div className="h-px flex-1 bg-gradient-to-r from-transparent via-triage-blue-dark/30 to-transparent" /><div className="flex items-center gap-1.5 bg-triage-blue-light border border-triage-blue-dark/30 rounded-full px-4 py-1.5"><ArrowRight size={14} className="text-triage-blue-text" /><span className="text-triage-blue-text text-sm font-semibold">{block.text}</span></div><div className="h-px flex-1 bg-gradient-to-r from-transparent via-triage-blue-dark/30 to-transparent" /></div>;
       default: return null;
     }
   };
 
   return (
     <div className="p-4 pb-24 max-w-lg mx-auto">
-      <h1 className="text-lg font-black mb-1 flex items-center gap-2 text-gray-800"><GitBranch size={20} className="text-triage-teal-text" />Triage Flowchart</h1>
-      <p className="text-gray-400 text-xs mb-3">{flowchartMeta.practices} · v{flowchartMeta.version} · {flowchartMeta.owner}</p>
+      <h1 className="text-lg font-semibold mb-1 flex items-center gap-2 text-gray-800"><GitBranch size={20} className="text-triage-teal-text" />Triage Flowchart</h1>
+      <p className="text-gray-400 text-sm mb-3">{flowchartMeta.practices} · v{flowchartMeta.version} · {flowchartMeta.owner}</p>
       <SearchBar value={search} onChange={setSearch} placeholder="Search flowchart..." />
       <div className="flex gap-1.5 mb-3 overflow-x-auto pb-1 -mx-1 px-1">
-        <button onClick={() => setTierFilter(null)} className={`px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all ${tierFilter === null ? 'bg-triage-blue/20 text-triage-blue-textborder border-triage-blue/30' : 'bg-gray-50 text-gray-400 border border-transparent'}`}>All</button>
-        {[1, 2, 3].map(t => <button key={t} onClick={() => setTierFilter(tierFilter === t ? null : t)} className={`px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all ${tierFilter === t ? `${tierColors[t].bg} ${tierColors[t].text} border ${tierColors[t].border}` : 'bg-gray-50 text-gray-400 border border-transparent'}`}>{tierColors[t].label}</button>)}
+        <button onClick={() => setTierFilter(null)} className={`px-3 py-1.5 rounded-full text-sm font-semibold whitespace-nowrap transition-all ${tierFilter === null ? 'bg-triage-blue-light text-triage-blue-text border border-triage-blue-dark/25' : 'bg-gray-50 text-gray-400 border border-transparent'}`}>All</button>
+        {[1, 2, 3].map(t => <button key={t} onClick={() => setTierFilter(tierFilter === t ? null : t)} className={`px-3 py-1.5 rounded-full text-sm font-semibold whitespace-nowrap transition-all ${tierFilter === t ? `${tierColors[t].bg} ${tierColors[t].text} border ${tierColors[t].border}` : 'bg-gray-50 text-gray-400 border border-transparent'}`}>{tierColors[t].label}</button>)}
       </div>
       <div className="space-y-2">
         {filtered.map(s => {
@@ -1783,9 +1788,9 @@ const FlowchartScreen = () => {
                 <div className="flex items-center gap-3">
                   <span className="text-lg">{s.icon}</span>
                   <div className="flex-1">
-                    <span className="text-gray-400 text-xs font-mono mr-2">{s.number}</span>
+                    <span className="text-gray-400 text-sm font-mono mr-2">{s.number}</span>
                     <span className="text-gray-800 font-bold text-sm">{s.title}</span>
-                    {tc && <span className={`ml-2 text-[10px] px-1.5 py-0.5 rounded ${tc.bg} ${tc.text} font-semibold`}>{tc.label}</span>}
+                    {tc && <span className={`ml-2 text-sm px-1.5 py-0.5 rounded ${tc.bg} ${tc.text} font-semibold`}>{tc.label}</span>}
                   </div>
                   {expanded === s.id ? <ChevronUp size={16} className="text-triage-teal-text" /> : <ChevronDown size={16} className="text-gray-300" />}
                 </div>
@@ -1815,27 +1820,27 @@ const AdminConsole = ({ onBack, data, toast }) => {
   return (
     <div className="p-4 pb-24 max-w-2xl mx-auto">
       <BackButton onClick={onBack} />
-      <h1 className="text-lg font-black mb-2 flex items-center gap-2 text-gray-800"><Settings size={20} className="text-triage-purple-text" />Admin</h1>
+      <h1 className="text-lg font-semibold mb-2 flex items-center gap-2 text-gray-800"><Settings size={20} className="text-triage-purple-text" />Admin</h1>
       <div className="flex gap-1.5 overflow-x-auto pb-3 mb-3 -mx-1 px-1">
-        {tabs.map(t => <button key={t.id} onClick={() => setTab(t.id)} className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-all ${tab === t.id ? 'bg-triage-purple-light text-triage-purple-textborder border-triage-purple-dark/30' : 'bg-gray-50 text-gray-400 border border-transparent'}`}><t.icon size={14} />{t.label}</button>)}
+        {tabs.map(t => <button key={t.id} onClick={() => setTab(t.id)} className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-semibold whitespace-nowrap transition-all ${tab === t.id ? 'bg-triage-purple-light text-triage-purple-text border border-triage-purple-dark/30' : 'bg-gray-50 text-gray-400 border border-transparent'}`}><t.icon size={14} />{t.label}</button>)}
       </div>
 
       {tab === 'settings' && (<div className="space-y-4"><Input label="Practice Name" value={settings.practiceName} onChange={v => setS({...settings, practiceName: v})} /><Input label="ICB Area" value={settings.icbArea} onChange={v => setS({...settings, icbArea: v})} /><Input label="Clinical Owner" value={settings.clinicalOwner} onChange={v => setS({...settings, clinicalOwner: v})} /><Input label="Review Date" type="date" value={settings.reviewDate} onChange={v => setS({...settings, reviewDate: v})} /><Input label="Session Timeout (min)" type="number" value={settings.sessionTimeoutMinutes} onChange={v => setS({...settings, sessionTimeoutMinutes: parseInt(v)})} /><Button onClick={() => { saveSettings(settings); toast('Settings saved'); }} color="green" full><Save size={18} />Save</Button></div>)}
 
       {tab === 'users' && (<div className="space-y-4">
         <Button onClick={() => setSAU(true)} color="blue"><Plus size={16} />Add User</Button>
-        {showAddUser && <GlassCard color="blue"><Input label="Username" value={newUser.username} onChange={v => setNU({...newUser, username: v})} /><Input label="Name" value={newUser.name} onChange={v => setNU({...newUser, name: v})} /><Input label="Password" value={newUser.password} onChange={v => setNU({...newUser, password: v})} />{userErr && <div className="bg-triage-red/10 text-triage-red-textpx-3 py-2 rounded-xl mb-3 text-sm border border-triage-red/20">{userErr}</div>}<div className="flex gap-2"><Button onClick={async () => { setUE(''); if (!newUser.username || !newUser.password || !newUser.name) { setUE('All fields required'); return; } const r = await addUser(newUser); if (r.success) { setU(getUsers()); setSAU(false); setNU({ username: '', password: '', name: '', role: 'staff' }); toast('User added'); } else { setUE(r.message); } }} color="green" size="sm"><Check size={14} />Add</Button><Button onClick={() => setSAU(false)} color="gray" size="sm">Cancel</Button></div></GlassCard>}
-        {users.map((u, i) => <GlassCard key={u.id}><div className="flex items-center gap-2 mb-2"><User size={16} className="text-gray-400" /><span className="font-bold text-gray-800 text-sm">{u.name}</span><span className={`text-[10px] px-1.5 py-0.5 rounded font-semibold ${u.role === 'admin' ? 'bg-triage-blue/20 text-triage-blue' : 'bg-gray-100 text-gray-500'}`}>{u.role}</span></div><Input label="Username" value={u.username} onChange={v => setU(users.map((x, j) => j === i ? { ...x, username: v } : x))} /><Input label="Name" value={u.name} onChange={v => setU(users.map((x, j) => j === i ? { ...x, name: v } : x))} /></GlassCard>)}
+        {showAddUser && <GlassCard color="blue"><Input label="Username" value={newUser.username} onChange={v => setNU({...newUser, username: v})} /><Input label="Name" value={newUser.name} onChange={v => setNU({...newUser, name: v})} /><Input label="Password" value={newUser.password} onChange={v => setNU({...newUser, password: v})} />{userErr && <div className="bg-triage-red-light text-triage-red-text px-3 py-2 rounded-xl mb-3 text-sm border border-triage-red-dark/20">{userErr}</div>}<div className="flex gap-2"><Button onClick={async () => { setUE(''); if (!newUser.username || !newUser.password || !newUser.name) { setUE('All fields required'); return; } const r = await addUser(newUser); if (r.success) { setU(getUsers()); setSAU(false); setNU({ username: '', password: '', name: '', role: 'staff' }); toast('User added'); } else { setUE(r.message); } }} color="green" size="sm"><Check size={14} />Add</Button><Button onClick={() => setSAU(false)} color="gray" size="sm">Cancel</Button></div></GlassCard>}
+        {users.map((u, i) => <GlassCard key={u.id}><div className="flex items-center gap-2 mb-2"><User size={16} className="text-gray-400" /><span className="font-bold text-gray-800 text-sm">{u.name}</span><span className={`text-sm px-1.5 py-0.5 rounded font-semibold ${u.role === 'admin' ? 'bg-triage-blue-light text-triage-blue-text' : 'bg-gray-100 text-gray-500'}`}>{u.role}</span></div><Input label="Username" value={u.username} onChange={v => setU(users.map((x, j) => j === i ? { ...x, username: v } : x))} /><Input label="Name" value={u.name} onChange={v => setU(users.map((x, j) => j === i ? { ...x, name: v } : x))} /></GlassCard>)}
         <Button onClick={async () => { await saveUsers(users); toast('Users saved'); }} color="green" full><Save size={16} />Save Users</Button>
       </div>)}
 
-      {tab === 'contacts' && (<div className="space-y-3">{data.contacts.map((c, i) => <GlassCard key={c.id}>{editContact === i ? <div className="space-y-3"><Input label="Service" value={c.service} onChange={v => { const cc = [...data.contacts]; cc[i] = { ...cc[i], service: v }; data.update('contacts', cc); }} /><Input label="Number" value={c.number} onChange={v => { const cc = [...data.contacts]; cc[i] = { ...cc[i], number: v }; data.update('contacts', cc); }} /><Input label="Hours" value={c.hours} onChange={v => { const cc = [...data.contacts]; cc[i] = { ...cc[i], hours: v }; data.update('contacts', cc); }} /><Button onClick={() => setEC(null)} size="sm"><Check size={14} />Done</Button></div> : <div className="flex items-center justify-between"><div><div className="font-semibold text-gray-800 text-sm">{c.service}</div><div className="text-xs text-gray-400">{c.number}</div></div><button onClick={() => setEC(i)} className="text-triage-blue-textp-2 rounded-xl hover:bg-triage-blue/10"><Edit size={16} /></button></div>}</GlassCard>)}</div>)}
+      {tab === 'contacts' && (<div className="space-y-3">{data.contacts.map((c, i) => <GlassCard key={c.id}>{editContact === i ? <div className="space-y-3"><Input label="Service" value={c.service} onChange={v => { const cc = [...data.contacts]; cc[i] = { ...cc[i], service: v }; data.update('contacts', cc); }} /><Input label="Number" value={c.number} onChange={v => { const cc = [...data.contacts]; cc[i] = { ...cc[i], number: v }; data.update('contacts', cc); }} /><Input label="Hours" value={c.hours} onChange={v => { const cc = [...data.contacts]; cc[i] = { ...cc[i], hours: v }; data.update('contacts', cc); }} /><Button onClick={() => setEC(null)} size="sm"><Check size={14} />Done</Button></div> : <div className="flex items-center justify-between"><div><div className="font-semibold text-gray-800 text-sm">{c.service}</div><div className="text-sm text-gray-400">{c.number}</div></div><button onClick={() => setEC(i)} className="text-triage-blue-text p-2 rounded-xl hover:bg-triage-blue-light"><Edit size={16} /></button></div>}</GlassCard>)}</div>)}
 
-      {tab === 'scripts' && (<div className="space-y-4">{Object.entries(data.scripts).map(([key, s]) => <GlassCard key={key}><div className="font-semibold mb-2 text-gray-800 text-sm">{s.title}</div>{editScript === key ? <div><TextArea value={s.script} onChange={v => { data.update('scripts', { ...data.scripts, [key]: { ...data.scripts[key], script: v } }); toast('Script saved'); }} rows={4} /><Button onClick={() => setES(null)} size="sm"><Check size={14} />Done</Button></div> : <div><p className="text-sm text-gray-400 italic mb-2">"{s.script.substring(0, 100)}..."</p><button onClick={() => setES(key)} className="text-triage-blue-texttext-sm flex items-center gap-1"><Edit size={14} />Edit</button></div>}</GlassCard>)}</div>)}
+      {tab === 'scripts' && (<div className="space-y-4">{Object.entries(data.scripts).map(([key, s]) => <GlassCard key={key}><div className="font-semibold mb-2 text-gray-800 text-sm">{s.title}</div>{editScript === key ? <div><TextArea value={s.script} onChange={v => { data.update('scripts', { ...data.scripts, [key]: { ...data.scripts[key], script: v } }); toast('Script saved'); }} rows={4} /><Button onClick={() => setES(null)} size="sm"><Check size={14} />Done</Button></div> : <div><p className="text-sm text-gray-400 italic mb-2">"{s.script.substring(0, 100)}..."</p><button onClick={() => setES(key)} className="text-triage-blue-text text-sm flex items-center gap-1"><Edit size={14} />Edit</button></div>}</GlassCard>)}</div>)}
 
-      {tab === 'backup' && (<div className="space-y-4"><GlassCard><h3 className="font-bold mb-2 text-gray-800 text-sm">Export</h3><Button onClick={() => { exportAllData(); toast('Backup downloaded'); }} color="blue" size="sm"><Download size={16} />Export</Button></GlassCard><GlassCard><h3 className="font-bold mb-2 text-gray-800 text-sm">Import</h3><label className="inline-flex items-center gap-2 px-4 py-2.5 bg-triage-blue/20 text-triage-blue-textborder border-triage-blue/30 rounded-xl font-semibold cursor-pointer text-sm"><Upload size={16} />Import<input type="file" accept=".json" onChange={e => { const f = e.target.files?.[0]; if (f) { const r = new FileReader(); r.onload = ev => { const res = importAllData(ev.target.result); toast(res.message, res.success ? 'success' : 'error'); if (res.success) { setS(getSettings()); setU(getUsers()); } }; r.readAsText(f); } }} className="hidden" /></label></GlassCard><GlassCard color="red"><h3 className="font-bold mb-2 text-gray-800 text-sm">Reset</h3><Button onClick={() => { if (confirm('Reset ALL custom content?')) { data.reset(); toast('Reset complete'); } }} color="red" size="sm"><RefreshCw size={16} />Reset All</Button></GlassCard></div>)}
+      {tab === 'backup' && (<div className="space-y-4"><GlassCard><h3 className="font-bold mb-2 text-gray-800 text-sm">Export</h3><Button onClick={() => { exportAllData(); toast('Backup downloaded'); }} color="blue" size="sm"><Download size={16} />Export</Button></GlassCard><GlassCard><h3 className="font-bold mb-2 text-gray-800 text-sm">Import</h3><label className="inline-flex items-center gap-2 px-4 py-2.5 bg-triage-blue-light text-triage-blue-text border border-triage-blue-dark/25 rounded-xl font-semibold cursor-pointer text-sm"><Upload size={16} />Import<input type="file" accept=".json" onChange={e => { const f = e.target.files?.[0]; if (f) { const r = new FileReader(); r.onload = ev => { const res = importAllData(ev.target.result); toast(res.message, res.success ? 'success' : 'error'); if (res.success) { setS(getSettings()); setU(getUsers()); } }; r.readAsText(f); } }} className="hidden" /></label></GlassCard><GlassCard color="red"><h3 className="font-bold mb-2 text-gray-800 text-sm">Reset</h3><Button onClick={() => { if (confirm('Reset ALL custom content?')) { data.reset(); toast('Reset complete'); } }} color="red" size="sm"><RefreshCw size={16} />Reset All</Button></GlassCard></div>)}
 
-      {tab === 'audit' && (<div>{auditLog.length === 0 ? <p className="text-gray-400 text-center py-8">No activity</p> : <div className="space-y-1">{auditLog.slice(0, 50).map((l, i) => <div key={i} className="flex justify-between py-2 border-b border-gray-100 text-sm"><span className="text-gray-600">{l.action}</span><span className="text-gray-400 text-xs">{new Date(l.timestamp).toLocaleString('en-GB')}</span></div>)}</div>}</div>)}
+      {tab === 'audit' && (<div>{auditLog.length === 0 ? <p className="text-gray-400 text-center py-8">No activity</p> : <div className="space-y-1">{auditLog.slice(0, 50).map((l, i) => <div key={i} className="flex justify-between py-2 border-b border-gray-100 text-sm"><span className="text-gray-600">{l.action}</span><span className="text-gray-400 text-sm">{new Date(l.timestamp).toLocaleString('en-GB')}</span></div>)}</div>}</div>)}
     </div>
   );
 };
@@ -1852,25 +1857,25 @@ const NavBar = ({ screen, onNav, isAdminUser, currentTier, onTierChange, session
     { id: isAdminUser ? 'admin' : 'training', icon: isAdminUser ? Settings : GraduationCap, label: isAdminUser ? 'Admin' : 'Training' }
   ];
   return (
-    <nav className="fixed bottom-0 left-0 right-0 bg-white shadow-sm border-t border-gray-200 z-40">
+    <nav className="fixed bottom-0 left-0 right-0 bg-white shadow-md border-t border-gray-100 z-40">
       {/* Tier toggle — only show if user can access Tier 2 */}
       {showTier2 && (
-        <div className="flex justify-center gap-1 pt-1.5 pb-0.5">
+        <div className="flex justify-center gap-2 px-4 pt-2 pb-1">
           <button onClick={() => onTierChange(1)}
-            className={`px-3 py-1 rounded-full text-[9px] font-bold transition-all ${currentTier === 1 ? 'bg-triage-blue/20 text-triage-blue-textborder border-triage-blue/30' : 'text-gray-400 hover:text-gray-500'}`}>
-            TIER 1 — Reception
+            className={`px-4 py-1.5 rounded-xl text-sm font-semibold transition-all ${currentTier === 1 ? 'bg-triage-blue-light text-triage-blue-text border border-triage-blue-dark/20 shadow-sm' : 'text-gray-400 hover:text-gray-500 hover:bg-gray-50'}`}>
+            Tier 1 — Reception
           </button>
           <button onClick={() => onTierChange(2)}
-            className={`px-3 py-1 rounded-full text-[9px] font-bold transition-all ${currentTier === 2 ? 'bg-triage-purple-light text-triage-purple-text border border-triage-purple-dark/35' : 'text-gray-400 hover:text-gray-500'}`}>
-            TIER 2 — Triager
+            className={`px-4 py-1.5 rounded-xl text-sm font-semibold transition-all ${currentTier === 2 ? 'bg-triage-purple-light text-triage-purple-text border border-triage-purple-dark/20 shadow-sm' : 'text-gray-400 hover:text-gray-500 hover:bg-gray-50'}`}>
+            Tier 2 — Triager
           </button>
         </div>
       )}
-      <div className="flex justify-around py-1.5">
+      <div className="flex justify-around py-2 px-2">
         {items.map(i => (
           <button key={i.id} onClick={() => onNav(i.id)}
-            className={`flex flex-col items-center py-1.5 px-3 rounded-xl transition-all ${screen === i.id ? 'text-triage-blue-textbg-triage-blue/10' : 'text-gray-400 hover:text-gray-500'}`}>
-            <i.icon size={20} /><span className="text-[10px] mt-0.5 font-medium">{i.label}</span>
+            className={`flex flex-col items-center py-2 px-3 rounded-xl transition-all ${screen === i.id ? 'text-triage-blue-text bg-triage-blue-light' : 'text-gray-400 hover:text-gray-500'}`}>
+            <i.icon size={20} /><span className="text-sm mt-1 font-medium">{i.label}</span>
           </button>
         ))}
       </div>
