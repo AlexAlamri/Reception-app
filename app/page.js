@@ -68,7 +68,10 @@ function useKeywordScanner(text, redFlags, amberFlags, pharmacyFirst, highRiskGr
   return useMemo(() => {
     if (!text || text.length < 2) return null;
     const lower = text.toLowerCase();
-    const kw = (k) => { const kl = k.toLowerCase(); return lower.includes(kl) || kl.includes(lower); };
+    // Standard match: text contains keyword, OR keyword contains text (min 4 chars to prevent false positives)
+    const kw = (k) => { const kl = k.toLowerCase(); return lower.includes(kl) || (lower.length >= 4 && kl.includes(lower)); };
+    // Strict match for STOP patterns: text must contain the full keyword (no reverse match — false positives trigger full-screen 999 overlay)
+    const kwStrict = (k) => lower.includes(k.toLowerCase());
     const red = redFlags.filter(f => f.keywords.some(k => kw(k)));
     const amber = amberFlags.filter(f => f.keywords.some(k => kw(k)) || (f.searchTerms && f.searchTerms.some(t => kw(t))));
     const pharmacy = pharmacyFirst.filter(c => (c.condition && kw(c.condition)) || (c.name && kw(c.name)) || (c.keywords && c.keywords.some(k => kw(k))));
@@ -91,8 +94,8 @@ function useKeywordScanner(text, redFlags, amberFlags, pharmacyFirst, highRiskGr
     // NEW: Green flag scanning
     const green = greenFlags.filter(f => f.keywords.some(k => kw(k)));
     const hasGreen = green.length > 0;
-    // NEW: STOP pattern scanning (HIGHEST PRIORITY)
-    const stop = stopPatterns.filter(p => p.keywords.some(k => kw(k)));
+    // STOP pattern scanning (HIGHEST PRIORITY) — strict forward-only match
+    const stop = stopPatterns.filter(p => p.keywords.some(k => kwStrict(k)));
     const hasStop = stop.length > 0;
     return {
       // EXISTING:
@@ -559,7 +562,7 @@ const DecisionFlow = ({ data, settings, onRecord, showToast }) => {
   const allSelfCareChecked = selfCareChecks.every(Boolean);
 
   return (
-    <div className="p-3 sm:p-4 pb-44 max-w-lg mx-auto">
+    <div className="p-3 sm:p-4 pb-56 max-w-lg mx-auto">
       {/* ---- STOP ALERT OVERLAY ---- */}
       {scanResults?.hasStop && !stopAcknowledged && (
         <StopAlertOverlay
@@ -585,7 +588,7 @@ const DecisionFlow = ({ data, settings, onRecord, showToast }) => {
       </div>
 
       {/* ---- STICKY PATIENT WORDS BANNER + KEYWORD SCANNER ---- */}
-      <div className="sticky top-0 z-20 bg-white/95 pb-3">
+      <div className="sticky top-10 z-20 bg-white pb-3">
         <div className="relative">
           <Search className="absolute left-3 top-3 text-gray-300" size={16} />
           <textarea value={scanText} onChange={e => setScanText(e.target.value)} autoFocus={true}
@@ -1047,7 +1050,7 @@ const DecisionFlow = ({ data, settings, onRecord, showToast }) => {
       </div>
 
       {/* ---- QUICK ACTION BAR (fixed bottom) ---- */}
-      <div className="fixed bottom-[3.75rem] left-0 right-0 z-30 bg-white shadow-md border-t border-gray-100 p-2.5">
+      <div className="fixed bottom-[7.5rem] left-0 right-0 z-30 bg-white shadow-md border-t border-gray-100 p-2.5">
         <div className="flex gap-2.5 max-w-lg mx-auto">
           <button onClick={() => setQuickAction(quickAction === '999' ? null : '999')}
             className="flex-1 bg-triage-red-light border border-triage-red-dark/20 text-triage-red-text rounded-xl py-2.5 text-sm font-semibold text-center hover:brightness-95 transition-all">
@@ -1096,7 +1099,7 @@ const DecisionFlow = ({ data, settings, onRecord, showToast }) => {
 
       {/* ---- OUTCOME BAR (sticky bottom) ---- */}
       {outcome && (
-        <div className="fixed bottom-[7.5rem] left-0 right-0 z-40 p-3">
+        <div className="fixed bottom-[11rem] left-0 right-0 z-40 p-3">
           <div className={`max-w-lg mx-auto ${C[outcome.color]?.bg || C.blue.bg} border ${C[outcome.color]?.border || C.blue.border} rounded-2xl p-3 shadow-lg`}>
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2 flex-1 min-w-0">
@@ -1125,7 +1128,7 @@ const SearchScreen = ({ data }) => {
   const [search, setSearch] = useState('');
   const results = useKeywordScanner(search, data.redFlags, data.amberFlags, data.pharmacyFirst, data.highRiskGroups);
   return (
-    <div className="p-4 pb-24 max-w-lg mx-auto">
+    <div className="p-4 pb-32 max-w-lg mx-auto">
       <h1 className="text-lg font-semibold mb-3 flex items-center gap-2 text-gray-800"><Search size={20} className="text-triage-blue-text" />Quick Lookup</h1>
       <SearchBar value={search} onChange={setSearch} placeholder="Type symptom or keyword..." />
       {search.length >= 2 && !results?.hasAny && <p className="text-center text-gray-400 mt-8 text-sm">No matches. If unsure → GP Triager.</p>}
@@ -1158,7 +1161,7 @@ const ContactsScreen = ({ contacts }) => {
   const [search, setSearch] = useState('');
   const filtered = contacts.filter(c => c.service.toLowerCase().includes(search.toLowerCase()));
   return (
-    <div className="p-4 pb-24 max-w-lg mx-auto">
+    <div className="p-4 pb-32 max-w-lg mx-auto">
       <h1 className="text-lg font-semibold mb-3 flex items-center gap-2 text-gray-800"><Phone size={20} className="text-triage-blue-text" />Key Contacts</h1>
       <SearchBar value={search} onChange={setSearch} placeholder="Search contacts..." />
       {filtered.map(c => <div key={c.id}><PhoneLink {...c} /></div>)}
@@ -1247,14 +1250,14 @@ const TrainingScreen = ({ onBack, scenarios }) => {
   const pct = totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0;
 
   if (!sc) return (
-    <div className="p-4 pb-24 max-w-lg mx-auto">
+    <div className="p-4 pb-32 max-w-lg mx-auto">
       <BackButton onClick={onBack} />
       <div className="text-center text-gray-400 mt-8">No scenarios for this topic.</div>
     </div>
   );
 
   return (
-    <div className="p-4 pb-24 max-w-lg mx-auto">
+    <div className="p-4 pb-32 max-w-lg mx-auto">
       <BackButton onClick={onBack} />
       <h1 className="text-lg font-semibold mb-2 flex items-center gap-2 text-gray-800"><GraduationCap size={20} className="text-triage-purple-text" />Training</h1>
 
@@ -1387,7 +1390,7 @@ const Tier2Workflow = ({ data, showToast }) => {
     : data.amberFlags;
 
   return (
-    <div className="p-3 sm:p-4 pb-36 max-w-lg mx-auto">
+    <div className="p-3 sm:p-4 pb-40 max-w-lg mx-auto">
       {/* TIER 2 HEADER */}
       <div className="mb-5">
         <h1 className="text-xl font-semibold text-gray-800">Tier 2 — Patient Services Team</h1>
@@ -1880,7 +1883,7 @@ const SOPScreen = () => {
   };
 
   return (
-    <div className="p-4 pb-24 max-w-lg mx-auto">
+    <div className="p-4 pb-32 max-w-lg mx-auto">
       <h1 className="text-lg font-semibold mb-1 flex items-center gap-2 text-gray-800"><BookOpen size={20} className="text-triage-purple-text" />Triage SOP</h1>
       <p className="text-gray-400 text-sm mb-3">{sopMeta.practices} · v{sopMeta.version} · {sopMeta.owner}</p>
       <SearchBar value={search} onChange={setSearch} placeholder="Search SOP..." />
@@ -1942,7 +1945,7 @@ const FlowchartScreen = () => {
   };
 
   return (
-    <div className="p-4 pb-24 max-w-lg mx-auto">
+    <div className="p-4 pb-32 max-w-lg mx-auto">
       <h1 className="text-lg font-semibold mb-1 flex items-center gap-2 text-gray-800"><GitBranch size={20} className="text-triage-teal-text" />Triage Flowchart</h1>
       <p className="text-gray-400 text-sm mb-3">{flowchartMeta.practices} · v{flowchartMeta.version} · {flowchartMeta.owner}</p>
       <SearchBar value={search} onChange={setSearch} placeholder="Search flowchart..." />
@@ -1990,7 +1993,7 @@ const AdminConsole = ({ onBack, data, toast }) => {
   const tabs = [{ id: 'settings', label: 'Settings', icon: Settings },{ id: 'users', label: 'Users', icon: User },{ id: 'contacts', label: 'Contacts', icon: Phone },{ id: 'scripts', label: 'Scripts', icon: FileText },{ id: 'backup', label: 'Backup', icon: Download },{ id: 'audit', label: 'Audit', icon: History }];
 
   return (
-    <div className="p-4 pb-24 max-w-2xl mx-auto">
+    <div className="p-4 pb-32 max-w-2xl mx-auto">
       <BackButton onClick={onBack} />
       <h1 className="text-lg font-semibold mb-2 flex items-center gap-2 text-gray-800"><Settings size={20} className="text-triage-purple-text" />Admin</h1>
       <div className="flex gap-1.5 overflow-x-auto pb-3 mb-3 -mx-1 px-1">
