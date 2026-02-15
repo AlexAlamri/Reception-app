@@ -118,6 +118,82 @@ const C = {
   gray: { text: 'text-triage-grey-text', bg: 'bg-triage-grey-light', border: 'border-triage-grey-dark', card: 'bg-triage-grey-light border-l-triage-grey-dark', dot: 'bg-triage-grey-dark', ring: '' },
 };
 
+// ============ ICON LOOKUPS ============
+const systemIcons = {
+  'Cardiac': { icon: '❤️', bg: 'bg-triage-red-light' },
+  'Respiratory': { icon: '🫁', bg: 'bg-triage-blue-light' },
+  'Neurological': { icon: '🧠', bg: 'bg-triage-purple-light' },
+  'Sepsis/Meningitis': { icon: '🦠', bg: 'bg-triage-red-light' },
+  'GI/Abdominal': { icon: '🫃', bg: 'bg-triage-yellow-light' },
+  'Vascular': { icon: '🩸', bg: 'bg-triage-red-light' },
+  'Urological': { icon: '💧', bg: 'bg-triage-blue-light' },
+  'Obstetric': { icon: '🤰', bg: 'bg-pink-100' },
+  'Oncology': { icon: '🎗️', bg: 'bg-triage-purple-light' },
+  'Eye': { icon: '👁️', bg: 'bg-triage-teal-light' },
+  'Allergy': { icon: '⚠️', bg: 'bg-triage-amber-light' },
+  'Mental Health': { icon: '💚', bg: 'bg-triage-green-light' },
+};
+
+const pathwayIcons = {
+  'Eye Emergency': { icon: '👁️', bg: 'bg-triage-teal-light' },
+  'Injury / Acute Trauma': { icon: '🦴', bg: 'bg-triage-amber-light' },
+  'Pregnancy >18wks': { icon: '🤰', bg: 'bg-pink-100' },
+  'Sexual Health': { icon: '🩺', bg: 'bg-triage-purple-light' },
+  'Mental Health (non-crisis)': { icon: '🧠', bg: 'bg-triage-green-light' },
+  'Health Visiting (0–5)': { icon: '👶', bg: 'bg-triage-yellow-light' },
+  'Abortion Services': { icon: '🚫', bg: 'bg-triage-purple-light' },
+  'NHS 111': { icon: '📞', bg: 'bg-triage-blue-light' },
+  'NHS 111 Emergency Rx': { icon: '💊', bg: 'bg-triage-amber-light' },
+  'Mental Health Crisis': { icon: '🚨', bg: 'bg-triage-red-light' },
+  '999 / A&E': { icon: '🚑', bg: 'bg-triage-red-light' },
+  'Pharmacy First': { icon: '💊', bg: 'bg-triage-green-light' },
+  'Planned / EMIS': { icon: '📋', bg: 'bg-triage-blue-light' },
+};
+
+const pharmacyIcons = {
+  'Sinusitis': { icon: '🤧', bg: 'bg-triage-yellow-light' },
+  'Sore Throat': { icon: '🗣️', bg: 'bg-triage-amber-light' },
+  'Earache': { icon: '👂', bg: 'bg-triage-yellow-light' },
+  'Infected Insect Bite': { icon: '🐛', bg: 'bg-triage-green-light' },
+  'Impetigo': { icon: '🩹', bg: 'bg-triage-amber-light' },
+  'Shingles': { icon: '🔥', bg: 'bg-triage-red-light' },
+  'UTI': { icon: '💧', bg: 'bg-triage-blue-light' },
+};
+
+const purpleIcons = {
+  'Possible cancer / 2WW (NICE NG12)': { icon: '🎗️' },
+  'Mental health (CRISIS)': { icon: '🧠' },
+  'Safeguarding': { icon: '🛡️' },
+  'Under 1 year — ANY new concern': { icon: '👶' },
+  'High-risk + NEW symptoms': { icon: '⚠️' },
+  'Multiple / vague / >2 weeks / worst ever': { icon: '🔀' },
+  'ALL medication decisions': { icon: '💊' },
+};
+
+const amberIcons = {
+  'Breathing: new/worsening': { icon: '🫁' },
+  'Abdominal: severe/acute': { icon: '🫃' },
+  'Diabetes urgent': { icon: '💉' },
+  'Urinary: blood/fever/male/pregnant': { icon: '💧' },
+  'Neurology/Head': { icon: '🧠' },
+  'Skin/Infection': { icon: '🩹' },
+  'Eye problems': { icon: '👁️' },
+  'DVT (NG158)': { icon: '🦵' },
+  'PE (NG158)': { icon: '🫁' },
+  'GCA (NG244)': { icon: '🤕' },
+  'Renal Colic': { icon: '🫘' },
+  'Fever <5s (NG143)': { icon: '🌡️' },
+  'Neutropenic Sepsis': { icon: '🦠' },
+  'Testicular Pain (non-torsion)': { icon: '⚠️' },
+  "Women's Health": { icon: '🤰' },
+  'Acute Back Pain + flags': { icon: '🦴' },
+};
+
+const getIcon = (map, name) => {
+  if (!name) return null;
+  return map[name] || null;
+};
+
 // ============ CORE UI COMPONENTS ============
 const EmergencyBanner = () => (
   <div className="emergency-banner text-white py-2.5 px-4 text-center font-semibold sticky top-0 z-50 text-sm">
@@ -345,7 +421,7 @@ const FlowStep = ({ num, color, title, subtitle, expanded, onToggle, badge, badg
   const c = C[color] || C.gray;
   const bc = C[badgeColor] || C[color] || C.gray;
   return (
-    <div id={`flow-step-${num}`} className={`mb-3 rounded-2xl border transition-all duration-200 ${completed ? 'opacity-50' : ''} ${locked ? 'opacity-50 pointer-events-none' : ''} ${expanded ? `${c.bg} ${c.border}` : 'bg-white border-gray-100 shadow-sm'}`}>
+    <div id={`flow-step-${num}`} className={`mb-3 rounded-2xl border transition-all duration-300 ${completed ? 'opacity-50' : ''} ${locked ? 'opacity-50 pointer-events-none' : ''} ${expanded ? `${c.bg} ${c.border}` : 'bg-white border-gray-100 shadow-sm'}`}>
       <button onClick={locked ? undefined : onToggle} className="w-full text-left p-4 sm:p-5 flex items-center gap-4">
         <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm flex-shrink-0 ${completed ? 'bg-triage-green-light border border-triage-green-dark/30 text-triage-green-text' : locked ? 'bg-gray-100 border border-gray-200 text-gray-400' : `${c.bg} border ${c.border} ${c.text}`}`}>
           {completed ? <Check size={16} /> : locked ? <Lock size={14} /> : num}
@@ -361,7 +437,7 @@ const FlowStep = ({ num, color, title, subtitle, expanded, onToggle, badge, badg
         )}
         {!locked && (expanded ? <ChevronUp size={18} className={c.text} /> : <ChevronDown size={18} className="text-gray-300" />)}
       </button>
-      {expanded && !locked && <div className="px-4 sm:px-5 pb-5 pt-2 border-t border-gray-100 animate-fade-slide">{children}</div>}
+      {expanded && !locked && <div className="px-4 sm:px-5 pb-5 pt-2 border-t border-gray-100 animate-fade-slide transition-all duration-300">{children}</div>}
     </div>
   );
 };
@@ -535,6 +611,26 @@ const DecisionFlow = ({ data, settings, onRecord, showToast }) => {
         )}
       </div>
 
+      {/* ---- STEP PROGRESS INDICATOR ---- */}
+      <div className="flex items-center mb-4 px-2">
+        {[1, 2, 3, 4, 5].flatMap((step, i) => {
+          const items = [];
+          if (i > 0) items.push(
+            <div key={`line-${step}`} className={`h-0.5 flex-1 transition-all duration-300 ${completedSteps.has(step - 1) ? 'bg-triage-green-dark/30' : 'bg-gray-200'}`} />
+          );
+          items.push(
+            <div key={`step-${step}`} className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0 transition-all duration-300 ${
+              completedSteps.has(step) ? 'bg-triage-green-light border border-triage-green-dark/30 text-triage-green-text' :
+              expandedStep === step ? 'bg-triage-blue-dark text-white shadow-md' :
+              'bg-gray-200 text-gray-400'
+            }`}>
+              {completedSteps.has(step) ? '✓' : step}
+            </div>
+          );
+          return items;
+        })}
+      </div>
+
       {/* ---- GOLDEN RULE ---- */}
       <div className="bg-white border border-gray-100 rounded-2xl shadow-sm px-4 py-3 mb-5">
         <div className="flex items-center gap-2 mb-1.5">
@@ -572,6 +668,14 @@ const DecisionFlow = ({ data, settings, onRecord, showToast }) => {
           </div>
         )}
 
+        {/* Empty state for no scanner matches */}
+        {scanText && scanResults && !scanResults.hasRed && !scanResults.hasStop && (
+          <div className="bg-gray-50 border border-gray-100 rounded-xl p-4 mb-3 text-center">
+            <span className="text-xl">✨</span>
+            <div className="text-gray-400 text-sm mt-1">No red flags matched — continue to the next step</div>
+          </div>
+        )}
+
         {/* Collapsed accordion by body system */}
         <div className="text-gray-500 text-sm mb-3 font-semibold">Body systems — click to expand:</div>
         <div className="space-y-2 mb-4 max-h-72 overflow-y-auto pr-1">
@@ -587,8 +691,11 @@ const DecisionFlow = ({ data, settings, onRecord, showToast }) => {
               return (
                 <div key={system} className={`rounded-xl border ${isMatched ? 'border-l-4 border-l-triage-red-dark border-triage-red-dark/30 bg-triage-red-light' : 'border-gray-100 bg-white shadow-sm'}`}>
                   <button onClick={() => setExpandedSystems(prev => ({ ...prev, [system]: !isOpen }))}
-                    className="w-full flex items-center justify-between px-3.5 py-2.5 text-left hover:bg-gray-50/50 transition-colors rounded-xl">
-                    <span className={`text-sm font-semibold ${isMatched ? 'text-triage-red-text' : 'text-gray-600'}`}>
+                    className="w-full flex items-center gap-3 px-3.5 py-2.5 text-left hover:bg-gray-50/50 transition-colors rounded-xl">
+                    {(() => { const si = systemIcons[system]; return si ? (
+                      <div className={`w-10 h-10 rounded-full ${si.bg} flex items-center justify-center text-xl flex-shrink-0`}>{si.icon}</div>
+                    ) : null; })()}
+                    <span className={`flex-1 text-sm font-semibold ${isMatched ? 'text-triage-red-text' : 'text-gray-600'}`}>
                       {isMatched && '🚨 '}{system} ({flags.length} flag{flags.length > 1 ? 's' : ''})
                     </span>
                     {isOpen ? <ChevronUp size={14} className="text-gray-400" /> : <ChevronDown size={14} className="text-gray-400" />}
@@ -617,7 +724,7 @@ const DecisionFlow = ({ data, settings, onRecord, showToast }) => {
           </button>
         </div>
         <div className="text-gray-400 text-sm text-center mb-3">On-site ambulance: 020 3162 7525 | Crisis: 0800 028 8000 | CAMHS: 0203 228 5980</div>
-        <button onClick={() => advanceToNext(1)} className="w-full text-center text-sm text-gray-400 hover:text-triage-green-text py-3 border-t border-gray-100 transition-colors">
+        <button onClick={() => advanceToNext(1)} className="w-full text-center text-sm text-gray-400 hover:text-triage-green-text py-3 border-t border-gray-100 transition-all hover:scale-[1.02]">
           ✓ No red flags identified — continue ↓
         </button>
       </FlowStep>
@@ -637,6 +744,14 @@ const DecisionFlow = ({ data, settings, onRecord, showToast }) => {
             <div className="flex flex-wrap gap-1">
               {scanResults.pathways.map(p => <span key={p.id} className="bg-triage-blue-light px-2 py-0.5 rounded text-sm text-triage-blue-text font-medium">{p.pathway}</span>)}
             </div>
+          </div>
+        )}
+
+        {/* Empty state for no pathway matches */}
+        {scanText && scanResults && !scanResults.hasPathway && (
+          <div className="bg-gray-50 border border-gray-100 rounded-xl p-4 mb-3 text-center">
+            <span className="text-xl">✨</span>
+            <div className="text-gray-400 text-sm mt-1">No pathway matched — review options below or continue</div>
           </div>
         )}
 
@@ -660,7 +775,9 @@ const DecisionFlow = ({ data, settings, onRecord, showToast }) => {
             return (
               <div key={i} className={`rounded-2xl border p-3.5 ${is999 ? 'border-triage-red-dark/20 bg-triage-red-light' : 'border-gray-100 bg-white shadow-sm'} hover:shadow-md transition-shadow`}>
                 <div className="flex items-start gap-3">
-                  <div className={`w-10 h-10 rounded-full flex items-center justify-center text-lg flex-shrink-0 ${is999 ? 'bg-triage-red-light border border-triage-red-dark/20' : 'bg-triage-blue-light border border-triage-blue-dark/15'}`}>{p.icon}</div>
+                  {(() => { const pi = pathwayIcons[p.name]; return (
+                    <div className={`w-12 h-12 rounded-full flex items-center justify-center text-2xl flex-shrink-0 ${pi ? pi.bg : is999 ? 'bg-triage-red-light' : 'bg-triage-blue-light'}`}>{pi ? pi.icon : p.icon}</div>
+                  ); })()}
                   <div className="flex-1 min-w-0">
                     <div className={`font-semibold text-sm ${is999 ? 'text-triage-red-text' : 'text-gray-700'}`}>{p.name}</div>
                     <div className="text-gray-400 text-sm mt-0.5">{p.detail}</div>
@@ -681,7 +798,7 @@ const DecisionFlow = ({ data, settings, onRecord, showToast }) => {
           })}
         </div>
 
-        <button onClick={() => advanceToNext(2)} className="w-full text-center text-sm text-gray-400 hover:text-triage-green-text py-3 border-t border-gray-100 transition-colors">
+        <button onClick={() => advanceToNext(2)} className="w-full text-center text-sm text-gray-400 hover:text-triage-green-text py-3 border-t border-gray-100 transition-all hover:scale-[1.02]">
           ✓ No external pathway — continue ↓
         </button>
       </FlowStep>
@@ -772,6 +889,14 @@ const DecisionFlow = ({ data, settings, onRecord, showToast }) => {
         expanded={expandedStep === 4} onToggle={() => toggle(4)} completed={completedSteps.has(4)}
         badge={scanResults?.pharmacy.length > 0 ? 'MATCH' : null} badgeColor="green">
 
+        {/* Empty state for no pharmacy matches */}
+        {scanText && scanResults && scanResults.pharmacy.length === 0 && (
+          <div className="bg-gray-50 border border-gray-100 rounded-xl p-4 mb-3 text-center">
+            <span className="text-xl">✨</span>
+            <div className="text-gray-400 text-sm mt-1">No Pharmacy First conditions matched — review options below</div>
+          </div>
+        )}
+
         {/* Critical exclusion warnings */}
         <div className="bg-triage-red-light border border-triage-red-dark/15 rounded-xl p-2.5 mb-3 space-y-1">
           <div className="text-triage-red-text text-sm font-bold">⚠️ UTI: WOMEN 16–64 ONLY. Male → GP. Pregnant → GP.</div>
@@ -781,15 +906,20 @@ const DecisionFlow = ({ data, settings, onRecord, showToast }) => {
         {/* Pharmacy First conditions table */}
         <div className="text-gray-500 font-bold text-sm mb-2">Pharmacy First — 7 conditions:</div>
         <div className="space-y-1.5 mb-3 max-h-56 overflow-y-auto pr-1">
-          {data.pharmacyFirst.map(c => (
+          {data.pharmacyFirst.map(c => {
+            const pi = getIcon(pharmacyIcons, c.condition || c.name);
+            return (
             <div key={c.id} className={`rounded-xl border p-2.5 ${scanResults?.pharmacy.some(p => p.id === c.id) ? 'border-l-4 border-l-triage-green-dark border-triage-green-dark/20 bg-triage-green-light' : 'border-gray-200 bg-gray-50'}`}>
-              <div className="flex items-center justify-between">
-                <div className="text-gray-700 font-bold text-sm">{c.icon} {c.condition || c.name}</div>
-                <span className="text-triage-blue-text text-sm font-semibold">{c.ageRange}</span>
+              <div className="flex items-center gap-3">
+                {pi && <div className={`w-12 h-12 rounded-full ${pi.bg} flex items-center justify-center text-2xl flex-shrink-0`}>{pi.icon}</div>}
+                <div className="flex-1 flex items-center justify-between">
+                  <div className="text-gray-700 font-bold text-sm">{!pi && c.icon} {c.condition || c.name}</div>
+                  <span className="text-triage-blue-text text-sm font-semibold">{c.ageRange}</span>
+                </div>
               </div>
               <div className="text-triage-red-text text-sm mt-1">Exclusions: {c.exclusions.join(' | ')}</div>
             </div>
-          ))}
+          ); })}
         </div>
 
         {/* Self-Care criteria */}
@@ -815,7 +945,7 @@ const DecisionFlow = ({ data, settings, onRecord, showToast }) => {
             ✓ Self-care offered
           </button>
         </div>
-        <button onClick={() => { setSelfCareOffered('declined'); advanceToNext(4); }} className="w-full text-center text-sm text-gray-400 hover:text-triage-blue-text py-3 border-t border-gray-100 transition-colors">
+        <button onClick={() => { setSelfCareOffered('declined'); advanceToNext(4); }} className="w-full text-center text-sm text-gray-400 hover:text-triage-blue-text py-3 border-t border-gray-100 transition-all hover:scale-[1.02]">
           Patient declined — continue to Step 5 ↓
         </button>
       </FlowStep>
@@ -1270,6 +1400,26 @@ const Tier2Workflow = ({ data, showToast }) => {
         )}
       </div>
 
+      {/* ---- STEP PROGRESS INDICATOR (TIER 2) ---- */}
+      <div className="flex items-center mb-4 px-2">
+        {[1, 2, 3, 4, 5, 6].flatMap((step, i) => {
+          const items = [];
+          if (i > 0) items.push(
+            <div key={`t2line-${step}`} className={`h-0.5 flex-1 transition-all duration-300 ${t2CompletedSteps.has(step - 1) ? 'bg-triage-green-dark/30' : 'bg-gray-200'}`} />
+          );
+          items.push(
+            <div key={`t2step-${step}`} className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0 transition-all duration-300 ${
+              t2CompletedSteps.has(step) ? 'bg-triage-green-light border border-triage-green-dark/30 text-triage-green-text' :
+              t2Step === step ? 'bg-triage-blue-dark text-white shadow-md' :
+              'bg-gray-200 text-gray-400'
+            }`}>
+              {t2CompletedSteps.has(step) ? '✓' : step}
+            </div>
+          );
+          return items;
+        })}
+      </div>
+
       {/* TIME LIMITS BAR */}
       <div className="grid grid-cols-3 gap-3 mb-5">
         <div className="bg-triage-amber-light border border-triage-amber-dark/20 rounded-2xl p-3 text-center shadow-sm">
@@ -1313,7 +1463,7 @@ const Tier2Workflow = ({ data, showToast }) => {
             <div className="text-sm text-triage-amber-text font-bold">AMBER = within 1 hour | All others = within 2 hours</div>
             <div className="text-sm text-gray-400 mt-1">PROCESS and BOOK protocol-clear. Do NOT decide clinical urgency.</div>
           </div>
-          <button onClick={() => t2Advance(1)} className="w-full py-3 bg-triage-blue-light border border-triage-blue-dark/20 text-triage-blue-text rounded-xl font-semibold text-sm hover:brightness-95 transition-all">
+          <button onClick={() => t2Advance(1)} className="w-full py-3 bg-triage-blue-light border border-triage-blue-dark/20 text-triage-blue-text rounded-xl font-semibold text-sm hover:brightness-95 hover:scale-[1.02] transition-all">
             Continue to Purple Check →
           </button>
         </div>
@@ -1327,12 +1477,23 @@ const Tier2Workflow = ({ data, showToast }) => {
           <div className="bg-triage-purple-light border border-triage-purple-dark/35 rounded-xl p-2.5">
             <div className="text-triage-purple-text text-sm font-bold">If ANY purple trigger applies → Tier 3 REGARDLESS — even if it also matches yellow or green.</div>
           </div>
+          {/* Empty state for no purple matches */}
+          {t2PatientWords && scan && !scan.hasPurple && (
+            <div className="bg-gray-50 border border-gray-100 rounded-xl p-4 mb-3 text-center">
+              <span className="text-xl">✨</span>
+              <div className="text-gray-400 text-sm mt-1">No purple flags matched — review list below to confirm</div>
+            </div>
+          )}
           <div className="space-y-2">
             {purpleFlags.map((pf, i) => {
               const matched = scan?.purple?.some(p => p.category === pf.category);
+              const pi = getIcon(purpleIcons, pf.category);
               return (
                 <div key={i} className={`border-l-4 ${matched ? 'border-triage-purple-dark bg-triage-purple-light' : 'border-gray-200 bg-gray-50'} rounded-r-xl p-2.5`}>
-                  <div className={`font-bold text-sm ${matched ? 'text-triage-purple-text' : 'text-gray-600'}`}>{pf.category}</div>
+                  <div className={`flex items-center gap-3 font-bold text-sm ${matched ? 'text-triage-purple-text' : 'text-gray-600'}`}>
+                    {pi && <div className="w-10 h-10 rounded-full bg-triage-purple-light flex items-center justify-center text-xl flex-shrink-0">{pi.icon}</div>}
+                    {pf.category}
+                  </div>
                   <div className="text-sm text-gray-400 mt-0.5">{pf.triggers.join(' · ')}</div>
                   <div className="text-sm text-triage-purple-text/70 mt-0.5">{pf.action}</div>
                 </div>
@@ -1342,11 +1503,11 @@ const Tier2Workflow = ({ data, showToast }) => {
           {purpleGate === null && (
             <div className="grid grid-cols-2 gap-3 mt-4">
               <button onClick={() => { setPurpleGate('clear'); t2Advance(2); }}
-                className="py-3.5 bg-triage-green-light border border-triage-green-dark/20 text-triage-green-text rounded-xl font-semibold text-sm hover:brightness-95 transition-all">
+                className="py-3.5 bg-triage-green-light border border-triage-green-dark/20 text-triage-green-text rounded-xl font-semibold text-sm hover:brightness-95 hover:scale-[1.02] transition-all">
                 No purple triggers — continue
               </button>
               <button onClick={() => { setPurpleGate('purple'); t2MarkDone(2); setT2Step(6); }}
-                className="py-3.5 bg-triage-purple-light border border-triage-purple-dark/25 text-triage-purple-text rounded-xl font-semibold text-sm animate-pulse">
+                className="py-3.5 bg-triage-purple-light border border-triage-purple-dark/25 text-triage-purple-text rounded-xl font-semibold text-sm animate-pulse hover:scale-[1.02] transition-transform">
                 Purple identified — escalate
               </button>
             </div>
@@ -1369,12 +1530,23 @@ const Tier2Workflow = ({ data, showToast }) => {
             <input type="text" value={amberSearch} onChange={e => setAmberSearch(e.target.value)}
               placeholder="Filter amber categories..." className="w-full pl-9 pr-3 py-2 rounded-xl bg-gray-50 border border-gray-200 focus:border-triage-amber/40 focus:outline-none text-gray-800 text-sm" />
           </div>
+          {/* Empty state for no amber matches */}
+          {t2PatientWords && scan && !scan.hasAmber && (
+            <div className="bg-gray-50 border border-gray-100 rounded-xl p-4 mb-3 text-center">
+              <span className="text-xl">✨</span>
+              <div className="text-gray-400 text-sm mt-1">No amber flags matched — review list below to confirm</div>
+            </div>
+          )}
           <div className="space-y-2 max-h-80 overflow-y-auto">
             {filteredAmber.map((af, i) => {
               const matched = scan?.amber?.some(a => a.category === af.category);
+              const ai = getIcon(amberIcons, af.category);
               return (
                 <div key={i} className={`border-l-4 ${matched ? 'border-triage-amber bg-triage-amber-light' : 'border-gray-200 bg-gray-50'} rounded-r-xl p-2.5`}>
-                  <div className={`font-bold text-sm ${matched ? 'text-triage-amber-text' : 'text-gray-600'}`}>{af.category}</div>
+                  <div className={`flex items-center gap-3 font-bold text-sm ${matched ? 'text-triage-amber-text' : 'text-gray-600'}`}>
+                    {ai && <div className="w-10 h-10 rounded-full bg-triage-amber-light flex items-center justify-center text-xl flex-shrink-0">{ai.icon}</div>}
+                    {af.category}
+                  </div>
                   <div className="text-sm text-gray-400 mt-0.5">{af.buzzwords ? af.buzzwords.join(', ') : af.keywords.join(', ')}</div>
                   <div className="text-sm text-triage-amber-dark/70 mt-0.5">{af.action}</div>
                   {af.notes && <div className="text-sm text-gray-400 mt-0.5 italic">{af.notes}</div>}
@@ -1385,11 +1557,11 @@ const Tier2Workflow = ({ data, showToast }) => {
           {amberGate === null && (
             <div className="grid grid-cols-2 gap-2 mt-3">
               <button onClick={() => { setAmberGate('clear'); t2Advance(3); }}
-                className="py-3 bg-triage-blue-light border border-triage-blue-dark/20 text-triage-blue-text rounded-xl font-semibold text-sm hover:brightness-95 transition-all">
+                className="py-3 bg-triage-blue-light border border-triage-blue-dark/20 text-triage-blue-text rounded-xl font-semibold text-sm hover:brightness-95 hover:scale-[1.02] transition-all">
                 No amber match — continue
               </button>
               <button onClick={() => { setAmberGate('amber'); t2MarkDone(3); showToast('Amber matched — book same-day duty GP'); }}
-                className="py-3 bg-triage-amber-light border border-triage-amber-dark/20 text-triage-amber-text rounded-xl font-semibold text-sm hover:brightness-95 transition-all">
+                className="py-3 bg-triage-amber-light border border-triage-amber-dark/20 text-triage-amber-text rounded-xl font-semibold text-sm hover:brightness-95 hover:scale-[1.02] transition-all">
                 Amber matched — booking same-day
               </button>
             </div>
@@ -1450,11 +1622,11 @@ const Tier2Workflow = ({ data, showToast }) => {
           {yellowGate === null && (
             <div className="grid grid-cols-2 gap-2 mt-2">
               <button onClick={() => { setYellowGate('clear'); t2Advance(4); }}
-                className="py-3 bg-triage-blue-light border border-triage-blue-dark/20 text-triage-blue-text rounded-xl font-semibold text-sm hover:brightness-95 transition-all">
+                className="py-3 bg-triage-blue-light border border-triage-blue-dark/20 text-triage-blue-text rounded-xl font-semibold text-sm hover:brightness-95 hover:scale-[1.02] transition-all">
                 No yellow match — continue
               </button>
               <button onClick={() => { setYellowGate('yellow'); t2MarkDone(4); showToast('Yellow matched — book 1-3 days'); }}
-                className="py-3 bg-triage-yellow-light border border-triage-yellow-dark/35 text-triage-yellow-text rounded-xl font-bold text-sm">
+                className="py-3 bg-triage-yellow-light border border-triage-yellow-dark/35 text-triage-yellow-text rounded-xl font-bold text-sm hover:scale-[1.02] transition-transform">
                 Yellow matched — booking 1-3 days
               </button>
             </div>
@@ -1520,11 +1692,11 @@ const Tier2Workflow = ({ data, showToast }) => {
           {greenGate === null && (
             <div className="grid grid-cols-2 gap-2 mt-2">
               <button onClick={() => { setGreenGate('clear'); t2Advance(5); }}
-                className="py-3 bg-triage-blue-light border border-triage-blue-dark/20 text-triage-blue-text rounded-xl font-semibold text-sm hover:brightness-95 transition-all">
+                className="py-3 bg-triage-blue-light border border-triage-blue-dark/20 text-triage-blue-text rounded-xl font-semibold text-sm hover:brightness-95 hover:scale-[1.02] transition-all">
                 No green match — continue
               </button>
               <button onClick={() => { setGreenGate('green'); t2MarkDone(5); showToast('Green matched — book within 1 week'); }}
-                className="py-3 bg-triage-green-light border border-triage-green-dark/20 text-triage-green-text rounded-xl font-semibold text-sm hover:brightness-95 transition-all">
+                className="py-3 bg-triage-green-light border border-triage-green-dark/20 text-triage-green-text rounded-xl font-semibold text-sm hover:brightness-95 hover:scale-[1.02] transition-all">
                 Green matched — booking 1 week
               </button>
             </div>
