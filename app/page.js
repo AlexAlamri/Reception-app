@@ -1097,7 +1097,7 @@ const DecisionFlow = ({ data, settings, onRecord, showToast }) => {
       {/* ---- OUTCOME BAR (sticky bottom) ---- */}
       {outcome && (
         <div className="fixed bottom-14 left-0 right-0 z-40 p-3">
-          <div className={`max-w-lg mx-auto ${C[outcome.color]?.bg || C.blue.bg} border ${C[outcome.color]?.border || C.blue.border} rounded-2xl p-3 backdrop-blur-xl shadow-2xl`}>
+          <div className={`max-w-lg mx-auto ${C[outcome.color]?.bg || C.blue.bg} border ${C[outcome.color]?.border || C.blue.border} rounded-2xl p-3 shadow-lg`}>
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2 flex-1 min-w-0">
                 <CheckCircle size={18} className={C[outcome.color]?.text || 'text-triage-blue-text'} />

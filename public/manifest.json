@@ -4,8 +4,8 @@
   "description": "Clinical triage navigation for GP reception staff",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#1976D2",
+  "background_color": "#F8F7F4",
+  "theme_color": "#F8F7F4",
   "orientation": "portrait",
   "icons": [
     {
