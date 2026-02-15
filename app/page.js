@@ -588,7 +588,7 @@ const DecisionFlow = ({ data, settings, onRecord, showToast }) => {
       </div>
 
       {/* ---- STICKY PATIENT WORDS BANNER + KEYWORD SCANNER ---- */}
-      <div className="sticky top-0 z-20 bg-white/95 pb-3">
+      <div className="sticky top-10 z-20 bg-white pb-3">
         <div className="relative">
           <Search className="absolute left-3 top-3 text-gray-300" size={16} />
           <textarea value={scanText} onChange={e => setScanText(e.target.value)} autoFocus={true}
@@ -1128,7 +1128,7 @@ const SearchScreen = ({ data }) => {
   const [search, setSearch] = useState('');
   const results = useKeywordScanner(search, data.redFlags, data.amberFlags, data.pharmacyFirst, data.highRiskGroups);
   return (
-    <div className="p-4 pb-24 max-w-lg mx-auto">
+    <div className="p-4 pb-32 max-w-lg mx-auto">
       <h1 className="text-lg font-semibold mb-3 flex items-center gap-2 text-gray-800"><Search size={20} className="text-triage-blue-text" />Quick Lookup</h1>
       <SearchBar value={search} onChange={setSearch} placeholder="Type symptom or keyword..." />
       {search.length >= 2 && !results?.hasAny && <p className="text-center text-gray-400 mt-8 text-sm">No matches. If unsure → GP Triager.</p>}
@@ -1161,7 +1161,7 @@ const ContactsScreen = ({ contacts }) => {
   const [search, setSearch] = useState('');
   const filtered = contacts.filter(c => c.service.toLowerCase().includes(search.toLowerCase()));
   return (
-    <div className="p-4 pb-24 max-w-lg mx-auto">
+    <div className="p-4 pb-32 max-w-lg mx-auto">
       <h1 className="text-lg font-semibold mb-3 flex items-center gap-2 text-gray-800"><Phone size={20} className="text-triage-blue-text" />Key Contacts</h1>
       <SearchBar value={search} onChange={setSearch} placeholder="Search contacts..." />
       {filtered.map(c => <div key={c.id}><PhoneLink {...c} /></div>)}
@@ -1250,14 +1250,14 @@ const TrainingScreen = ({ onBack, scenarios }) => {
   const pct = totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0;
 
   if (!sc) return (
-    <div className="p-4 pb-24 max-w-lg mx-auto">
+    <div className="p-4 pb-32 max-w-lg mx-auto">
       <BackButton onClick={onBack} />
       <div className="text-center text-gray-400 mt-8">No scenarios for this topic.</div>
     </div>
   );
 
   return (
-    <div className="p-4 pb-24 max-w-lg mx-auto">
+    <div className="p-4 pb-32 max-w-lg mx-auto">
       <BackButton onClick={onBack} />
       <h1 className="text-lg font-semibold mb-2 flex items-center gap-2 text-gray-800"><GraduationCap size={20} className="text-triage-purple-text" />Training</h1>
 
@@ -1390,7 +1390,7 @@ const Tier2Workflow = ({ data, showToast }) => {
     : data.amberFlags;
 
   return (
-    <div className="p-3 sm:p-4 pb-36 max-w-lg mx-auto">
+    <div className="p-3 sm:p-4 pb-40 max-w-lg mx-auto">
       {/* TIER 2 HEADER */}
       <div className="mb-5">
         <h1 className="text-xl font-semibold text-gray-800">Tier 2 — Patient Services Team</h1>
@@ -1883,7 +1883,7 @@ const SOPScreen = () => {
   };
 
   return (
-    <div className="p-4 pb-24 max-w-lg mx-auto">
+    <div className="p-4 pb-32 max-w-lg mx-auto">
       <h1 className="text-lg font-semibold mb-1 flex items-center gap-2 text-gray-800"><BookOpen size={20} className="text-triage-purple-text" />Triage SOP</h1>
       <p className="text-gray-400 text-sm mb-3">{sopMeta.practices} · v{sopMeta.version} · {sopMeta.owner}</p>
       <SearchBar value={search} onChange={setSearch} placeholder="Search SOP..." />
@@ -1945,7 +1945,7 @@ const FlowchartScreen = () => {
   };
 
   return (
-    <div className="p-4 pb-24 max-w-lg mx-auto">
+    <div className="p-4 pb-32 max-w-lg mx-auto">
       <h1 className="text-lg font-semibold mb-1 flex items-center gap-2 text-gray-800"><GitBranch size={20} className="text-triage-teal-text" />Triage Flowchart</h1>
       <p className="text-gray-400 text-sm mb-3">{flowchartMeta.practices} · v{flowchartMeta.version} · {flowchartMeta.owner}</p>
       <SearchBar value={search} onChange={setSearch} placeholder="Search flowchart..." />
@@ -1993,7 +1993,7 @@ const AdminConsole = ({ onBack, data, toast }) => {
   const tabs = [{ id: 'settings', label: 'Settings', icon: Settings },{ id: 'users', label: 'Users', icon: User },{ id: 'contacts', label: 'Contacts', icon: Phone },{ id: 'scripts', label: 'Scripts', icon: FileText },{ id: 'backup', label: 'Backup', icon: Download },{ id: 'audit', label: 'Audit', icon: History }];
 
   return (
-    <div className="p-4 pb-24 max-w-2xl mx-auto">
+    <div className="p-4 pb-32 max-w-2xl mx-auto">
       <BackButton onClick={onBack} />
       <h1 className="text-lg font-semibold mb-2 flex items-center gap-2 text-gray-800"><Settings size={20} className="text-triage-purple-text" />Admin</h1>
       <div className="flex gap-1.5 overflow-x-auto pb-3 mb-3 -mx-1 px-1">
