@@ -559,7 +559,7 @@ const DecisionFlow = ({ data, settings, onRecord, showToast }) => {
   const allSelfCareChecked = selfCareChecks.every(Boolean);
 
   return (
-    <div className="p-3 sm:p-4 pb-36 max-w-lg mx-auto">
+    <div className="p-3 sm:p-4 pb-44 max-w-lg mx-auto">
       {/* ---- STOP ALERT OVERLAY ---- */}
       {scanResults?.hasStop && !stopAcknowledged && (
         <StopAlertOverlay
@@ -1047,7 +1047,7 @@ const DecisionFlow = ({ data, settings, onRecord, showToast }) => {
       </div>
 
       {/* ---- QUICK ACTION BAR (fixed bottom) ---- */}
-      <div className="fixed bottom-0 left-0 right-0 z-30 bg-white shadow-md border-t border-gray-100 p-2.5">
+      <div className="fixed bottom-[3.75rem] left-0 right-0 z-30 bg-white shadow-md border-t border-gray-100 p-2.5">
         <div className="flex gap-2.5 max-w-lg mx-auto">
           <button onClick={() => setQuickAction(quickAction === '999' ? null : '999')}
             className="flex-1 bg-triage-red-light border border-triage-red-dark/20 text-triage-red-text rounded-xl py-2.5 text-sm font-semibold text-center hover:brightness-95 transition-all">
@@ -1096,7 +1096,7 @@ const DecisionFlow = ({ data, settings, onRecord, showToast }) => {
 
       {/* ---- OUTCOME BAR (sticky bottom) ---- */}
       {outcome && (
-        <div className="fixed bottom-14 left-0 right-0 z-40 p-3">
+        <div className="fixed bottom-[7.5rem] left-0 right-0 z-40 p-3">
           <div className={`max-w-lg mx-auto ${C[outcome.color]?.bg || C.blue.bg} border ${C[outcome.color]?.border || C.blue.border} rounded-2xl p-3 shadow-lg`}>
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2 flex-1 min-w-0">
@@ -1265,7 +1265,7 @@ const TrainingScreen = ({ onBack, scenarios }) => {
           <button onClick={resetProgress} className="text-gray-400 text-sm hover:text-triage-red-text">Reset Progress</button>
         </div>
         <div className="w-full h-1.5 bg-gray-100 rounded-full overflow-hidden">
-          <div className="h-full bg-triage-green-light0 rounded-full transition-all" style={{ width: `${pct}%` }} />
+          <div className="h-full bg-triage-green-dark rounded-full transition-all" style={{ width: `${pct}%` }} />
         </div>
       </div>
 
