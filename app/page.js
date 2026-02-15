@@ -35,7 +35,7 @@ import {
   getUsers, saveUsers, exportAllData, importAllData, getAuditLog,
   DEFAULT_SETTINGS, logAction, changePassword, validatePassword,
   getSessionTimeRemaining, extendSession, isLockedOut, getLockoutRemaining,
-  addUser
+  addUser, initializeUsers
 } from '../lib/auth';
 
 // ============ DATA HOOK ============
@@ -165,11 +165,11 @@ const Button = ({ children, color = 'blue', onClick, full = false, size = 'md', 
   );
 };
 
-const Input = ({ label, type = 'text', value, onChange, placeholder, required, error, disabled }) => (
+const Input = ({ label, type = 'text', value, onChange, placeholder, required, error, disabled, ...rest }) => (
   <div className="mb-4">
     {label && <label className="block text-sm font-medium text-[rgba(255,255,255,0.6)] mb-1.5">{label}</label>}
     <input type={type} value={value} onChange={e => onChange(e.target.value)} placeholder={placeholder} required={required} disabled={disabled}
-      className={`w-full px-4 py-3 rounded-xl bg-[rgba(255,255,255,0.04)] border ${error ? 'border-triage-red/50' : 'border-[rgba(255,255,255,0.08)]'} focus:border-triage-blue/50 focus:outline-none focus:bg-[rgba(255,255,255,0.06)] text-white transition-all disabled:opacity-40`} />
+      className={`w-full px-4 py-3 rounded-xl bg-[rgba(255,255,255,0.04)] border ${error ? 'border-triage-red/50' : 'border-[rgba(255,255,255,0.08)]'} focus:border-triage-blue/50 focus:outline-none focus:bg-[rgba(255,255,255,0.06)] text-white transition-all disabled:opacity-40`} {...rest} />
     {error && <p className="text-triage-red text-sm mt-1">{error}</p>}
   </div>
 );
@@ -304,9 +304,9 @@ const LoginScreen = ({ onLogin, toast }) => {
   const settings = getSettings();
   const submit = async (e) => {
     e.preventDefault(); setError('');
-    if (isLockedOut()) { setError(`Account locked. Try again in ${getLockoutRemaining()} minutes.`); return; }
+    if (isLockedOut(username.trim())) { setError(`Account locked. Try again in ${getLockoutRemaining(username.trim())} minutes.`); return; }
     setLoading(true);
-    const r = await authenticateUser(username, password);
+    const r = await authenticateUser(username.trim(), password);
     setLoading(false);
     if (r.session) { toast(`Welcome, ${r.session.name}!`, 'success'); onLogin(r.session); }
     else { setError(r.error || 'Invalid credentials'); }
@@ -320,11 +320,12 @@ const LoginScreen = ({ onLogin, toast }) => {
           <p className="text-[rgba(255,255,255,0.4)] mt-1 font-medium">{settings.practiceName}</p>
         </div>
         <form onSubmit={submit}>
-          <Input label="Username" value={username} onChange={setUsername} placeholder="Enter username" required />
+          <Input label="Username" value={username} onChange={setUsername} placeholder="Enter username" required autoCapitalize="none" autoCorrect="off" spellCheck={false} autoComplete="username" />
           <div className="mb-4">
             <label className="block text-sm font-medium text-[rgba(255,255,255,0.6)] mb-1.5">Password</label>
             <div className="relative">
               <input type={showPw ? 'text' : 'password'} value={password} onChange={e => setPassword(e.target.value)} placeholder="Enter password" required
+                autoCapitalize="none" autoCorrect="off" spellCheck={false} autoComplete="current-password"
                 className="w-full px-4 py-3 pr-12 rounded-xl bg-[rgba(255,255,255,0.04)] border border-[rgba(255,255,255,0.08)] focus:border-triage-blue/50 focus:outline-none text-white transition-all" />
               <button type="button" onClick={() => setShowPw(!showPw)} className="absolute right-4 top-1/2 -translate-y-1/2 text-[rgba(255,255,255,0.3)]">{showPw ? <EyeOff size={20} /> : <Eye size={20} />}</button>
             </div>
@@ -1823,7 +1824,7 @@ const AdminConsole = ({ onBack, data, toast }) => {
       {tab === 'users' && (<div className="space-y-4">
         <Button onClick={() => setSAU(true)} color="blue"><Plus size={16} />Add User</Button>
         {showAddUser && <GlassCard color="blue"><Input label="Username" value={newUser.username} onChange={v => setNU({...newUser, username: v})} /><Input label="Name" value={newUser.name} onChange={v => setNU({...newUser, name: v})} /><Input label="Password" value={newUser.password} onChange={v => setNU({...newUser, password: v})} />{userErr && <div className="bg-triage-red/10 text-triage-red px-3 py-2 rounded-xl mb-3 text-sm border border-triage-red/20">{userErr}</div>}<div className="flex gap-2"><Button onClick={async () => { setUE(''); if (!newUser.username || !newUser.password || !newUser.name) { setUE('All fields required'); return; } const r = await addUser(newUser); if (r.success) { setU(getUsers()); setSAU(false); setNU({ username: '', password: '', name: '', role: 'staff' }); toast('User added'); } else { setUE(r.message); } }} color="green" size="sm"><Check size={14} />Add</Button><Button onClick={() => setSAU(false)} color="gray" size="sm">Cancel</Button></div></GlassCard>}
-        {users.map((u, i) => <GlassCard key={u.id}><div className="flex items-center gap-2 mb-2"><User size={16} className="text-[rgba(255,255,255,0.4)]" /><span className="font-bold text-white text-sm">{u.name}</span><span className={`text-[10px] px-1.5 py-0.5 rounded font-semibold ${u.role === 'admin' ? 'bg-triage-blue/20 text-triage-blue' : 'bg-[rgba(255,255,255,0.06)] text-[rgba(255,255,255,0.5)]'}`}>{u.role}</span></div><Input label="Username" value={u.username} onChange={v => { const n = [...users]; n[i].username = v; setU(n); }} /><Input label="Name" value={u.name} onChange={v => { const n = [...users]; n[i].name = v; setU(n); }} /></GlassCard>)}
+        {users.map((u, i) => <GlassCard key={u.id}><div className="flex items-center gap-2 mb-2"><User size={16} className="text-[rgba(255,255,255,0.4)]" /><span className="font-bold text-white text-sm">{u.name}</span><span className={`text-[10px] px-1.5 py-0.5 rounded font-semibold ${u.role === 'admin' ? 'bg-triage-blue/20 text-triage-blue' : 'bg-[rgba(255,255,255,0.06)] text-[rgba(255,255,255,0.5)]'}`}>{u.role}</span></div><Input label="Username" value={u.username} onChange={v => setU(users.map((x, j) => j === i ? { ...x, username: v } : x))} /><Input label="Name" value={u.name} onChange={v => setU(users.map((x, j) => j === i ? { ...x, name: v } : x))} /></GlassCard>)}
         <Button onClick={async () => { await saveUsers(users); toast('Users saved'); }} color="green" full><Save size={16} />Save Users</Button>
       </div>)}
 
@@ -1889,10 +1890,14 @@ export default function App() {
   const data = useTriageData();
 
   useEffect(() => {
-    const s = getSession(); setSession(s); setSettingsLocal(getSettings());
-    try { setHistory(JSON.parse(localStorage.getItem('triage_history') || '[]')); } catch {}
-    setLoading(false);
-    if (s?.mustChangePassword) setShowPasswordChange(true);
+    const init = async () => {
+      await initializeUsers();
+      const s = getSession(); setSession(s); setSettingsLocal(getSettings());
+      try { setHistory(JSON.parse(localStorage.getItem('triage_history') || '[]')); } catch {}
+      setLoading(false);
+      if (s?.mustChangePassword) setShowPasswordChange(true);
+    };
+    init();
   }, []);
 
   useEffect(() => { if (history.length) localStorage.setItem('triage_history', JSON.stringify(history)); }, [history]);
