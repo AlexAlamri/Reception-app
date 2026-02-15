@@ -165,11 +165,11 @@ const Button = ({ children, color = 'blue', onClick, full = false, size = 'md', 
   );
 };
 
-const Input = ({ label, type = 'text', value, onChange, placeholder, required, error, disabled }) => (
+const Input = ({ label, type = 'text', value, onChange, placeholder, required, error, disabled, ...rest }) => (
   <div className="mb-4">
     {label && <label className="block text-sm font-medium text-[rgba(255,255,255,0.6)] mb-1.5">{label}</label>}
     <input type={type} value={value} onChange={e => onChange(e.target.value)} placeholder={placeholder} required={required} disabled={disabled}
-      className={`w-full px-4 py-3 rounded-xl bg-[rgba(255,255,255,0.04)] border ${error ? 'border-triage-red/50' : 'border-[rgba(255,255,255,0.08)]'} focus:border-triage-blue/50 focus:outline-none focus:bg-[rgba(255,255,255,0.06)] text-white transition-all disabled:opacity-40`} />
+      className={`w-full px-4 py-3 rounded-xl bg-[rgba(255,255,255,0.04)] border ${error ? 'border-triage-red/50' : 'border-[rgba(255,255,255,0.08)]'} focus:border-triage-blue/50 focus:outline-none focus:bg-[rgba(255,255,255,0.06)] text-white transition-all disabled:opacity-40`} {...rest} />
     {error && <p className="text-triage-red text-sm mt-1">{error}</p>}
   </div>
 );
@@ -304,9 +304,9 @@ const LoginScreen = ({ onLogin, toast }) => {
   const settings = getSettings();
   const submit = async (e) => {
     e.preventDefault(); setError('');
-    if (isLockedOut()) { setError(`Account locked. Try again in ${getLockoutRemaining()} minutes.`); return; }
+    if (isLockedOut(username.trim())) { setError(`Account locked. Try again in ${getLockoutRemaining(username.trim())} minutes.`); return; }
     setLoading(true);
-    const r = await authenticateUser(username, password);
+    const r = await authenticateUser(username.trim(), password);
     setLoading(false);
     if (r.session) { toast(`Welcome, ${r.session.name}!`, 'success'); onLogin(r.session); }
     else { setError(r.error || 'Invalid credentials'); }
@@ -320,11 +320,12 @@ const LoginScreen = ({ onLogin, toast }) => {
           <p className="text-[rgba(255,255,255,0.4)] mt-1 font-medium">{settings.practiceName}</p>
         </div>
         <form onSubmit={submit}>
-          <Input label="Username" value={username} onChange={setUsername} placeholder="Enter username" required />
+          <Input label="Username" value={username} onChange={setUsername} placeholder="Enter username" required autoCapitalize="none" autoCorrect="off" spellCheck={false} autoComplete="username" />
           <div className="mb-4">
             <label className="block text-sm font-medium text-[rgba(255,255,255,0.6)] mb-1.5">Password</label>
             <div className="relative">
               <input type={showPw ? 'text' : 'password'} value={password} onChange={e => setPassword(e.target.value)} placeholder="Enter password" required
+                autoCapitalize="none" autoCorrect="off" spellCheck={false} autoComplete="current-password"
                 className="w-full px-4 py-3 pr-12 rounded-xl bg-[rgba(255,255,255,0.04)] border border-[rgba(255,255,255,0.08)] focus:border-triage-blue/50 focus:outline-none text-white transition-all" />
               <button type="button" onClick={() => setShowPw(!showPw)} className="absolute right-4 top-1/2 -translate-y-1/2 text-[rgba(255,255,255,0.3)]">{showPw ? <EyeOff size={20} /> : <Eye size={20} />}</button>
             </div>
