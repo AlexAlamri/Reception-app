@@ -68,7 +68,10 @@ function useKeywordScanner(text, redFlags, amberFlags, pharmacyFirst, highRiskGr
   return useMemo(() => {
     if (!text || text.length < 2) return null;
     const lower = text.toLowerCase();
-    const kw = (k) => { const kl = k.toLowerCase(); return lower.includes(kl) || kl.includes(lower); };
+    // Standard match: text contains keyword, OR keyword contains text (min 4 chars to prevent false positives)
+    const kw = (k) => { const kl = k.toLowerCase(); return lower.includes(kl) || (lower.length >= 4 && kl.includes(lower)); };
+    // Strict match for STOP patterns: text must contain the full keyword (no reverse match — false positives trigger full-screen 999 overlay)
+    const kwStrict = (k) => lower.includes(k.toLowerCase());
     const red = redFlags.filter(f => f.keywords.some(k => kw(k)));
     const amber = amberFlags.filter(f => f.keywords.some(k => kw(k)) || (f.searchTerms && f.searchTerms.some(t => kw(t))));
     const pharmacy = pharmacyFirst.filter(c => (c.condition && kw(c.condition)) || (c.name && kw(c.name)) || (c.keywords && c.keywords.some(k => kw(k))));
@@ -91,8 +94,8 @@ function useKeywordScanner(text, redFlags, amberFlags, pharmacyFirst, highRiskGr
     // NEW: Green flag scanning
     const green = greenFlags.filter(f => f.keywords.some(k => kw(k)));
     const hasGreen = green.length > 0;
-    // NEW: STOP pattern scanning (HIGHEST PRIORITY)
-    const stop = stopPatterns.filter(p => p.keywords.some(k => kw(k)));
+    // STOP pattern scanning (HIGHEST PRIORITY) — strict forward-only match
+    const stop = stopPatterns.filter(p => p.keywords.some(k => kwStrict(k)));
     const hasStop = stop.length > 0;
     return {
       // EXISTING:
